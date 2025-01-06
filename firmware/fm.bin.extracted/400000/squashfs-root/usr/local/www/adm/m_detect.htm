@@ -1,0 +1,1065 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+<script language="JavaScript" type="text/javascript" src="../plugins.js"></script>
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../slider.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+
+<!--LINK REL="stylesheet" TYPE="text/css" HREF="m_detect.css"-->
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+<script language="JavaScript" type="text/javascript"> 
+
+//####################################################################
+// Please remember update these information when OCX updated
+//####################################################################
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_MODE = 28;
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_POS= 29;
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_REF_COOR= 30;
+var	DEVICE_COMMAND_SHAPE_MOTION_CLEAR = 31;
+var	DEVICE_COMMAND_SHAPE_MOTION_RESET= 32;
+var	DEVICE_COMMAND_SHAPE_MOTION_SAVE= 33;
+var	DEVICE_COMMAND_ZOOM_ENABLE_CGI= 34;
+var viewer_ocx_classid="clsid:4B90BBA0-9621-48CB-810B-5A75E9CA6270";
+var viewer_ocx_codebase="../img/MediaAccess.cab#Version=1,2,0,45";//JavaApplet version:1.0.0.56
+var viewer_ocx_id="Viewer";
+var enable_java = 1;
+/*
+var lpp = 'YWRtaW5pc3RyYXRvcjo='; 
+var real_protocol = "http:";
+var camera_hostname	= "172.21.15.25";
+var camera_port = "80";
+var camera_host = "172.21.15.25";
+var ipadd;
+var interval_do_type	= 0;
+*/
+var lpp; 
+var real_protocol = self.location.protocol;
+var camera_hostname	= self.location.hostname;
+var camera_port = self.location.port;
+var camera_host = self.location.host;
+var ipadd;
+var interval_do_type	= 0;
+var def_stream_ch = "1";//"@h_def_stream_ch#";
+
+if (camera_port.length <= 0 || real_protocol != "http:")
+{
+    camera_port = 80;
+}
+
+var stream_width = 400;
+var stream_height = 300;
+var SetURL_URL = "rtsp://"+camera_hostname+':'+camera_port+"/img/video.sav?channel="+def_stream_ch+"&padding=yes";
+    
+var applet_obj_string	= "<applet name='icv' code='com.sc.ipcam.IpCamViewer' archive='../img/IpCamViewer.jar' width='"+
+                        stream_width+"' height='"+stream_height+"'>"+
+						"<param name='protocol'	value='priv'/>";
+if (real_protocol != "http:")
+{
+    applet_obj_string +="<param name='port' value='80'/>";
+}
+applet_obj_string +="<param name='uri' value='/img/video.mjpeg?padding=yes'/>"+
+					"<param name='motion'	value='true'/>"+
+					"<param name='controlpanel'	value='false'/>"+
+					"<param name='bgc' value='000000034'/>"+
+					"<param name='ctrlpan' value='false'/>"+
+					"<param name='language' value=''/>"+
+					"<param name='X-1' value='Authorization:Basic "+lpp+"'/>"+
+					"</applet>";
+				
+var dw_video_ocx = 	'<object classid="'+viewer_ocx_classid+'" CODEBASE="'+viewer_ocx_codebase+'" id="'+viewer_ocx_id+'" name="'+viewer_ocx_id+
+			        '" width="'+stream_width+'" height="'+stream_height+'">'+
+					'<param name="Text" value="'+
+                     SetURL_URL+									  
+				  ' '+
+				  lpp+
+				  ' '+
+				  '21'+
+				  ' '+
+				  "IE"+
+				    ' '+'dimX='+stream_width+' dimY='+stream_height+
+				  '">' + 
+				  '<param name="BackColor" value="12632256">'+
+				  '<param name="_Version" value="65536">'+
+				  '<param name="_ExtentX" value="11774">'+
+				  '<param name="_ExtentY" value="6562">'+
+					'</object>';
+					
+function dw(message)
+{ document.write(message); }
+
+
+function showDownloaddecorder()
+{
+	   if(isIE())
+    {
+    		document.getElementById("v_downloaddecoder").style.display = "block";
+    }
+    else if (enable_java)
+    {
+         document.getElementById("v_downloaddecoder").style.display = "none";
+    }
+    else if (!enable_java)
+    {
+        document.getElementById("v_downloaddecoder").style.display = "none";
+    }
+}
+
+function Display(message)
+{ 
+	document.getElementById("PlayArea").innerHTML=message;
+}
+
+function doPlay() 
+{
+    if(isIE())
+    {
+        document.getElementById("motion_area_1").style.display = "block";
+        document.getElementById("motion_area_2").style.display = "block";
+        document.getElementById("motion_area_3").style.display = "block";
+        document.getElementById("motion_area_4").style.display = "block";
+    	//dw(dw_video_ocx);
+		Display(dw_video_ocx);
+    }
+    else if (enable_java)
+    {
+        document.getElementById("motion_area_1").style.display = "block";
+        document.getElementById("motion_area_2").style.display = "block";
+        document.getElementById("motion_area_3").style.display = "block";
+        document.getElementById("motion_area_4").style.display = "block";
+       if(detectJAVA())
+         {
+          	//dw(applet_obj_string);
+			Display(applet_obj_string);
+         }
+    }
+    else if (!enable_java)
+    {
+        document.getElementById("motion_area_1").style.display = "none";
+        document.getElementById("motion_area_2").style.display = "none";
+        document.getElementById("motion_area_3").style.display = "none";
+        document.getElementById("motion_area_4").style.display = "none";
+       
+        //dw("This page only can support Internet Explorer 6.0 or above.<p> Please open this page in Internet Explorer. ");
+		Display("This page only can support Internet Explorer 6.0 or above.<p> Please open this page in Internet Explorer. ");
+	}
+}
+
+var mySlider1 = new Slider( "Slider1" );
+mySlider1.onchange = "setWidth('v_value1',this.getValue(1), 0)";
+mySlider1.buttonHeight = 16;
+mySlider1.buttonWidth = 9;
+mySlider1.maxSlide = 75;
+mySlider1.offsetX = 0;
+if(isIE())
+{
+	if (IEVersion()==8)
+		mySlider1.offsetY = -8;
+	else
+		mySlider1.offsetY = -8;
+}
+else
+{
+	mySlider1.offsetY = 3;
+}
+mySlider1.buttonImg = "../buttons/b_slidebar.gif";
+mySlider1.buttonHiliteImg = "../buttons/b_slidebar2.gif";
+mySlider1.writeSlider();
+
+var mySlider2 = new Slider( "Slider2" );
+mySlider2.onchange = "setWidth('v_value2',this.getValue(1), 1)";
+mySlider2.buttonHeight = 16;
+mySlider2.buttonWidth = 9;
+mySlider2.maxSlide = 75;
+mySlider2.offsetX = 0;
+if(isIE())
+{
+	if (IEVersion()==8)
+		mySlider2.offsetY = -8;
+	else
+		mySlider2.offsetY = -8;
+}
+else
+{
+	mySlider2.offsetY = 3;
+}
+mySlider2.buttonImg = "../buttons/b_slidebar.gif";
+mySlider2.buttonHiliteImg = "../buttons/b_slidebar2.gif";
+mySlider2.writeSlider();
+
+var mySlider3 = new Slider( "Slider3" );
+mySlider3.onchange = "setWidth('v_value3',this.getValue(1), 2)";
+mySlider3.buttonHeight = 16;
+mySlider3.buttonWidth = 9;
+mySlider3.maxSlide = 75;
+mySlider3.offsetX = 0;
+if(isIE())
+{
+	if (IEVersion()==8)
+		mySlider3.offsetY = -8;
+	else
+		mySlider3.offsetY = -8;
+}
+else
+{
+	mySlider3.offsetY = 3;
+}
+mySlider3.buttonImg = "../buttons/b_slidebar.gif";
+mySlider3.buttonHiliteImg = "../buttons/b_slidebar2.gif";
+mySlider3.writeSlider();
+
+var mySlider4 = new Slider( "Slider4" );
+mySlider4.onchange = "setWidth('v_value4',this.getValue(1), 3)";
+mySlider4.buttonHeight = 16;
+mySlider4.buttonWidth = 9;
+mySlider4.maxSlide = 75;
+mySlider4.offsetX = 0;
+if(isIE())
+{
+	if (IEVersion()==8)
+		mySlider4.offsetY = -8;
+	else
+		mySlider4.offsetY = -8;
+}
+else
+{
+	mySlider4.offsetY = 3;
+}
+mySlider4.buttonImg = "../buttons/b_slidebar.gif";
+mySlider4.buttonHiliteImg = "../buttons/b_slidebar2.gif";
+mySlider4.writeSlider();
+
+function set_all()
+{
+	var cf = document.forms[0];
+	lpp=cf.h_authorization.value;
+	
+	applet_obj_string	= "<applet name='icv' code='com.sc.ipcam.IpCamViewer' archive='../img/IpCamViewer.jar' width='"+
+                        stream_width+"' height='"+stream_height+"'>"+
+						"<param name='protocol'	value='priv'/>";
+	if (real_protocol != "http:")
+	{
+	    applet_obj_string +="<param name='port' value='80'/>";
+	}
+	applet_obj_string +="<param name='uri' value='/img/video.mjpeg?padding=yes'/>"+
+						"<param name='motion'	value='true'/>"+
+						"<param name='controlpanel'	value='false'/>"+
+						"<param name='bgc' value='000000034'/>"+
+						"<param name='ctrlpan' value='false'/>"+
+						"<param name='language' value=''/>"+
+						"<param name='X-1' value='Authorization:Basic "+lpp+"'/>"+
+						"</applet>";
+					
+	dw_video_ocx = 	'<object classid="'+viewer_ocx_classid+'" CODEBASE="'+viewer_ocx_codebase+'" id="'+viewer_ocx_id+'" name="'+viewer_ocx_id+
+			        '" width="'+stream_width+'" height="'+stream_height+'">'+
+					'<param name="Text" value="'+
+                     SetURL_URL+									  
+				  ' '+
+				  lpp+
+				  ' '+
+				  '21'+
+				  ' '+
+				  "IE"+
+				    ' '+'dimX='+stream_width+' dimY='+stream_height+
+				  '">' + 
+				  '<param name="BackColor" value="12632256">'+
+				  '<param name="_Version" value="65536">'+
+				  '<param name="_ExtentX" value="11774">'+
+				  '<param name="_ExtentY" value="6562">'+
+					'</object>';
+
+	doPlay();
+	mySlider1.placeSlider();
+	mySlider2.placeSlider();
+	mySlider3.placeSlider();
+	mySlider4.placeSlider();
+}
+
+function init()
+{
+	menuframe.highLight('mdDIV');
+//	mySlider1.placeSlider();
+//	mySlider2.placeSlider();
+//	mySlider3.placeSlider();
+//	mySlider4.placeSlider();
+	
+//	mySlider5.placeSlider();
+//	mySlider6.placeSlider();
+//	mySlider7.placeSlider();
+//	mySlider8.placeSlider();
+
+	netcamObj = document.icv;
+
+	var cf = document.forms[0];
+	dataToVisible(cf);
+	showMsg();
+	self.status = msg_connect_livevideo;
+    if (enable_java || isIE())
+    {
+    	setInterval("fetch_motion_config()", 30);
+    }
+    
+    if(isIE())
+    {
+    		document.getElementById("v_downloaddecoder").style.display = "block";
+    }
+    else if (enable_java)
+    {
+         document.getElementById("v_downloaddecoder").style.display = "none";
+    }
+    else if (!enable_java)
+    {
+        document.getElementById("v_downloaddecoder").style.display = "none";
+    }
+
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			["USER", "h_authorization", "h_authorization"]
+		];
+	read.callback = set_all;
+	read.get(array_get);
+}
+
+function fetch_motion_config()
+{
+	try {
+		if (interval_do_type < 10000) {
+			fetch_init();
+		} else {
+			fetch_indicator();
+		}
+	} 
+	catch (e) {
+	}
+}
+
+function fetch_init() 
+{
+	var cf = document.forms[0];
+
+    if(isIE())
+    {
+    	cf.det_area1.value = document.Viewer.GetMDAreaCaption(0);
+    	cf.det_area2.value = document.Viewer.GetMDAreaCaption(1);
+    	cf.det_area3.value = document.Viewer.GetMDAreaCaption(2);
+    	cf.det_area4.value = document.Viewer.GetMDAreaCaption(3);
+    }
+    else if (enable_java)
+    {
+    	cf.det_area1.value = document.icv.getMotionTitle(1);
+    	cf.det_area2.value = document.icv.getMotionTitle(2);
+    	cf.det_area3.value = document.icv.getMotionTitle(3);
+    	cf.det_area4.value = document.icv.getMotionTitle(4);
+    }
+
+    
+
+	if ((null == cf.det_area1.value) || (cf.det_area1.value.length <= 0) 
+		|| (null == cf.det_area2.value) || (cf.det_area2.value.length <= 0) 
+		|| (null == cf.det_area3.value) || (cf.det_area3.value.length <= 0) 
+		|| (null == cf.det_area4.value) || (cf.det_area4.value.length <= 0)) 
+	{
+		interval_do_type++;
+		return;
+	}
+    //alert("interval_do_type="+interval_do_type);
+	
+//	setTimeout("if(document.forms[0].a2.checked ||document.forms[0].a3.checked ||document.forms[0].a4.checked){document.forms[0].ct.checked = true;}",100);
+
+	
+    if(isIE())
+    {
+    	setTimeout("document.forms[0].a1.checked = document.Viewer.GetMDAreaEnabledStatus(0)",10);
+    	setTimeout("document.forms[0].a2.checked = document.Viewer.GetMDAreaEnabledStatus(1)",10);
+    	setTimeout("document.forms[0].a3.checked = document.Viewer.GetMDAreaEnabledStatus(2)",10);
+    	setTimeout("document.forms[0].a4.checked = document.Viewer.GetMDAreaEnabledStatus(3)",10);
+        
+    	setTimeout("mySlider1.setValue(document.Viewer.GetMDAreaThreshold(0)/255)",10);
+    	setTimeout("mySlider2.setValue(document.Viewer.GetMDAreaThreshold(1)/255)",10);
+    	setTimeout("mySlider3.setValue(document.Viewer.GetMDAreaThreshold(2)/255)",10);
+    	setTimeout("mySlider4.setValue(document.Viewer.GetMDAreaThreshold(3)/255)",10);
+    }
+    else if (enable_java)
+    {
+    	setTimeout("document.forms[0].a1.checked = document.icv.getMotionEnabled(1)",10);
+    	setTimeout("document.forms[0].a2.checked = document.icv.getMotionEnabled(2)",10);
+    	setTimeout("document.forms[0].a3.checked = document.icv.getMotionEnabled(3)",10);
+    	setTimeout("document.forms[0].a4.checked = document.icv.getMotionEnabled(4)",10);
+        
+    	setTimeout("mySlider1.setValue(document.icv.getMotionThreshold(1)/255)",10);
+    	setTimeout("mySlider2.setValue(document.icv.getMotionThreshold(2)/255);",10);
+    	setTimeout("mySlider3.setValue(document.icv.getMotionThreshold(3)/255)",10);
+    	setTimeout("mySlider4.setValue(document.icv.getMotionThreshold(4)/255)",10);
+    }
+	interval_do_type = 10000;
+}
+
+function fetch_indicator() 
+{
+    if(isIE())
+    {
+        if (document.forms[0].a1.checked)
+        	setWidth2("v_value5",document.Viewer.GetMDAreaIndicator(0)/255);
+        else
+        	setWidth2("v_value5",0);
+        if (document.forms[0].a2.checked)
+        	setWidth2("v_value6",document.Viewer.GetMDAreaIndicator(1)/255);
+        else
+        	setWidth2("v_value6",0);
+        if (document.forms[0].a3.checked)
+        	setWidth2("v_value7",document.Viewer.GetMDAreaIndicator(2)/255);
+        else
+        	setWidth2("v_value7",0);
+        if (document.forms[0].a4.checked)
+        	setWidth2("v_value8",document.Viewer.GetMDAreaIndicator(3)/255);
+        else
+        	setWidth2("v_value8",0);
+    }
+    else if (enable_java)
+    {
+        if (document.forms[0].a1.checked)
+        	setWidth2("v_value5",document.icv.getMotionIndicator(1)/255);
+        else
+        	setWidth2("v_value5",0);
+        if (document.forms[0].a2.checked)
+        	setWidth2("v_value6",document.icv.getMotionIndicator(2)/255);
+        else
+        	setWidth2("v_value6",0);
+        if (document.forms[0].a3.checked)
+        	setWidth2("v_value7",document.icv.getMotionIndicator(3)/255);
+        else
+        	setWidth2("v_value7",0);
+        if (document.forms[0].a4.checked)
+        	setWidth2("v_value8",document.icv.getMotionIndicator(4)/255);
+        else
+        	setWidth2("v_value8",0);
+    }
+}
+
+function url_escape(val) {
+	var val2 = "";
+	for (i=0; i<val.length; i++) {
+		switch (val.charAt(i)) {	// ~!@#$%^&*()_+`-={}|[]\:";'<>?,./
+			case ' ':
+				val2 += "%20";
+				break;
+			case '#':
+				val2 += "%23";
+				break;
+			case '%':
+				val2 += "%25";
+				break;
+			case '&':
+				val2 += "%26";
+				break;
+			case '+':
+				val2 += "%2B";
+				break;
+			case '?':
+				val2 += "%3F";
+				break;
+			default:
+				val2 += val.charAt(i);
+				break;
+		}
+	}
+	return val2;
+}
+
+var ajax_save_all = null;
+
+function createAJAX()
+{
+	if(window.ActiveXObject)
+	{
+		try
+		{
+			return new ActiveXObject("Msxml2.XMLHTTP");
+		}
+		catch(e)
+		{
+			try {
+				return new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			catch(e2)
+			{
+				return null;
+			}
+		}
+	}
+	else if(window.XMLHttpRequest)
+	{
+		return new XMLHttpRequest();
+	}
+	else
+	{
+		return null;
+	}
+}
+
+function onRcvSaveAllResponse()
+{
+	if(ajax_save_all.readyState == 4)
+	{
+		if(ajax_save_all.status != 200)
+		{
+            if (ajax_save_all.responseText != "")
+			{
+				alert(ajax_save_all.responseText);
+			}
+		}
+        else
+        {
+			document.Viewer.SetMDAreaThreshold(v1, 0);
+			document.Viewer.SetMDAreaThreshold(v2, 1);
+			document.Viewer.SetMDAreaThreshold(v3, 2);
+			document.Viewer.SetMDAreaThreshold(v4, 3);
+			alert("Set success!");
+			//var content = document.getElementById("savecgi");
+			//content.innerHTML = ajax_save_all.responseText;
+			//setTimeout('location.href = "file.cgi?next_file=m_detect.htm";', 2000);
+        }
+	}
+}
+
+function sendSaveAllRequest()
+{
+	var timestamp = new Date();
+
+    if (ajax_save_all != null)
+    {
+        ajax_save_all.abort();
+        ajax_save_all = null;
+    }
+	ajax_save_all = createAJAX();
+	if(!ajax_save_all)
+	{
+		alert("No AJAX object");
+		return ;
+	}
+	if(-1 == camera_hostname.indexOf(":"))
+	{
+		ipadd = camera_host;
+	}
+	else
+	{
+		if("" == camera_port)
+		{
+			ipadd = "[" + camera_hostname + "]";
+		}
+		else
+		{
+			ipadd = "[" + camera_hostname + "]:" + camera_port;
+		}
+	}
+	var url = "/adm/set_group.cgi?group=MOTION&";
+	url += "md_switch1="+(document.forms[0].a1.checked?1:0)+"&";
+	url += "md_switch2="+(document.forms[0].a2.checked?1:0)+"&";
+	url += "md_switch3="+(document.forms[0].a3.checked?1:0)+"&";
+	url += "md_switch4="+(document.forms[0].a4.checked?1:0)+"&";
+	url += "md_name1="+url_escape(document.forms[0].det_area1.value)+"&";
+	url += "md_name2="+url_escape(document.forms[0].det_area2.value)+"&";
+	url += "md_name3="+url_escape(document.forms[0].det_area3.value)+"&";
+	url += "md_name4="+url_escape(document.forms[0].det_area4.value)+"&";
+    if(isIE())
+    {        
+        var i=1;
+
+        for (i=1;i<=4;i++)
+        {
+        	var safearray_abs = document.Viewer.GetMDAreaAbsLocation(i-1);
+        	var mySparsearray_abs =new VBArray(safearray_abs);
+        	var mySparsearray_js_abs = mySparsearray_abs.toArray();
+        	url += "md_abs_window"+i+"="+mySparsearray_js_abs[0]+","+mySparsearray_js_abs[1]+","+mySparsearray_js_abs[2]+","+mySparsearray_js_abs[3]+"/"+mySparsearray_js_abs[4]+","+mySparsearray_js_abs[5]+"&";
+        }
+    }
+    else if (enable_java)
+    {
+    	url += "md_abs_window1="+document.icv.getMotionAbsRectangle(1)+"&";
+    	url += "md_abs_window2="+document.icv.getMotionAbsRectangle(2)+"&";
+    	url += "md_abs_window3="+document.icv.getMotionAbsRectangle(3)+"&";
+    	url += "md_abs_window4="+document.icv.getMotionAbsRectangle(4)+"&";
+    }
+	url += "md_threshold1="+v1+"&";
+	url += "md_threshold2="+v2+"&";
+	url += "md_threshold3="+v3+"&";
+	url += "md_threshold4="+v4+"&";
+    //add this key for solving the browser cache issue.
+	url += CGIRequestRandomKey +"="+ timestamp.getTime();
+
+	ajax_save_all.onreadystatechange = onRcvSaveAllResponse;
+	ajax_save_all.open("GET", url, true);
+	ajax_save_all.send("");
+}
+
+function SaveAll()
+{
+    sendSaveAllRequest();   
+	//window.savecgi.location = url;
+		//window.savecgi.open   (url,"newwindow","height=100,width=300,   toolbar=no   ,   menubar=no,   scrollbars=no,   resizable=no,   location=no,   status=no ,   alwaysLowered=yes ");   
+}
+
+var v1,v2,v3,v4 =0;
+function setWidth(obj,theWidth, id)
+{
+  document.getElementById(obj).style.width=Number(theWidth*10);
+  	if(obj == "v_value1")
+  		v1=parseInt(Number(theWidth * 255),10);
+	else if(obj == "v_value2")
+  		v2=parseInt(Number(theWidth * 255),10);
+	else if(obj == "v_value3")
+  		v3=parseInt(Number(theWidth * 255),10);
+	else if(obj == "v_value4")
+  		v4=parseInt(Number(theWidth * 255),10);
+
+}
+
+function setWidth2(obj,theWidth)
+{
+	  document.getElementById(obj).style.width=Number(theWidth*82)+"px";
+	  if(isIE())
+	  {
+		  if (IEVersion()==8)
+			document.getElementById(obj).style.marginTop="0px";
+	      else
+			document.getElementById(obj).style.marginTop="0px";
+	  }
+	  else if (enable_java)
+	  {
+	  	document.getElementById(obj).style.marginTop="12px";
+	  }
+}
+
+function mot_en_click(i) 
+{
+	var b =0 ;
+	var formObj;
+	var formObjStr = "formObj=document.forms[0].a" + (i);
+    
+    if(isIE())
+    {
+         b = document.Viewer.GetMDAreaEnabledStatus(i-1)
+    }
+    else if (enable_java)
+    {
+         b = document.icv.getMotionEnabled(i)
+    }
+
+
+	eval(formObjStr);
+	
+    if(isIE())
+    {
+    	if(formObj.checked == true) 
+        {
+    		document.Viewer.SetMDAreaEnabledStatus(true,i-1);
+    	}
+    	else
+        {
+    		if(b != 0) 
+            {
+    			document.Viewer.SetMDAreaEnabledStatus(false,i-1);
+    		}
+    	}
+    }
+    else if (enable_java)
+    {
+    	if(formObj.checked == true) 
+        {
+    		document.icv.setMotionEnabled(i, true);
+    	}
+    	else
+        {
+    		if(b != 0) 
+            {
+    			document.icv.setMotionEnabled(i, false);
+    		}
+    	}
+    }
+    
+}
+
+function md_title(index) 
+{
+	var formObj;
+	var formObjStr = "formObj=document.forms[0].det_area" + (index);
+
+	eval(formObjStr);
+
+    if(isIE())
+    {
+    	document.Viewer.SetMDAreaCaption(formObj.value,index-1);
+    }
+    else if (enable_java)
+    {
+    	document.icv.setMotionTitle(index, formObj.value);
+    }
+
+}
+function doStop()
+{
+     if(isIE())
+     {
+    	document.Viewer.Stop();
+     }
+     else if (enable_java)
+     {
+       	document.icv.stop();
+     }
+
+        
+}
+
+function detectJAVA()
+{
+	// detect if user didn't install Java
+	var jres = deployJava.getJREs(); 
+	if(navigator.userAgent.indexOf('Opera')>=0 && jres == "")//Opera browser without JAVA plug-in
+	{
+		//jres = java.lang.System.getProperty("java.version");
+			if(!navigator.javaEnabled())
+			{
+				alert("Please enable Java in Preperence option setting.");
+				return false;
+			}
+	}
+	else if(jres!="")
+	{
+		//detect java version if version < 1.4 ths ask to update
+		var java_ver=parseFloat(jres);
+		if(java_ver< 1.4)
+		{
+			if(confirm("Your JAVA version is too old, please update:\n\tcurrent version:"+jres+"\n\trequested version: 1.4 and above"))
+			{
+				window.open('http://www.sun.com','_blank');
+			}
+			else
+			{
+				;
+			}
+			return false;
+		}
+	}
+	else
+	{
+		if(confirm("Please install JAVA"))
+		{
+			window.open('http://www.sun.com')
+		}
+		else
+		{
+			;
+		}
+		return false;
+	}
+
+	return true;
+}
+// End Script -->
+
+</script>
+
+</head>
+
+<body onbeforeunload="doStop();" onLoad="init();">
+<form name="m_detect" method="post" action="file.cgi" >
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab3" cellspacing="0">
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+<td width="2px" nowrap="nowrap"></td>
+<td height="10px" class="subhead">&nbsp; Set Detection Areas</td>
+<td width="2px" nowrap="nowrap"></td>
+</tr>
+<tr>
+<td width="2px" nowrap="nowrap"></td>
+<td id="content_td" nowrap="nowrap" valign="top">
+<!--content put there-->
+<div id="scroll" style="overflow-y:hidden;">
+
+<table cellpadding="0" cellspacing="0" style="margin-left:5px; margin-top:10px;height:450px; z-index:10">
+
+<tr>
+<td valign="top">
+<!-- Left Pannel -->
+ <table cellpadding="0" cellspacing="0">
+ 
+ <!-- area1 -->
+ <tr>
+ <td> 
+ <div id="motion_area_1" style="display:none">
+ <table border="0" cellpadding="0" cellspacing="0">
+ <tr>
+ <td class="control" colspan="2" align="left">
+ <input type="checkbox" NAME="a1" VALUE="disable" onClick="mot_en_click(1);">
+ <input type="text" name="det_area1" size="10" maxlength="12" style="{height:20;width:117;font-size:9pt}" value="" onBlur="md_title(1);">
+</td>
+ </tr>
+  
+ <tr>
+ <td class="control2">Indicator</td>
+ <td class="control" align="left">
+ <div class="ind">
+ <img src="../buttons/v_bar1.gif" alt="Indicator 1" border="0" name="Slider5RailImg" id="Slider5RailImg">
+ <div id="v_value5" class="value" style="height:10px;"></div>
+ </div>
+ </td>
+ </tr>
+  
+ <tr>
+ <td class="control3">Threshold</td> 	
+ <td class="control" valign="top">
+	<div class="sli" style="padding:0px;overflow:hidden"  nowrap>
+		<img src="../buttons/v_bar1.gif" alt="Threshold 1" border="0" name="Slider1RailImg" id="Slider1RailImg">
+		<div id="v_value1" class="valuer"></div>
+	</div> </td>
+ </tr>
+
+
+ </table>
+ </div>
+ </td>
+ </tr>
+  
+ <!-- area2 --> 
+ <tr>
+ <td>
+ <div id="motion_area_2" style="display:none">
+ <table border="0" cellpadding="0" cellspacing="0">
+ <tr>
+ <td class="control" colspan="2" align="left">
+ <input type="checkbox" NAME="a2" VALUE="disable" onClick="mot_en_click(2);">
+ <input type="text" name="det_area2" size="10" maxlength="12" style="{height:20;width:117;font-size:9pt}" value="" onBlur="md_title(2);">
+ </td>
+ </tr>
+ 
+ <tr>
+ <td class="control2">Indicator</td>
+ <td class="control" align="left">
+ <div class="ind">
+<img src="../buttons/v_bar1.gif" alt="Indicator 2" border="0" name="Slider6RailImg" id="Slider6RailImg">
+ <div id="v_value6" class="value" style="height:10px;"></div>
+ </div>
+ </td>
+ </tr>
+ 
+ <tr>
+ <td class="control3">Threshold</td>
+ <td class="control" valign="top">
+ <div class="sli" style="padding:0px;overflow:hidden"   nowrap>
+<img src="../buttons/v_bar1.gif" alt="Threshold 2" border="0" name="Slider2RailImg" id="Slider2RailImg">
+ <div id="v_value2" class="valuer"></div>
+ </div> 
+ </td>
+ </tr>
+
+ </table>
+ </div>
+ </td>
+ </tr>
+ 
+
+ <!-- area3 -->
+ <tr>
+ <td>
+ <div id="motion_area_3" style="display:none">
+ <table border="0" cellpadding="0" cellspacing="0">
+ <tr>
+ <td class="control" colspan="2" align="left">
+ <input type="checkbox" NAME="a3" VALUE="disable" onClick="mot_en_click(3);">
+ <input type="text" name="det_area3" size="10" maxlength="12" style="{height:20;width:117;font-size:9pt}" value="" onBlur="md_title(3);">
+ </td>
+ </tr>
+ 
+ <tr>
+ <td class="control2">Indicator</td>
+ <td class="control" align="left">
+ <div class="ind">
+<img src="../buttons/v_bar1.gif" alt="Indicator 3" border="0" name="Slider7RailImg" id="Slider7RailImg">
+ <div id="v_value7" class="value" style="height:10px;"></div>
+ </div>
+ </td>
+ </tr>
+ 
+ <tr>
+ <td class="control3">Threshold</td>
+ <td class="control" valign="top">
+ <div class="sli" style="padding:0px;overflow:hidden"   nowrap>
+<img src="../buttons/v_bar1.gif" alt="Threshold 3" border="0" name="Slider3RailImg" id="Slider3RailImg">
+ <div id="v_value3" class="valuer"></div>
+ </div> 
+ </td>
+ </tr> 
+
+ </table>
+ </div>
+ </td>
+ </tr>
+ 
+  
+ <!-- area4 -->
+ <tr>
+ <td>
+ <div id="motion_area_4" style="display:none">
+ <table border="0" cellpadding="0" cellspacing="0">
+ <tr>
+ <td class="control" colspan="2" align="left">
+ <input type="checkbox" NAME="a4" VALUE="disable" onClick="mot_en_click(4);">
+ <input type="text" name="det_area4" size="10" maxlength="12" style="{height:20;width:117;font-size:9pt}" value="" onBlur="md_title(4);">
+ </td>
+ </tr>
+ 
+ <tr>
+ 	<td class="control2">Indicator</td>
+ 	<td class="control" align="left">
+	<div class="ind">
+	<img src="../buttons/v_bar1.gif" alt="Indicator 4" border="0" name="Slider8RailImg" id="Slider8RailImg">
+	<div id="v_value8" class="value" style="height:10px;"></div>
+	</div>
+	</td>
+ </tr>
+ <tr>
+ 	<td class="control3">Threshold</td>
+ 	<td class="control" valign="top">
+ 	<div class="sli" style="padding:0px;overflow:hidden" nowrap>
+		<img src="../buttons/v_bar1.gif" alt="Threshold 4" border="0" name="Slider4RailImg" id="Slider4RailImg">
+ 		<div id="v_value4" class="valuer"></div>
+ 	</div> 
+ 	</td>
+ </tr>
+
+ </table>
+ </div>
+ </td>
+ </tr>
+ 
+ </table>
+</td> <!-- End of Left Panel -->
+
+<!-- Right Motion -->
+ <td width="100%" valign="top">
+ <table cellspacing="0" cellpadding="0" style="margin-left:5px">
+ <tr>
+ <td width="400px" height="300px" valign="middle" align="center">
+ 	 <!--script language="javascript" type="text/javascript">
+ 	doPlay();
+ </script-->
+ <div id="PlayArea">
+ </div>
+ </td>
+ </tr>
+ 
+  <tr><td>&nbsp</td></tr>
+  <tr>
+  <td valign="middle" align="center">
+  <div id="v_downloaddecoder" style="display:none">
+	<a href="../img/license.htm" class="bluelink" target="_blank">Click here to install or upgrade the H.264 decoders.</a>		
+  </div>
+ </td>
+ </tr>
+ 
+
+ </table>
+</td> <!-- End of Right Motion -->
+
+ 
+</tr>
+</table>
+</div>
+</td>
+<td width="2px" nowrap="nowrap"></td>
+</tr>
+
+<tr>
+<td width="2px" nowrap="nowrap"></td>
+<td align="center">
+<table id="button_table" cellpadding="0" cellspacing="0" style="margin-left:20px; position:relative;">
+<tr>
+<td style="padding-left:25px">
+<input type="button" name="save" class="stdbuttton" value=" Save " onClick="SaveAll()">
+</td>
+<td style="padding-left:20px">
+<input name="save" type="reset" class="stdbuttton" id="button_font_cancel" value="Cancel" onClick="setTimeout('init()',250)">
+</td>
+<td style="padding-left:20px">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_md.htm')"> 
+</td>
+</tr>
+
+</table>
+</td>
+<td width="2px"  nowrap="nowrap"></td>
+</tr>
+
+<tr>
+<td width="2px"  nowrap="nowrap">
+</td>
+<td height="10px" nowrap="nowrap">
+</td>
+<td width="2px"  nowrap="nowrap">
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>  <!-- pagemain -->
+<input type="Hidden" name="h_authorization" value="">
+<input type="Hidden" name="todo" value="connect">
+<input type="Hidden" name="this_file" value="m_detect.htm"> 
+<input type="Hidden" name="next_file" value="m_detect.htm">
+</form>
+
+<div id="savecgi" style="visibility:hidden"></div>
+
+<script> var msgVar="@message#"; </script>
+
+</body>
+</html>
+

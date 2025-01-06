@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Mcard Status</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var h_mmcsd_status;
+var h_mmcsd_total_size;
+var h_mmcsd_free_size;
+var h_mmcsd_used_size;
+var h_mmcsd_used_percent;
+
+function set_status()
+{
+	var mcard_status = h_mmcsd_status;
+	
+	if ("4" == mcard_status)
+	{
+		parent.document.getElementById("statusDIV").innerHTML 	= "Under formatting";
+	}
+	
+	if ("3" == mcard_status)
+	{
+		parent.document.getElementById("statusDIV").innerHTML 	= "Read and Write";
+	}
+	else if ("2" == mcard_status)
+	{
+		parent.document.getElementById("statusDIV").innerHTML 	= "Read only";
+	}
+	else if ("1" == mcard_status)
+	{
+		parent.document.getElementById("statusDIV").innerHTML 	= "Unknow format";
+	}
+	else
+	{
+		parent.document.getElementById("statusDIV").innerHTML 	= "N/A";
+	}
+	parent.document.getElementById("totalSize").innerHTML 		= "Total Size: " + h_mmcsd_total_size;
+	parent.document.getElementById("freeSize").innerHTML 			= "Free Size: " + h_mmcsd_free_size;
+	parent.document.getElementById("usedSize").innerHTML 			= "Used Size: " + h_mmcsd_used_size;
+	parent.document.getElementById("usedPercent").innerHTML 	= "Used (%): " + h_mmcsd_used_percent;	
+}
+
+function refreshMcardStatus()
+{
+	var read = new GroupCtrl();
+	var array_get_value=[
+			["SDCARD", "sdcard_status", "h_mmcsd_status"],
+			["SDCARD", "sdcard_total_size", "h_mmcsd_total_size"],
+			["SDCARD", "sdcard_free_size", "h_mmcsd_free_size"],
+			["SDCARD", "sdcard_used_size", "h_mmcsd_used_size"],
+			["SDCARD", "sdcard_used_percent", "h_mmcsd_used_percent"]
+		];
+	read.callback = set_status;
+	read.getvalue(array_get_value);
+}
+// End Script -->
+</script>
+</head>
+
+<body onload="refreshMcardStatus();">
+</body>
+</html>
+

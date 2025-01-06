@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta name="description" content="RC8510A">
+
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Administration</title>
+
+<style type="text/css">
+BODY, P, TABLE, TD, UL, OL, LI, DD 
+        { color: black;   font: normal 9pt    Arial,Helvetica,sans-serif; }
+BIG     { color: black;  font: bold 12pt    Arial,Helvetica,sans-serif; text-indent: 10pt; }
+H3      { color: black;   font: bold 14pt      Arial,Helvetica,sans-serif; }
+.bignum    { color: blue;  font: bold 12pt Courier,serif; }
+.swhead    { background: red; }
+BIG.sw  { color: white;  font: bold 14pt      Arial,Helvetica,sans-serif; }
+</style>
+
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var nextfileVar = "@next_file#";
+var finish_msg = "\Firmware completed, camera restarting." + 
+"\nPlease wait for restart to be completed before continuing.";
+var close_msg = "\Firmware completed, camera restarting." + 
+"\nPlease close this window and wait for restart to be completed before continuing.";
+var pchar = "|";          // progress char
+var maxchars = 50;  
+var delay_time = @upg_delay_time#; //1800 msecs or 4000 msecs
+var charcount = 0;  
+
+function updateProgress()
+{
+	var cf = document.forms[0];
+	/*
+	if ( top.location.href != self.location.href )
+	{
+		top.location.href = self.location.href ;
+		return;
+	}
+	*/
+	if (charcount < maxchars)
+	{
+		charcount ++;
+		cf.progress.value = makeStr(charcount,pchar);
+		cf.progress.select();
+		window.status = "Progress: " + Math.floor(charcount/maxchars *100) + " %";
+		if( charcount == maxchars)
+			setTimeout("updateProgress()",1000);
+		else
+			setTimeout("updateProgress()",delay_time);
+	}
+	else
+	{ 
+		
+		
+		if(isIE())
+		{ alert(finish_msg); top.self.close(); }
+		else
+		{ alert(close_msg);  }
+		
+		
+	}
+}
+
+function makeStr(strSize, fillChar)
+{
+	var temp = "";
+	for (i=0; i < strSize ; i ++)
+		temp = temp + fillChar;
+	return temp;
+}
+
+function getupgmsg()
+{
+	var time_risidual = delay_time%1200;
+	var time_min = (delay_time-time_risidual)/1200;
+	var time_end = time_min+1;
+
+	var msg="Please wait. This could take "+time_min+" to "+time_end+" minutes.";
+
+	return msg;
+}
+
+// End Script --> 
+</script>
+
+
+
+</head>
+
+<body bgcolor="#ffffff" marginwidth="0" marginheight="0" topmargin="0" leftmargin="0" onLoad="updateProgress()">
+<form method="post" action="upg_pg.cgi" onSubmit="return false">
+<table border="0" cellpadding="2" cellspacing="0" width="100%" bgcolor="#ffffff">
+<tr class="swhead"><td colspan="2" align="center"><big class="sw">Firmware in Progress !</big></td></tr>
+</table>
+<BR>
+<div align="center">
+
+<table border=0 cellspacing=0 cellpadding=6>
+<tr>
+<td colspan="2" align="center"><BR><Big>
+	<SCRIPT LANGUAGE="JavaScript">
+		dw(getupgmsg());
+	</SCRIPT> 
+</big></td>
+ <!--td colspan="2" align="center"><BR><Big>Please wait. This could take 4 to 5 minutes.</big></td-->
+</tr>
+<tr>
+ <td colspan="2" align="center"><BR><h3>Progress</h3></td>
+</tr>
+
+<tr>
+ <td nowrap colspan="2"><input type="text" class="bignum" name="progress" size="50" value="" readonly onFocus="this.select();this.blur();"></td>
+</tr>
+
+<tr>
+ <td nowrap align="left"><b>0%</b></td>
+ <td nowrap align="right"><b>100%</b></td>
+</tr>
+
+<tr>
+ <td colspan="2" align="center"><Big>Upgrade must NOT be interrupted !</big></td>
+</tr>
+
+</table>
+
+</div>
+
+</form>
+
+</body>
+</html>
+

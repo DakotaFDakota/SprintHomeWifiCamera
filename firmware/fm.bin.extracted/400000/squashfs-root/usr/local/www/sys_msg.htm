@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function setNext()
+{
+	var delayTimeStr = "@delayTime#";
+	var nextFile = "@next_file#";
+	var url_str=window.location.href;
+	if(url_str.indexOf('?')>=0)
+	{
+		var uri_str=url_str.split('?')[1];
+		var arr=uri_str.split('&');
+		//var arr2;
+		var message;
+		/*
+		for(i=0;i<arr.length;i++)
+		{
+			arr2=arr[i].split('=');
+			if(arr2[0]=="delayTime")
+			{
+				delayTimeStr = arr2[1];
+			}
+			else if(arr2[0]=="next_file")
+			{
+				nextFile = arr2[1];
+			}
+			else if(arr2[0]=="message")
+			{
+				message = arr2[1];
+			}
+		}*/
+		delayTimeStr = arr[0];
+		nextFile = arr[1];
+		if(arr[2] == 0 || arr[2] == 1 || arr[2] == 2 || arr[2] == 3)
+		{
+			message = sys_message[arr[2]];
+		}
+		else
+		{
+			message = arr[2];
+		}
+		document.getElementById("message").innerHTML=message;
+	}
+
+	var cmdstr = "location.href='" + nextFile + "'";
+	var delayTime = parseInt(delayTimeStr);
+	if (isNaN(delayTime))
+		delayTime = 10000;
+	if(nextFile.length > 2)
+		setTimeout(cmdstr,delayTime);
+
+}
+
+// End Script -->
+</script>
+
+
+
+<title>Network Camera - System Message</title>
+
+<STYLE TYPE="text/css">
+BODY, P, TABLE, TD, UL, OL, LI, DD 
+        { color: black;   font: bold 10pt    Arial,Helvetica,sans-serif; }
+B       { font-weight: bold; }
+b.main  { color: white; font: bold 10pt    Arial Narrow,Helvetica,sans-serif; }
+b.wh    { color: black; font-weight: bold; }
+big     { color: black;  font: bold 10pt    Arial,Helvetica,sans-serif; text-indent: 10pt; }
+caption { color: black;   font: bold 8pt      Arial,Helvetica,sans-serif; }
+DL, DT  { color: #666666; font: bold 10pt     Arial,Helvetica,sans-serif; }
+H1      { color: #333366;   font: bold 14pt   Arial,Helvetica,sans-serif; }
+H2      { color: black;   font: bold 16pt    Arial,Helvetica,sans-serif; }
+H3      { color: black;   font: bold 14pt      Arial,Helvetica,sans-serif; }
+H4      { color: white;   font: bold 12pt     Arial,Helvetica,sans-serif; }
+small   { color: black;   font: normal 8pt  Arial,Helvetica,sans-serif; }
+TH      { color: #00ada4;  font: bold 10pt Arial,Helvetica,sans-serif; padding-top:6px;}
+TH.help { color: black; font: bold 10pt Arial,Helvetica,sans-serif; text-align:left;}
+</style>
+
+</head>
+
+<body bgcolor="white" onLoad="setNext()">
+<h2 align="center">System Message</h2>
+<hr>
+<P><a id="message">@message#</a>
+</p>
+<BR>
+<hr>
+
+
+
+
+
+
+</body>
+</html>

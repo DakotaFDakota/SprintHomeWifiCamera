@@ -1,0 +1,805 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Administration</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var WIRELESS = false;
+
+//It MUST match with streaming server
+var bitrate_str = new Array("32 Kbps","64 Kbps","96 Kbps","128 Kbps","256 Kbps","384 Kbps","512 Kbps","768 Kbps","1 Mbps","1.2 Mbps","2 Mbps","22 Kbps","200 Kbps");
+var quality_level_str = new Array("Very Low","Low","Normal","High","Very High");
+var resolution_str = new Array("160*120","320*240","640*480","1280*720","1920*1080");
+var resolution_str_aspect = new Array("160*90","320*180","640*360","1280*720","1920*1080");
+var resolution_str_16_9 = new Array("160*90","320*180","640*360","1280*720","1920*1080");
+var resolution_str_4_3 = new Array("160*120","320*240","640*480","960*720","1440*1080");
+var resolution_str_16_6= new Array("160*60","320*120","640*240","1280*480","1920*720");
+var format_str = new Array("H.264","MPEG-4","MJPEG");
+
+function ret_bitrate_str(bit_val)
+{
+	var retstr="";
+	
+	if (bit_val >= 32 && bit_val < 1000)
+	{
+		retstr = bit_val+" Kbps";
+	}
+	else if (bit_val >= 1000)
+	{
+		retstr = bit_val/1000+" Mbps";
+	}
+	else
+	{
+		if (bit_val>=0 && bit_val < bitrate_str.length )
+			retstr=bitrate_str[bit_val];
+		else
+			retstr= "N/A";
+	}
+	return retstr;
+}
+function getEnable(stream_id)
+{
+	var type_str = document.getElementsByName("v"+stream_id+"_enable");
+	var fmt_str = "view_v"+stream_id+"_mode";
+	var format ;
+
+	format = document.getElementById(fmt_str).value;
+	if (format == "1")
+		type_str[0].innerHTML = "Enabled";
+	else
+		type_str[0].innerHTML = "Disabled";
+}
+
+function getStreamFormat(stream_id)
+{
+	var type_str = document.getElementsByName("v"+stream_id+"_format");
+	var fmt_str = "view_v"+stream_id+"_format";
+	var format ;
+
+	format = document.getElementById(fmt_str).value;
+	if (format>0 && format <= format_str.length)
+		type_str[0].innerHTML = format_str[format-1];
+	else
+		type_str[0].innerHTML = "N/A";
+}
+
+function getResolution(stream_id)
+{
+	var type_str = document.getElementsByName("v"+stream_id+"_res");
+	var format_str = "view_v"+stream_id+"_res";
+	var res ;
+	var aspect_ratio = document.getElementById("aspect_ratio").value;
+	res = document.getElementById(format_str).value;
+	if (res >0 && res <= resolution_str.length)
+	{
+		if ("2" == aspect_ratio)  //4:3
+		{
+			type_str[0].innerHTML =  resolution_str_4_3[res-1];
+		}
+		else if ("1" == aspect_ratio)  //16:9
+		{
+			type_str[0].innerHTML =  resolution_str_16_9[res-1];
+		}
+		else if ("0" == aspect_ratio)  //mixed
+		{
+			type_str[0].innerHTML =  resolution_str[res-1];
+		}
+	}
+	else
+	{
+		type_str[0].innerHTML =  "N/A";
+	}
+}
+
+function getFrate(stream_id)
+{
+	var type_str = document.getElementsByName("v"+stream_id+"_frate");
+	var format_str = "view_v"+stream_id+"_frate";
+	var fr ;
+	
+	fr = document.getElementById(format_str).value;
+    if (fr == "0")
+    {
+        type_str[0].innerHTML =  "Auto";
+    }
+    else
+    {
+        type_str[0].innerHTML =  fr;
+    }
+}
+
+function getQuality(stream_id)
+{
+	var type_str = document.getElementsByName("v"+stream_id+"_quality");
+	var bwopt_str = "view_v"+stream_id+"_bwopt";
+	var val_str = "";
+	var bwopt_val ;
+	var q_val;
+	var fmt_str = "view_v"+stream_id+"_format";
+
+
+	
+	bwopt_val = document.getElementById(bwopt_str).value;
+	if (bwopt_val == "1" || document.getElementById(fmt_str).value == '3')
+	{
+		val_str = "view_v"+stream_id+"_compression";
+		q_val = document.getElementById(val_str).value;
+		if (q_val>0 && q_val <= quality_level_str.length)
+			type_str[0].innerHTML = quality_level_str[q_val-1];
+		else
+			type_str[0].innerHTML = "N/A";
+	}
+	else
+	{
+		val_str = "view_v"+stream_id+"_bitrate";
+		q_val = document.getElementById(val_str).value;
+		type_str[0].innerHTML =  ret_bitrate_str(q_val);
+	}
+}
+
+function getNetTypeW()
+{
+	var cf = document.forms[0];
+	var type_str = document.getElementsByName("w_mode");
+	var type = cf.h_w_mode.value;
+    
+    if(type == "0")
+    {
+        type_str[0].innerHTML="Ad-hoc";
+    }
+    else
+    {
+        type_str[0].innerHTML="Infrastructure";
+    }
+}
+function getChannelW()
+{
+	var cf = document.forms[0];
+	var type_str = document.getElementsByName("curr_ch");
+    var chn=cf.curr_channel.value;
+    if (chn=="N/A")
+    {
+        type_str[0].innerHTML="N/A";
+    }
+    else
+    {
+        type_str[0].innerHTML=chn;
+    }
+}
+function getSecurityW()
+{
+	var cf = document.forms[0];
+	var type_str = document.getElementsByName("wire_sec");
+	var type = cf.h_wire_sec.value;
+
+    if (type == "1")
+    {
+        type_str[0].innerHTML="WEP";
+    }
+    else if (type == "2")
+    {
+        type_str[0].innerHTML="WPA/WPA2 Personal";
+    }
+    else
+    {
+        type_str[0].innerHTML="Disabled";
+    }
+    
+}
+
+
+function showText(txt) {
+        document.write(txt);
+}
+
+/* UPNP Traversal Ports status */
+/*
+var upnptravui_list = new Array(
+											["UPNPTRAV", "Disabled"],	//0
+											["gw_ext_ip", "N/A"]			//1
+										);
+*/
+//var upnptrav_ports;// "@upnp_trav_ports#";
+/*
+												"UPNPTRAV=1&HTTP_MODE=1&HTTPS_MODE=0"+
+												"&HTTP=80&HTTPS=443&RTSP=554&RTP=50000"+
+												"&gw_ext_ip=192.168.23.10&TCP.HTTP=0&TCP.HTTPS=0&TCP.RTSP=554"+
+												"&UDP.RTP_RTCP1=50000,0,50002,50003&UDP.RTP_RTCP2=0,50005,50006,50007"+
+												"&UDP.RTP_RTCP3=50008,0,0,50011&UDP.RTP_RTCP4=0,50013,0,0"+
+												"&UDP.RTP_RTCP5=0,0,0,0&UDP.RTP_RTCP6=50020,50021,50022,50023"+
+												"&UDP.RTP_RTCP7=50024,50025,50026,50027&UDP.RTP_RTCP8=50028,50029,50030,50031"+
+												"&UDP.RTP_RTCP9=50032,50033,50034,50035&UDP.RTP_RTCP10=50036,50037,50038,50039";
+*/
+/*
+function showUPNPTravStatusUI()
+{
+	var i, k;
+	var upnptrav_list;
+	var upnptrav_value;
+	var listtag = "&";
+	var valuetag = "=";
+	
+	upnptrav_list = upnptrav_ports.split(listtag);
+	for (k = 0; k < upnptravui_list.length; k++)
+	{
+		for (i = 0; i < upnptrav_list.length; i++)
+		{
+			upnptrav_value = upnptrav_list[i].split(valuetag);
+			if (upnptrav_value[0] == upnptravui_list[k][0])
+			{
+				if (0 == k)
+				{
+					if ("1" == 	upnptrav_value[1])
+					{
+						upnptravui_list[k][1] = "Enabled";
+					}
+				}
+				else if (1 == k)
+				{
+					if (upnptrav_value[1].length > 7)
+					{
+						upnptravui_list[k][1] = upnptrav_value[1];
+					}
+				}
+				upnptrav_list.splice(i, 1);
+				break;
+			}
+		}
+	}
+
+	document.getElementById("upnptrav_flag").innerHTML = upnptravui_list[0][1];
+	document.getElementById("upnptrav_gwip").innerHTML = upnptravui_list[1][1];
+    if ("Enabled" == upnptravui_list[0][1])
+    {
+        show_hide("UPNPTravStatusDiv", true);
+    }
+    else
+    {
+        show_hide("UPNPTravStatusDiv", false);
+    }
+}
+*/
+/*function show_v4_v6()
+{
+	var cf = document.forms[0];
+	var ipversion = cf.h_ipversion.value;
+//	show_hide("v4_ip", ("0" == ipversion || "2" == ipversion));
+//	show_hide("v6_ip", ("1" == ipversion || "2" == ipversion));
+	if (0 == ipversion)
+	{
+		document.getElementById("v6ip").style.display = "none";
+		document.getElementById("v6gw").style.display = "none";
+	}
+	else if (1 == ipversion)
+	{
+		document.getElementById("v4ip").style.display = "none";
+		document.getElementById("v4ms").style.display = "none";
+		document.getElementById("v4gw").style.display = "none";
+	}
+	//show_hide("mubd", 1);
+}*/
+
+function set_all()
+{
+	var i;
+	var cf = document.forms[0];
+	//show_v4_v6();
+	//alert("h_curr_wifi_bundle="+document.getElementById("h_curr_wifi_bundle").value);
+	if (document.getElementById("h_curr_wifi_bundle").value == 1)
+	{
+		WIRELESS = true;
+	}
+
+	if(WIRELESS == false)
+	{
+		document.getElementById('WirelessTr0').style.display = "none";
+		document.getElementById('WirelessTr1').style.display = "none";
+		document.getElementById('WirelessTr2').style.display = "none";
+		document.getElementById('WirelessTr3').style.display = "none";
+		document.getElementById('WirelessTr4').style.display = "none";
+		document.getElementById('WirelessTr5').style.display = "none";
+		document.getElementById('WirelessTr6').style.display = "none";
+		document.getElementById('WirelessTr7').style.display = "none";
+	}
+	getNetTypeW();
+	getChannelW();
+	getSecurityW();
+	for(i=1;i<=2;i++)
+	{
+		getEnable(i);
+		getStreamFormat(i);
+		getResolution(i);
+		getQuality(i);
+		getFrate(i);
+	}
+	//upnptrav_ports = cf.upnp_trav_ports.value;
+	//showUPNPTravStatusUI();
+	cgi_cnt--;
+	if(cgi_cnt == 0)
+	{
+		document.getElementById("ongoing").style.display="none";
+		document.getElementById("mubd").style.display="block";	
+	}	
+}
+
+var cgi_cnt=0;
+var content="";
+function querycgi_response()
+{
+	var cf = document.forms[0];
+	//alert("content="+content);
+	if (content != "")
+	{
+		var all_value = content.split("\r\n");
+		var i;
+
+		for(i=0;i<all_value.length;i++)
+		{
+			if(all_value[i].split("=")[0] == "mac")
+			{		
+				document.getElementsByName("mac_addr")[0].innerHTML = all_value[i].split("=")[1];
+			}
+			else if(all_value[i].split("=")[0] == "fw_ver")
+			{
+				if(all_value[i].split("=")[1].indexOf("R00")>=0)
+				{
+					document.getElementsByName("ver")[0].innerHTML = all_value[i].split("=")[1].substring(0,all_value[i].split("=")[1].indexOf("R00"));
+				}
+				else
+				{
+					document.getElementsByName("ver")[0].innerHTML = all_value[i].split("=")[1];
+				}
+			}
+			else if(all_value[i].split("=")[0] == "wps_pin_code")
+			{
+				document.getElementsByName("wsc_pin")[0].innerHTML = all_value[i].split("=")[1];
+			}
+		}
+	}
+	cgi_cnt--;
+	if(cgi_cnt == 0)
+	{
+		document.getElementById("ongoing").style.display="none";
+		document.getElementById("mubd").style.display="block";	
+	}
+}
+
+function init()
+{
+	cgi_cnt = 0;
+	menuframe.highLight('statusDIV');
+	showMsg();
+//	showUPNPTravStatusUI();
+	var src_file = '../util/query.cgi?extension=yes';
+	cgi_cnt++;
+	call_http_cgi(src_file,querycgi_response);
+	cgi_cnt++;
+	var read = new GroupCtrl();
+	var array_get=[
+			//["HIDDEN", "ver", "ver"],	
+			//["HIDDEN", "mac_addr", "mac_addr"],
+			//["HIDDEN", "wsc_pin", "wsc_pin"],	
+			//["UPNP", "upnp_trav_ports", "upnp_trav_ports"],
+			["STREAMS", "view_v1_mode", "view_v1_mode"],	
+			["STREAMS", "view_v1_format", "view_v1_format"],
+			["STREAMS", "view_v1_res", "view_v1_res"],	
+			["STREAMS", "view_v1_frate", "view_v1_frate"],
+			["STREAMS", "view_v1_bwopt", "view_v1_bwopt"],	
+			["STREAMS", "view_v1_bitrate", "view_v1_bitrate"],
+			["STREAMS", "view_v1_compression", "view_v1_compression"],	
+			["STREAMS", "view_v2_mode", "view_v2_mode"],	
+			["STREAMS", "view_v2_format", "view_v2_format"],
+			["STREAMS", "view_v2_res", "view_v2_res"],	
+			["STREAMS", "view_v2_frate", "view_v2_frate"],
+			["STREAMS", "view_v2_bwopt", "view_v2_bwopt"],	
+			["STREAMS", "view_v2_bitrate", "view_v2_bitrate"],
+			["STREAMS", "view_v2_compression", "view_v2_compression"],	
+			["SYSTEM", "model_num", "model_num"],
+			["SYSTEM", "host_name", "device"],
+			["SYSTEM", "comment", "desc"],
+			["NETWORK", "ip_addr", "ip"],
+			["NETWORK", "netmask", "mask"],
+			["NETWORK", "gateway", "gw"],
+			["NETWORK", "wins_ip", "wins_ip"],
+			["VIDEO", "aspect_ratio", "aspect_ratio"],
+//			["NETWORK_IPV6", "auto_ip_addr", "auto_ip_addr"],
+//			["NETWORK_IPV6", "auto_gateway", "auto_gateway"],
+//			["NETWORK_IPV6", "ip_version", "h_ipversion"],
+			["WIRELESS", "curr_channel", "curr_channel"],
+			["WIRELESS", "curr_ssid", "curr_ssid"],
+			["WIRELESS", "curr_signal", "curr_signal"],
+//			["WIRELESS", "wlan_type", "h_w_mode"],
+			["WIRELESS", "wlan_security", "h_wire_sec"],
+			["WIRELESS", "curr_wifi_bundle", "h_curr_wifi_bundle"]
+		];
+	read.callback=set_all;
+	read.get(array_get);
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();">
+
+<input type="hidden" name="view_v1_mode" id="view_v1_mode" value="">
+<input type="hidden" name="view_v1_format" id="view_v1_format" value="">
+<input type="hidden" name="view_v1_res" id="view_v1_res" value="">
+<input type="hidden" name="view_v1_frate" id="view_v1_frate" value="">
+<input type="hidden" name="view_v1_bwopt" id="view_v1_bwopt" value="">
+<input type="hidden" name="view_v1_bitrate" id="view_v1_bitrate" value="">
+<input type="hidden" name="view_v1_compression" id="view_v1_compression" value="">
+
+<input type="hidden" name="view_v2_mode" id="view_v2_mode" value="">
+<input type="hidden" name="view_v2_format" id="view_v2_format" value="">
+<input type="hidden" name="view_v2_res" id="view_v2_res" value="">
+<input type="hidden" name="view_v2_frate" id="view_v2_frate" value="">
+<input type="hidden" name="view_v2_bwopt" id="view_v2_bwopt" value="">
+<input type="hidden" name="view_v2_bitrate" id="view_v2_bitrate" value="">
+<input type="hidden" name="view_v2_compression" id="view_v2_compression" value="">
+
+<input type="hidden" name="h_curr_wifi_bundle" id="h_curr_wifi_bundle" value="">
+
+<FORM name="status" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td width="204" class="leftspacer"> </td>
+ <td width="439" class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>System </td>
+ <td class="rc" nowrap> </td>
+</tr>
+ 
+<tr>
+ <td class="lc" nowrap>Device Name:</td>
+ <td class="rc" nowrap><a name="device"></a></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Description:</td>
+ <td class="rc" nowrap><a name="desc"></a></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>F/W version:</td>
+ <td class="rc" nowrap><a name="ver"></a></td>
+</tr>
+
+
+<tr>  <!-- layout row, adds spacing above sub-head  -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>Network </td>
+ <td class="rc" nowrap> </td>
+</tr>
+
+<tr>
+ <td class="lc">MAC Address:</td>
+ <td class="rc" nowrap><a name="mac_addr"></a></td>
+</tr>
+
+<tr id="v4ip">
+ <td class="lc" nowrap>IP Address:</td>
+ <td class="rc" nowrap><a name="ip"></a></td>
+</tr>
+
+<tr id="v4ms">
+ <td class="lc" nowrap>Network Mask:</td>
+ <td class="rc" nowrap><a name="mask"></a></td>
+</tr>
+
+<tr id="v4gw">
+ <td class="lc" nowrap>Gateway:</td>
+ <td class="rc" nowrap><a name="gw"></a></td>
+</tr>
+
+<!--tr id="v6ip">
+ <td class="lc" nowrap>IPv6 Address(es):</td>
+ <td class="rc" nowrap><a name="auto_ip_addr"></a></td>
+</tr-->
+
+<!--tr id="v6gw">
+ <td class="lc" nowrap>IPv6 Gateway(s):</td>
+ <td class="rc" nowrap><a name="auto_gateway"></a></td>
+</tr-->
+
+<tr>
+ <td class="lc" nowrap>WINS Address:</td>
+ <td class="rc" nowrap><a name="wins_ip"></a></td>
+</tr>
+
+
+<tr id="WirelessTr0">  <!-- layout row, adds spacing above sub-head  -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr id="WirelessTr1">
+ <td class="subhead" nowrap>Wireless </td>
+ <td class="rc" nowrap> </td>
+</tr>
+ 
+<tr id="WirelessTr2">
+ <td class="lc" nowrap>WSC PIN Code:</td>
+ <td class="rc" nowrap><b><a name="wsc_pin"></a></b></td>
+</tr>
+
+<tr id="WirelessTr3">
+ <td class="lc" nowrap>Network Type:</td>
+ <td class="rc" nowrap><a name="w_mode"></a>
+	<!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getNetTypeW());
+	 </SCRIPT--> 
+</td>
+</tr>
+
+<tr id="WirelessTr4">
+ <td class="lc" nowrap>SSID:</td>
+ <td class="rc" nowrap><a name="curr_ssid"></a></td>
+</tr>
+
+<tr id="WirelessTr5">
+ <td class="lc" nowrap>Channel:</td>
+ <td class="rc" nowrap><a name="curr_ch"></a>
+	<!--SCRIPT LANGUAGE="JavaScript">
+		showText(getChannelW());
+	</SCRIPT--> 
+</td>
+</tr>
+
+<tr id="WirelessTr6">
+ <td class="lc" nowrap>Security:</td>
+ <td class="rc" nowrap><a name="wire_sec"></a>
+	<!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getSecurityW());
+	 </SCRIPT--> 
+</td>
+</tr>
+
+<tr id="WirelessTr7">
+ <td nowrap class="lc">Signal Strength:</td>
+ <td class="rc" nowrap><a name="curr_signal"></a></td>
+</tr>
+
+<!--script>
+if(!WIRELESS)
+{
+document.getElementById('WirelessTr0').style.display = "none";
+document.getElementById('WirelessTr1').style.display = "none";
+document.getElementById('WirelessTr2').style.display = "none";
+document.getElementById('WirelessTr3').style.display = "none";
+document.getElementById('WirelessTr4').style.display = "none";
+document.getElementById('WirelessTr5').style.display = "none";
+document.getElementById('WirelessTr6').style.display = "none";
+document.getElementById('WirelessTr7').style.display = "none";
+}
+</script-->
+
+<tr>  <!-- layout row, adds spacing above sub-head  -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>Streaming 1 </td>
+ <td class="rc" nowrap><a name="v1_enable"></a> 
+<!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getEnable(1));
+	 </SCRIPT-->
+ </td>
+</tr>
+<tr>
+ <td class="lc" nowrap>Video Format: </td>
+ <td colspan="1"><a name="v1_format"></a>
+ <!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getStreamFormat(1));
+	 </SCRIPT--></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Resolution:</td>
+ <td colspan="1"><a name="v1_res"></a>
+ <!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getResolution(1));
+	 </SCRIPT--></td>
+</tr>
+
+<tr>
+   <td class="lc">Video Quality:</td>
+   <td colspan="1"><a name="v1_quality"></a>
+   <!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getQuality(1));
+	 </SCRIPT--></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Frame Rate:</td>
+ <td colspan="1"><a name="v1_frate"></a>
+	<!--SCRIPT LANGUAGE="JavaScript">
+	showText(getFrate(1));
+	</SCRIPT--> 
+</td>
+</tr>
+<tr>  <!-- layout row, adds spacing above sub-head  -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>Streaming 2 </td>
+ <td class="rc" nowrap><a name="v2_enable"></a>
+<!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getEnable(2));
+	 </SCRIPT-->
+ </td>
+</tr>
+<tr>
+ <td class="lc" nowrap>Video Format:</td>
+ <td colspan="1"><a name="v2_format"></a>
+ <!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getStreamFormat(2));
+	 </SCRIPT--></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Resolution:</td>
+ <td colspan="1"><a name="v2_res"></a>
+ <!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getResolution(2));
+	 </SCRIPT--></td>
+</tr>
+
+<tr>
+   <td class="lc">Video Quality:</td>
+   <td colspan="1"><a name="v2_quality"></a>
+   <!--SCRIPT LANGUAGE="JavaScript">
+	 showText(getQuality(2));
+	 </SCRIPT--></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Frame Rate:</td>
+ <td colspan="1"><a name="v2_frate"></a>
+	<!--SCRIPT LANGUAGE="JavaScript">
+	showText(getFrate(2));
+	</SCRIPT--> 
+</td>
+</tr>
+
+<tr>  <!-- layout row, adds spacing above sub-head  -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+
+<!--tr>
+ <td colspan="2" nowrap class="subhead">UPnP Traversal (Port Mapping)</td>
+</tr-->
+
+<!--tr>
+ <td class="lc" nowrap>Status:</td>
+ <td colspan="1" id="upnptrav_flag">&nbsp;</td>
+</tr-->
+
+<!--tr>
+ <td colspan="2" align="left" nowrap class="upnptvtd">
+ <div align="left" id="UPNPTravStatusDiv">
+	 <table class="upnptvtab" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+		   <td class="upnptvtablc">Gateway External Address:</td>
+		   <td colspan="1" id="upnptrav_gwip">&nbsp;</td>
+		</tr>
+		<tr>
+		   <td valign="top" class="upnptvtablc">Ports Information:</td>
+		   <td colspan="1">
+			 	<span class='upnptvspan1'>Application</span>
+				<span class='upnptvspan2'>Port</span>
+				<span class='upnptvspan3'>Protocal</span>Status<br>
+			 	<iframe SRC="upnptravports.htm" class="imenu_upnptv" scrolling="auto" frameborder="1" align="left"></iframe>
+		   </td>
+		</tr>
+	 </table>
+ </div>
+ </td>
+</tr-->
+
+<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+</tr> 
+
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_status.htm')">
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+ <input type="button" class="stdbuttton" name="refresh" value=" Refresh " onClick="location.href='status.htm'">
+
+ </td>
+</tr>
+<!-- table footer -->
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+</table>
+</td>
+</tr>
+</table>
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+<input type="hidden" name="aspect_ratio" id="aspect_ratio" value="">
+<input type="hidden" name="h_ipversion" value="">
+<input type="hidden" name="curr_channel" value="">
+<input type="hidden" name="h_w_mode" value="">
+<input type="hidden" name="h_wire_sec" value="">
+<!--input type="hidden" name="upnp_trav_ports" value=""-->
+
+<input type="hidden" name="h_view" value="@h_view#">
+<input type="Hidden" name="this_file" value="status.htm">
+<input type="Hidden" name="next_file" value="status.htm">
+<input type="Hidden" name="todo" value="reset">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <link rel="stylesheet" href="/file/set.css">
+    <script type="text/javascript" src="/file/javascript.js"></script>
+
+    <title></title>
+
+    <script>
+      function checktarget()
+      {
+        var test;
+        if( document.upload.target.selectedIndex == 0 ) test = "upgrade.asp";
+        else test = "upgradet.asp";
+        document.location.replace(test);
+      }
+
+      function evaltF()
+      {
+        if ( messageCheck() ) return true;
+        return false;
+      }
+
+      function messageCheck()
+      {
+        var hid = document.upload;
+        if(hid.binary.value.length == 0)
+				{
+          alert(showText(file));
+          return false;
+        }
+				else
+				{
+          //if (confirm(showText(FirmwareUpgradeConfirm)))
+          //{
+            hid.submit();
+            //alert(showText(FirmwareUpgradeAlert));
+          //}
+        }
+      }
+
+      function logoutF()
+      {
+        document.upload.logout.value=1;
+        document.upload.submit();
+        return true;
+      }
+    </script>
+  </head>
+
+  <body class="mainbg">
+    <blockquote>
+      <br>
+      <a class="titlecolor">Firmware Upgrade</a>
+      <br>
+      <br>
+      
+      <br>
+      <br>
+
+      <form method="post" action="/cgi-bin/upload_my" enctype="multipart/form-data" name="upload">
+        <table border="0" cellspacing="0" cellpadding="0" width="600">
+          <tr>
+            <td><input type="file" size="25" maxlength="31" name="binary" onkeypress="return false"></td>
+          </tr>
+        </table>
+				<br>
+				<br>
+        <table width="600" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="middle">
+              <input type=submit value=apply onclick="return evaltF();" class="button">
+              <script>//document.write('<input type=button value="'+showText(CANCEL)+'" onClick="document.upload.reset();" class="button">');</script>
+              <!--<input type="hidden" value="/tlaccept.asp" name="submit-url">-->
+            </td>
+          </tr>
+        </table>
+      </form>
+    </blockquote>
+  </body>
+</html>
+

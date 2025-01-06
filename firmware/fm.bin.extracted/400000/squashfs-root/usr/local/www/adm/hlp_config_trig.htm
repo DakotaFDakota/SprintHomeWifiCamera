@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Help -  Event Condition</TITLE>
+
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus()">
+<table width="100%">
+<tr>
+  <th class="help">Help - Config Event Trigger</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+<p><b>Name:</b>
+Event configuration name.
+</p>
+
+<p><b>Schedule</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Always</td>
+  <td>Always enable this event.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Schedule</td>
+  <td>Enable this event by schedule.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Never</td>
+  <td>Disable this event.</td>
+</tr>
+</table>
+
+<p><b>Trigger</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Motion Detection</td>
+  <td>Trigger by motion detection.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">PIR</td>
+  <td>Trigger by PIR.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Input</td>
+  <td>Trigger from input port.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Audio Detection</td>
+  <td>Trigger from audio detection.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">HTTP CGI</td>
+  <td>Trigger from http_trigger.cgi.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Periodically</td>
+  <td>Trigger periodically.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Continuously</td>
+  <td>Trigger continuesely.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Interval</td>
+  <td>Select the desired option for the events interval. (* "0" = No Delay)</td>
+</tr>
+</table>
+
+<p><b>Action</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Output Port</td>
+  <td> If checked, the output port state will be activated as configured. (* Output port must first be configured on the <strong>I/O Port</strong> page.) </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">White Light LEDs</td>
+  <td>If checked, White Light LEDS will be turn on during night mode.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">HTTP</td>
+  <td>If checked, an HTTP notification will be delivered to the HTTP server.  (* HTTP server must first be configured on the <strong>HTTP</strong> page first.) </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">E-Mail</td>
+  <td>If checked, an E-Mail (with "Attachment") will be delivered to the SMTP server. (* SMTP Server must first be configured on the <strong>E-Mail</strong> page.)</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead">FTP</td>
+  <td>        If checked, an FTP upload (with "Attachment") will be activated to the FTP server.  A secondary server may also be 
+        specified, if required. This will be used if the primary 
+        server is unavailable. &nbsp; (* FTP servers must first be configured on the <strong>FTP</strong> page.)</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">SMB/CIFS</td>
+  <td>If checked, video files will be uploaded to the SMB/CIFS host server.  (* SMB/CIFS client must first be enabled and configured on the <b>SMB/CIFS Client</b> page first.)</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">SMB Recording</td>
+  <td>If checked, video files will be recorded to the SMB/CIFS host server.  (* SMB/CIFS client must first be enabled and configured on the <b>SMB/CIFS Client</b> page first.)</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Pre-Capture</td>
+  <td>Select the desired length for the video and audio before event trigger.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Post-Capture</td>
+  <td>Select the desired length for the video and audio after event trigger.</td>
+</tr>
+</table>
+</body>
+</html>
+

@@ -1,0 +1,1444 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+
+<title>Network Camera - Video &amp; Audio</title>
+
+<link rel="stylesheet" type="text/css" href="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+//var ic;
+var mask_top_val =0;
+var mask_left_val = 0;
+var mask_w_val = 0;
+var mask_h_val = 0;
+
+function showVol()
+{
+	var cf = document.forms[0];
+	
+	if(cf.speaker.checked)
+	{
+		cf.speaker_vol.disabled = false;
+	}
+	else
+	{
+		cf.speaker_vol.disabled = true;
+	}
+}
+
+function set_all()
+{
+	var cf = document.forms[0];
+	//alert(cf.enco_aud_tmp.value);
+	cf.enco_aud.value = cf.enco_aud_tmp.value.split(",", 1);
+	//alert(cf.enco_aud.value);
+	
+	set_au_type();
+	//showVol();
+	set_text_overlay();
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+	var cf = document.forms[0];
+
+//	init_privcay_mask();
+//	dataToVisible(cf);
+	menuframe.highLight('imageDIV');
+/*
+	if (1 == cf.h_mic.value) {
+		cf.mic.checked = true;
+	}
+	set_au_type();
+	if (1 == cf.h_speaker.value) {
+		cf.speaker.checked = true;
+	}
+	showVol();
+	if (1 == cf.h_time_stamp.value) {
+		cf.time_stamp.checked = true;
+	}
+	if (1 == cf.h_text_overlay.value) {
+		cf.text_overlay.checked = true;
+	}
+*/
+	/*if (cf.h_adv_vnf.value != 0)
+	{
+		cf.adv_vnf.checked = true;
+	}*/
+	//show_mask_div();
+//	set_text_overlay();
+	var read = new GroupCtrl();
+	var array_get=
+	[
+		["SYSTEM", "model_num", "model_num"],
+		["VIDEO", "power_line", "pfreq"],
+		["VIDEO", "color", "color_type"],
+		["VIDEO", "exposure", "exposure"],
+		["VIDEO", "sharpness", "sharpness"],
+		["VIDEO", "contrast", "contrast"],
+		["VIDEO", "saturation", "saturation"],	
+		["VIDEO", "dn_sch", "dnsch"],
+		//["SYSTEM", "irled_lum", "irled_lum"],			
+		["VIDEO", "flip", "flip"],		
+		["VIDEO", "mirror", "mirror"],		
+		["VIDEO", "time_stamp", "time_stamp"],
+		["VIDEO", "text_overlay", "text_overlay"],		
+		["VIDEO", "text", "overlay"],
+		["AUDIO", "audio_in", "mic"],		
+		["AUDIO", "in_audio_type", "enco_aud_tmp"],
+		["AUDIO", "audio_out", "speaker"],		
+		//["AUDIO", "out_volume", "speaker_vol"],
+	];
+	read.callback = set_all;
+	read.get(array_get);
+}
+
+/*
+function init_privcay_mask()
+{
+	var cf = document.forms[0];
+	var tmp_index =0;
+	var position_str = cf.h_mask_position1.value;
+	var pos_var = new Array(220,165,440,315);
+	var i =0;
+	
+	//alert("position_str="+position_str+",h_mask_position1.value="+cf.h_mask_position1.value);
+	for(i=0;i<4;i++)
+	{
+	
+		tmp_index=position_str.indexOf(',');
+		if (tmp_index >0)
+		{
+			pos_var[i] = parseInt(position_str.substr(0,tmp_index));
+			position_str = position_str.substr(tmp_index+1,position_str.length-tmp_index-1);
+		}
+		else
+		{
+			if (i>=3)
+			{
+				pos_var[i] = parseInt(position_str);
+			}
+			break;
+		}
+	}
+	//alert(pos_var[0]+","+pos_var[1]+","+pos_var[2]+","+pos_var[3]);
+	if (pos_var[2] > pos_var[0] && pos_var[3] > pos_var[1])
+	{
+		mask_top_val =pos_var[1];
+		mask_left_val = pos_var[0];
+		mask_w_val = pos_var[2]-pos_var[0];
+		mask_h_val = pos_var[3]-pos_var[1];
+		
+		$("dragDiv").style.left = (pos_var[0])/2 + "px";
+		$("dragDiv").style.top = pos_var[1]/2 + "px";
+		$("dragDiv").style.width = (pos_var[2]-pos_var[0])/2 + "px";
+		$("dragDiv").style.height = (pos_var[3]-pos_var[1])/2 + "px";
+	}
+	else if (pos_var[2] < pos_var[0] && pos_var[3] < pos_var[1])
+	{
+		mask_top_val =pos_var[3];
+		mask_left_val = pos_var[2];
+		mask_w_val = pos_var[0]-pos_var[2];
+		mask_h_val = pos_var[1]-pos_var[3];
+		
+		$("dragDiv").style.left = pos_var[2]/2 + "px";
+		$("dragDiv").style.top = pos_var[3]/2 + "px";
+		$("dragDiv").style.width = (pos_var[0]-pos_var[2]+1)/2 + "px" ;
+		$("dragDiv").style.height = (pos_var[1]-pos_var[3]+1)/2 + "px" ;
+	}
+	$("dragDiv").style.backgroundColor = '#'+cf.h_mask_color1.value;
+}
+
+var first_show = 0;
+function show_mask_div()
+{
+	var timestamp = new Date();
+    var img_url =   "../img/snapshot.cgi?size=2&quality=1&ts="+timestamp.getTime();
+    
+	if($("mask_window1").checked)
+	{
+		$("privcay_mask").style.display = "block";
+		if (!first_show)
+		{
+			first_show = 1;
+			ic = new ImgCropper("bgDiv", "dragDiv", img_url, {
+			Width: 320, Height: 240, Color: "#EBEBEB",
+			Resize: true,
+			Right: "rRight", Left: "rLeft", Up:	"rUp", Down: "rDown",
+			RightDown: "rRightDown", LeftDown: "rLeftDown", RightUp: "rRightUp", LeftUp: "rLeftUp"})
+		}
+		else
+		{
+
+			ic.Url = img_url;
+			ic.Init();
+		}
+	}
+	else
+	{
+		$("privcay_mask").style.display = "none";
+	}
+}
+
+function check_mask_value()
+{
+	var cf = document.forms[0];
+	var right_val ;
+	var bottom_val ;
+
+	//alert(mask_left_val+","+mask_top_val+","+mask_w_val+","+mask_h_val);
+	if (mask_top_val <0)	{mask_top_val = 0;}
+	else if (mask_top_val >= 240) {mask_top_val = 239;}
+	if (mask_left_val <0) {mask_left_val = 0;}
+	else if (mask_left_val >=320) {mask_left_val = 319;}
+	if (mask_w_val <0) {mask_w_val = 0;}
+	if (mask_h_val <0) {mask_h_val = 0;}
+	
+	right_val = mask_left_val + mask_w_val;
+	bottom_val = mask_top_val + mask_h_val;
+
+	mask_top_val = mask_top_val *2;
+	mask_left_val = mask_left_val *2;
+	right_val = right_val*2;
+	bottom_val = bottom_val*2;
+	
+	if (bottom_val >=480){bottom_val = 478;}
+	if (right_val >=640) {right_val = 638;}
+	
+	cf.h_mask_position1.value = mask_left_val+","+mask_top_val+","+right_val+","+bottom_val;
+	//cf.h_mask_color1.value = "888888"; //black
+	
+	//alert(cf.h_mask_position1.value);
+	
+}
+*/
+function checkData()
+{
+	var cf = document.forms[0];
+    var msg = "";
+
+	if (cf.text_overlay.checked)  
+	{
+		msg+= checkBlank(cf.overlay, msg_overlay);
+	}
+    /*
+	if($("mask_window1").checked)
+	{
+		check_mask_value();
+	}
+	*/
+	//return false;
+	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	
+//	dataToHidden(cf);
+   // cf.h_adv_vnf.value      = cf.adv_vnf.checked ? 3 : 0;
+//	cf.h_mic.value			= cf.mic.checked ? 1 : 0;
+//	cf.h_speaker.value		= cf.speaker.checked ? 1 : 0;
+//	cf.h_time_stamp.value	= cf.time_stamp.checked ? 1 : 0;
+//	cf.h_text_overlay.value	= cf.text_overlay.checked ? 1 : 0;
+	var save = new GroupCtrl();
+	var array_set=
+	[
+		["VIDEO", "power_line", "pfreq"],
+		["VIDEO", "color", "color_type"],
+		["VIDEO", "exposure", "exposure"],
+		["VIDEO", "sharpness", "sharpness"],
+		["VIDEO", "contrast", "contrast"],
+		["VIDEO", "saturation", "saturation"],	
+		["VIDEO", "dn_sch", "dnsch"],
+		//["SYSTEM", "irled_lum","irled_lum"],
+		["VIDEO", "flip", "flip"],		
+		["VIDEO", "mirror", "mirror"],		
+		["VIDEO", "time_stamp", "time_stamp"],
+		["VIDEO", "text_overlay", "text_overlay"],		
+		["VIDEO", "text", "overlay"],
+		["AUDIO", "audio_in", "mic"],		
+		["AUDIO", "in_audio_type", "enco_aud"],
+		["AUDIO", "audio_out", "speaker"],		
+		//["AUDIO", "out_volume", "speaker_vol"],
+	];
+	save.set(array_set);	
+	return true;
+}
+
+
+function set_au_type()
+{
+	var cf = document.forms[0];
+	
+	if(cf.mic.checked)
+	{
+		cf.enco_aud.disabled = false;
+	}
+	else
+	{
+		cf.enco_aud.disabled = true;
+	}
+}
+
+
+function set_text_overlay()
+{
+	var cf = document.forms[0];
+	
+	if(cf.text_overlay.checked)
+	{
+		cf.overlay.disabled = false;
+	}
+	else
+	{
+		cf.overlay.disabled = true;
+	}	
+}
+/*
+//Privcay Mask
+var isIE = (document.all) ? true : false;
+var isIE6 = isIE && ([/MSIE (\d)\.0/i.exec(navigator.userAgent)][0][1] == 6);
+
+
+var $ = function (id) {
+	return "string" == typeof id ? document.getElementById(id) : id;
+};
+
+
+var Class = 
+{
+	create: function() 
+	{
+		return function() { this.initialize.apply(this, arguments); }
+	}
+}
+
+var Extend = function(destination, source) 
+{
+	for (var property in source) 
+	{
+		destination[property] = source[property];
+	}
+}
+
+var Bind = function(object, fun) 
+{
+	return function() 
+	{
+		return fun.apply(object, arguments);
+	}
+}
+
+var BindAsEventListener = function(object, fun) 
+{
+	var args = Array.prototype.slice.call(arguments).slice(2);
+	return function(event) 
+	{
+		return fun.apply(object, [event || window.event].concat(args));
+	}
+}
+
+var CurrentStyle = function(element)
+{
+	return element.currentStyle || document.defaultView.getComputedStyle(element, null);
+}
+
+function addEventHandler(oTarget, sEventType, fnHandler) 
+{
+	if (oTarget.addEventListener) 
+	{
+		oTarget.addEventListener(sEventType, fnHandler, false);
+	} 
+	else if (oTarget.attachEvent) 
+	{
+		oTarget.attachEvent("on" + sEventType, fnHandler);
+	} 
+	else 
+	{
+		oTarget["on" + sEventType] = fnHandler;
+	}
+};
+
+function removeEventHandler(oTarget, sEventType, fnHandler) 
+{
+    if (oTarget.removeEventListener) 
+    {
+        oTarget.removeEventListener(sEventType, fnHandler, false);
+    } 
+    else if (oTarget.detachEvent) 
+    {
+        oTarget.detachEvent("on" + sEventType, fnHandler);
+    } 
+    else 
+    { 
+        oTarget["on" + sEventType] = null;
+    }
+};
+
+
+var Drag = Class.create();
+Drag.prototype = {
+  initialize: function(drag, options) {
+	this.Drag = $(drag);
+	this._x = this._y = 0;
+	this._marginLeft = this._marginTop = 0;
+
+	this._fM = BindAsEventListener(this, this.Move);
+	this._fS = Bind(this, this.Stop);
+	
+	this.SetOptions(options);
+	
+	this.Limit = !!this.options.Limit;
+	this.mxLeft = parseInt(this.options.mxLeft);
+	this.mxRight = parseInt(this.options.mxRight);
+	this.mxTop = parseInt(this.options.mxTop);
+	this.mxBottom = parseInt(this.options.mxBottom);
+	
+	this.LockX = !!this.options.LockX;
+	this.LockY = !!this.options.LockY;
+	this.Lock = !!this.options.Lock;
+	
+	this.onStart = this.options.onStart;
+	this.onMove = this.options.onMove;
+	this.onStop = this.options.onStop;
+	
+	this._Handle = $(this.options.Handle) || this.Drag;
+	this._mxContainer = $(this.options.mxContainer) || null;
+	
+	this.Drag.style.position = "absolute";
+
+	if(isIE && !!this.options.Transparent){
+		with(this._Handle.appendChild(document.createElement("div")).style){
+			width = height = "100%"; fontSize = 0;
+		}
+	}
+
+	this.Repair();
+	addEventHandler(this._Handle, "mousedown", BindAsEventListener(this, this.Start));
+  },
+
+  SetOptions: function(options) {
+	this.options = {
+		Handle:			"",
+		Limit:			false,
+		mxLeft:			0,
+		mxRight:		320,
+		mxTop:			0,
+		mxBottom:		240,
+		mxContainer:	"",
+		LockX:			false,
+		LockY:			false,
+		Lock:			false,
+		Transparent:	false,
+		onStart:		function(){},
+		onMove:			function(){},
+		onStop:			function(){}
+	};
+	Extend(this.options, options || {});
+  },
+
+  Start: function(oEvent) {
+	if(this.Lock){ return; }
+	
+	$("dragDiv").style.opacity = 0.5;
+	$("dragDiv").style.filter = "alpha(opacity=50)";
+	
+	this.Repair();
+
+	this._x = oEvent.clientX - this.Drag.offsetLeft;
+	this._y = oEvent.clientY - this.Drag.offsetTop;
+
+	this._marginLeft = parseInt(CurrentStyle(this.Drag).marginLeft) || 0;
+	this._marginTop = parseInt(CurrentStyle(this.Drag).marginTop) || 0;
+
+	addEventHandler(document, "mousemove", this._fM);
+	addEventHandler(document, "mouseup", this._fS);
+	if(isIE){
+		addEventHandler(this._Handle, "losecapture", this._fS);
+		this._Handle.setCapture();
+	}else{
+		addEventHandler(window, "blur", this._fS);
+		oEvent.preventDefault();
+	};
+	this.onStart();
+  },
+
+  Repair: function() {
+	if(this.Limit){
+		this.mxRight = Math.max(this.mxRight, this.mxLeft + this.Drag.offsetWidth);
+		this.mxBottom = Math.max(this.mxBottom, this.mxTop + this.Drag.offsetHeight);
+		!this._mxContainer || CurrentStyle(this._mxContainer).position == "relative" || CurrentStyle(this._mxContainer).position == "absolute" || (this._mxContainer.style.position = "relative");
+	}
+  },
+
+  Move: function(oEvent) {
+	if(this.Lock){ this.Stop(); return; };
+	window.getSelection ? window.getSelection().removeAllRanges() : document.selection.empty();
+	var iLeft = oEvent.clientX - this._x, iTop = oEvent.clientY - this._y;
+	if(this.Limit){
+		var mxLeft = this.mxLeft, mxRight = this.mxRight, mxTop = this.mxTop, mxBottom = this.mxBottom;
+		if(!!this._mxContainer){
+			mxLeft = Math.max(mxLeft, 0);
+			mxTop = Math.max(mxTop, 0);
+			mxRight = Math.min(mxRight, this._mxContainer.clientWidth);
+			mxBottom = Math.min(mxBottom, this._mxContainer.clientHeight);
+		};
+		iLeft = Math.max(Math.min(iLeft, mxRight - this.Drag.offsetWidth), mxLeft);
+		iTop = Math.max(Math.min(iTop, mxBottom - this.Drag.offsetHeight), mxTop);
+	}
+
+	if(!this.LockX){ this.Drag.style.left = iLeft - this._marginLeft + "px"; }
+	if(!this.LockY){ this.Drag.style.top = iTop - this._marginTop + "px"; }
+	this.onMove();
+  },
+
+  Stop: function() {
+	removeEventHandler(document, "mousemove", this._fM);
+	removeEventHandler(document, "mouseup", this._fS);
+	
+	$("dragDiv").style.opacity = 1;
+	$("dragDiv").style.filter = "alpha(opacity=100)";
+
+	if(isIE){
+		removeEventHandler(this._Handle, "losecapture", this._fS);
+		this._Handle.releaseCapture();
+	}else{
+		removeEventHandler(window, "blur", this._fS);
+	};
+	this.onStop();
+  }
+};
+
+
+var Resize = Class.create();
+Resize.prototype = {
+  initialize: function(obj, options) {
+	this._obj = $(obj);
+	
+	this._styleWidth = this._styleHeight = this._styleLeft = this._styleTop = 0;
+	this._sideRight = this._sideDown = this._sideLeft = this._sideUp = 0;
+	this._fixLeft = this._fixTop = 0;
+	this._scaleLeft = this._scaleTop = 0;
+	
+	this._mxSet = function(){};
+	this._mxRightWidth = this._mxDownHeight = this._mxUpHeight = this._mxLeftWidth = 0;
+	this._mxScaleWidth = this._mxScaleHeight = 0;
+	
+	this._fun = function(){};
+	
+	var _style = CurrentStyle(this._obj);
+	this._borderX = (parseInt(_style.borderLeftWidth) || 0) + (parseInt(_style.borderRightWidth) || 0);
+	this._borderY = (parseInt(_style.borderTopWidth) || 0) + (parseInt(_style.borderBottomWidth) || 0);
+	this._fR = BindAsEventListener(this, this.Resize);
+	this._fS = Bind(this, this.Stop);
+	
+	this.SetOptions(options);
+	this.Max = !!this.options.Max;
+	this._mxContainer = $(this.options.mxContainer) || null;
+	this.mxLeft = Math.round(this.options.mxLeft);
+	this.mxRight = Math.round(this.options.mxRight);
+	this.mxTop = Math.round(this.options.mxTop);
+	this.mxBottom = Math.round(this.options.mxBottom);
+	this.Min = !!this.options.Min;
+	this.minWidth = Math.round(this.options.minWidth);
+	this.minHeight = Math.round(this.options.minHeight);
+	this.Scale = !!this.options.Scale;
+	this.Ratio = Math.max(this.options.Ratio, 0);
+	
+	this.onResize = this.options.onResize;
+	
+	this._obj.style.position = "absolute";
+	!this._mxContainer || CurrentStyle(this._mxContainer).position == "relative" || (this._mxContainer.style.position = "relative");
+  },
+  SetOptions: function(options) {
+    this.options = {
+		Max:		false,
+		mxContainer:"",
+		mxLeft:		0,
+		mxRight:	320,
+		mxTop:		0,
+		mxBottom:	240,
+		Min:		false,
+		minWidth:	50,
+		minHeight:	50,
+		Scale:		false,
+		Ratio:		0,
+		onResize:	function(){}
+    };
+    Extend(this.options, options || {});
+  },
+  Set: function(resize, side) {
+	var resize = $(resize), fun;
+	if(!resize) return;
+	switch (side.toLowerCase()) {
+	case "up" :
+		fun = this.Up;
+		break;
+	case "down" :
+		fun = this.Down;
+		break;
+	case "left" :
+		fun = this.Left;
+		break;
+	case "right" :
+		fun = this.Right;
+		break;
+	case "left-up" :
+		fun = this.LeftUp;
+		break;
+	case "right-up" :
+		fun = this.RightUp;
+		break;
+	case "left-down" :
+		fun = this.LeftDown;
+		break;
+	case "right-down" :
+	default :
+		fun = this.RightDown;
+	};
+	addEventHandler(resize, "mousedown", BindAsEventListener(this, this.Start, fun));
+  },
+  Start: function(e, fun, touch) {
+  
+  	$("dragDiv").style.opacity = 0.5;
+	$("dragDiv").style.filter = "alpha(opacity=50)";
+
+	e.stopPropagation ? e.stopPropagation() : (e.cancelBubble = true);
+	this._fun = fun;
+	this._styleWidth = this._obj.clientWidth;
+	this._styleHeight = this._obj.clientHeight;
+	this._styleLeft = this._obj.offsetLeft;
+	this._styleTop = this._obj.offsetTop;
+	this._sideLeft = e.clientX - this._styleWidth;
+	this._sideRight = e.clientX + this._styleWidth;
+	this._sideUp = e.clientY - this._styleHeight;
+	this._sideDown = e.clientY + this._styleHeight;
+	this._fixLeft = this._styleLeft + this._styleWidth;
+	this._fixTop = this._styleTop + this._styleHeight;
+	if(this.Scale){
+		this.Ratio = Math.max(this.Ratio, 0) || this._styleWidth / this._styleHeight;
+		this._scaleLeft = this._styleLeft + this._styleWidth / 2;
+		this._scaleTop = this._styleTop + this._styleHeight / 2;
+	};
+
+	if(this.Max){
+		var mxLeft = this.mxLeft, mxRight = this.mxRight, mxTop = this.mxTop, mxBottom = this.mxBottom;
+
+		if(!!this._mxContainer){
+			mxLeft = Math.max(mxLeft, 0);
+			mxTop = Math.max(mxTop, 0);
+			mxRight = Math.min(mxRight, this._mxContainer.clientWidth);
+			mxBottom = Math.min(mxBottom, this._mxContainer.clientHeight);
+		};
+		mxRight = Math.max(mxRight, mxLeft + (this.Min ? this.minWidth : 0) + this._borderX);
+		mxBottom = Math.max(mxBottom, mxTop + (this.Min ? this.minHeight : 0) + this._borderY);
+
+		this._mxSet = function(){
+			this._mxRightWidth = mxRight - this._styleLeft - this._borderX;
+			this._mxDownHeight = mxBottom - this._styleTop - this._borderY;
+			this._mxUpHeight = Math.max(this._fixTop - mxTop, this.Min ? this.minHeight : 0);
+			this._mxLeftWidth = Math.max(this._fixLeft - mxLeft, this.Min ? this.minWidth : 0);
+		};
+		this._mxSet();
+		if(this.Scale){
+			this._mxScaleWidth = Math.min(this._scaleLeft - mxLeft, mxRight - this._scaleLeft - this._borderX) * 2;
+			this._mxScaleHeight = Math.min(this._scaleTop - mxTop, mxBottom - this._scaleTop - this._borderY) * 2;
+		};
+	};
+
+	addEventHandler(document, "mousemove", this._fR);
+	addEventHandler(document, "mouseup", this._fS);
+	if(isIE){
+		addEventHandler(this._obj, "losecapture", this._fS);
+		this._obj.setCapture();
+	}else{
+		addEventHandler(window, "blur", this._fS);
+		e.preventDefault();
+	};
+  },
+
+  Resize: function(e) {
+	window.getSelection ? window.getSelection().removeAllRanges() : document.selection.empty();
+	this._fun(e);
+
+	with(this._obj.style){
+		width = this._styleWidth + "px"; height = this._styleHeight + "px";
+		top = this._styleTop + "px"; left = this._styleLeft + "px";
+	}
+	this.onResize();
+  },
+
+  Up: function(e) {
+	this.RepairY(this._sideDown - e.clientY, this._mxUpHeight);
+	this.RepairTop();
+	this.TurnDown(this.Down);
+  },
+
+  Down: function(e) {
+	this.RepairY(e.clientY - this._sideUp, this._mxDownHeight);
+	this.TurnUp(this.Up);
+  },
+
+  Right: function(e) {
+	this.RepairX(e.clientX - this._sideLeft, this._mxRightWidth);
+	this.TurnLeft(this.Left);
+  },
+
+  Left: function(e) {
+	this.RepairX(this._sideRight - e.clientX, this._mxLeftWidth);
+	this.RepairLeft();
+	this.TurnRight(this.Right);
+  },
+
+  RightDown: function(e) {
+	this.RepairAngle(
+		e.clientX - this._sideLeft, this._mxRightWidth,
+		e.clientY - this._sideUp, this._mxDownHeight
+	);
+	this.TurnLeft(this.LeftDown) || this.Scale || this.TurnUp(this.RightUp);
+  },
+
+  RightUp: function(e) {
+	this.RepairAngle(
+		e.clientX - this._sideLeft, this._mxRightWidth,
+		this._sideDown - e.clientY, this._mxUpHeight
+	);
+	this.RepairTop();
+	this.TurnLeft(this.LeftUp) || this.Scale || this.TurnDown(this.RightDown);
+  },
+
+  LeftDown: function(e) {
+	this.RepairAngle(
+		this._sideRight - e.clientX, this._mxLeftWidth,
+		e.clientY - this._sideUp, this._mxDownHeight
+	);
+	this.RepairLeft();
+	this.TurnRight(this.RightDown) || this.Scale || this.TurnUp(this.LeftUp);
+  },
+
+  LeftUp: function(e) {
+	this.RepairAngle(
+		this._sideRight - e.clientX, this._mxLeftWidth,
+		this._sideDown - e.clientY, this._mxUpHeight
+	);
+	this.RepairTop(); this.RepairLeft();
+	this.TurnRight(this.RightUp) || this.Scale || this.TurnDown(this.LeftDown);
+  },
+
+  RepairX: function(iWidth, mxWidth) {
+	iWidth = this.RepairWidth(iWidth, mxWidth);
+	if(this.Scale){
+		var iHeight = this.RepairScaleHeight(iWidth);
+		if(this.Max && iHeight > this._mxScaleHeight){
+			iHeight = this._mxScaleHeight;
+			iWidth = this.RepairScaleWidth(iHeight);
+		}else if(this.Min && iHeight < this.minHeight){
+			var tWidth = this.RepairScaleWidth(this.minHeight);
+			if(tWidth < mxWidth){ iHeight = this.minHeight; iWidth = tWidth; }
+		}
+		this._styleHeight = iHeight;
+		this._styleTop = this._scaleTop - iHeight / 2;
+	}
+	this._styleWidth = iWidth;
+  },
+
+  RepairY: function(iHeight, mxHeight) {
+	iHeight = this.RepairHeight(iHeight, mxHeight);
+	if(this.Scale){
+		var iWidth = this.RepairScaleWidth(iHeight);
+		if(this.Max && iWidth > this._mxScaleWidth){
+			iWidth = this._mxScaleWidth;
+			iHeight = this.RepairScaleHeight(iWidth);
+		}else if(this.Min && iWidth < this.minWidth){
+			var tHeight = this.RepairScaleHeight(this.minWidth);
+			if(tHeight < mxHeight){ iWidth = this.minWidth; iHeight = tHeight; }
+		}
+		this._styleWidth = iWidth;
+		this._styleLeft = this._scaleLeft - iWidth / 2;
+	}
+	this._styleHeight = iHeight;
+  },
+
+  RepairAngle: function(iWidth, mxWidth, iHeight, mxHeight) {
+	iWidth = this.RepairWidth(iWidth, mxWidth);	
+	if(this.Scale){
+		iHeight = this.RepairScaleHeight(iWidth);
+		if(this.Max && iHeight > mxHeight){
+			iHeight = mxHeight;
+			iWidth = this.RepairScaleWidth(iHeight);
+		}else if(this.Min && iHeight < this.minHeight){
+			var tWidth = this.RepairScaleWidth(this.minHeight);
+			if(tWidth < mxWidth){ iHeight = this.minHeight; iWidth = tWidth; }
+		}
+	}else{
+		iHeight = this.RepairHeight(iHeight, mxHeight);
+	}
+	this._styleWidth = iWidth;
+	this._styleHeight = iHeight;
+  },
+
+  RepairTop: function() {
+	this._styleTop = this._fixTop - this._styleHeight;
+  },
+
+  RepairLeft: function() {
+	this._styleLeft = this._fixLeft - this._styleWidth;
+  },
+
+  RepairHeight: function(iHeight, mxHeight) {
+	iHeight = Math.min(this.Max ? mxHeight : iHeight, iHeight);
+	iHeight = Math.max(this.Min ? this.minHeight : iHeight, iHeight, 0);
+	return iHeight;
+  },
+
+  RepairWidth: function(iWidth, mxWidth) {
+	iWidth = Math.min(this.Max ? mxWidth : iWidth, iWidth);
+	iWidth = Math.max(this.Min ? this.minWidth : iWidth, iWidth, 0);
+	return iWidth;
+  },
+
+  RepairScaleHeight: function(iWidth) {
+	return Math.max(Math.round((iWidth + this._borderX) / this.Ratio - this._borderY), 0);
+  },
+
+  RepairScaleWidth: function(iHeight) {
+	return Math.max(Math.round((iHeight + this._borderY) * this.Ratio - this._borderX), 0);
+  },
+
+  TurnRight: function(fun) {
+	if(!(this.Min || this._styleWidth)){
+		this._fun = fun;
+		this._sideLeft = this._sideRight;
+		this.Max && this._mxSet();
+		return true;
+	}
+  },
+
+  TurnLeft: function(fun) {
+	if(!(this.Min || this._styleWidth)){
+		this._fun = fun;
+		this._sideRight = this._sideLeft;
+		this._fixLeft = this._styleLeft;
+		this.Max && this._mxSet();
+		return true;
+	}
+  },
+
+  TurnUp: function(fun) {
+	if(!(this.Min || this._styleHeight)){
+		this._fun = fun;
+		this._sideDown = this._sideUp;
+		this._fixTop = this._styleTop;
+		this.Max && this._mxSet();
+		return true;
+	}
+  },
+
+  TurnDown: function(fun) {
+	if(!(this.Min || this._styleHeight)){
+		this._fun = fun;
+		this._sideUp = this._sideDown;
+		this.Max && this._mxSet();
+		return true;
+	}
+  },
+
+  Stop: function() {
+	removeEventHandler(document, "mousemove", this._fR);
+	removeEventHandler(document, "mouseup", this._fS);
+	$("dragDiv").style.opacity = 1;
+	$("dragDiv").style.filter = "alpha(opacity=100)";
+	if(isIE){
+		removeEventHandler(this._obj, "losecapture", this._fS);
+		this._obj.releaseCapture();
+	}else{
+		removeEventHandler(window, "blur", this._fS);
+	}
+  }
+};
+
+
+
+var ImgCropper = Class.create();
+ImgCropper.prototype = 
+{
+  initialize: function(container, handle, url, options) 
+  {
+		this._Container = $(container);
+		this._layHandle = $(handle);
+		this.Url = url;
+
+		this._layBase = this._Container.appendChild(document.createElement("img"));
+		this._layCropper = this._Container.appendChild(document.createElement("img"));
+		this._layCropper.onload = Bind(this, this.SetPos);
+
+		this._tempImg = document.createElement("img");
+		this._tempImg.onload = Bind(this, this.SetSize);
+	
+		this.SetOptions(options);
+	
+		this.Opacity = Math.round(this.options.Opacity);
+		this.Color = this.options.Color;
+		this.Scale = !!this.options.Scale;
+		this.Ratio = Math.max(this.options.Ratio, 0);
+		this.Width = Math.round(this.options.Width);
+		this.Height = Math.round(this.options.Height);
+		this._drag = new Drag(this._layHandle, { Limit: true, onMove: Bind(this, this.SetPos), Transparent: true });
+		this.Resize = !!this.options.Resize;
+		if(this.Resize)
+		{
+			var op = this.options, _resize = new Resize(this._layHandle, { Max: true, onResize: Bind(this, this.SetPos) });
+
+			op.RightDown && (_resize.Set(op.RightDown, "right-down"));
+			op.LeftDown && (_resize.Set(op.LeftDown, "left-down"));
+			op.RightUp && (_resize.Set(op.RightUp, "right-up"));
+			op.LeftUp && (_resize.Set(op.LeftUp, "left-up"));
+			op.Right && (_resize.Set(op.Right, "right"));
+			op.Left && (_resize.Set(op.Left, "left"));
+			op.Down && (_resize.Set(op.Down, "down"));
+			op.Up && (_resize.Set(op.Up, "up"));
+
+			this.Min = !!this.options.Min;
+			this.minWidth = Math.round(this.options.minWidth);
+			this.minHeight = Math.round(this.options.minHeight);
+
+			this._resize = _resize;
+		}
+
+		this._Container.style.position = "relative";
+		//this._Container.style.overflow = "hidden";
+		this._layHandle.style.zIndex = 200;
+		this._layCropper.style.zIndex = 100;
+		this._layBase.style.position = this._layCropper.style.position = "absolute";
+		this._layBase.style.top = this._layBase.style.left = this._layCropper.style.top = this._layCropper.style.left = 0;
+		this.Init();
+ },
+
+  SetOptions: function(options) 
+  {
+    this.options = {
+			Opacity:	100,
+			Color:		"",
+			Width:		0,
+			Height:		0,
+			Resize:		false,
+			Right:		"",
+			Left:		"",
+			Up:			"",
+			Down:		"",
+			RightDown:	"",
+			LeftDown:	"",
+			RightUp:	"",
+			LeftUp:		"",
+			Min:		false,
+			minWidth:	50,
+			minHeight:	50,
+			Scale:		false,
+			Ratio:		0
+    };
+    Extend(this.options, options || {});
+},
+
+  Init: function() 
+ 	{
+		this.Color && (this._Container.style.backgroundColor = this.Color);
+		this._tempImg.src = this._layBase.src = this._layCropper.src = this.Url;
+		if(isIE)
+		{
+			this._layBase.style.filter = "alpha(opacity:" + this.Opacity + ")";
+		} 
+		else 
+		{
+			this._layBase.style.opacity = this.Opacity / 100;
+		}
+  },
+
+  SetPos: function() 
+  {
+		if(isIE6){ with(this._layHandle.style){ zoom = 0.9; zoom = 1; }; };
+		var p = this.GetPos();
+		
+		//alert(p.Top+","+p.Left+","+p.Width+","+p.Height);
+		//$("idTop").value = p.Top;
+		//$("idLeft").value = p.Left;
+		//$("idWidth").value = p.Width;
+		//$("idHeight").value = +p.Height;		
+		mask_top_val =p.Top;
+		mask_left_val = p.Left;
+		mask_w_val = p.Width;
+		mask_h_val = p.Height;
+		
+		this._layCropper.style.clip = "rect(" + p.Top + "px " + (p.Left + p.Width) + "px " + (p.Top + p.Height) + "px " + p.Left + "px)";
+  },
+  SetSize: function() {
+	var s = this.GetSize(this._tempImg.width, this._tempImg.height, this.Width, this.Height);
+	this._layBase.style.width = this._layCropper.style.width = s.Width + "px";
+	this._layBase.style.height = this._layCropper.style.height = s.Height + "px";
+	this._drag.mxRight = s.Width; this._drag.mxBottom = s.Height;
+	if(this.Resize){ this._resize.mxRight = s.Width; this._resize.mxBottom = s.Height; }
+  },
+  GetPos: function() {
+	with(this._layHandle)
+	{
+		return { Top: parseInt(style.top), Left: parseInt(style.left), Width: offsetWidth, Height: offsetHeight }
+	}
+  },
+
+  GetSize: function(nowWidth, nowHeight, fixWidth, fixHeight) {
+	var iWidth = nowWidth, iHeight = nowHeight, scale = iWidth / iHeight;
+
+	if(fixHeight){ iWidth = (iHeight = fixHeight) * scale; }
+	if(fixWidth && (!fixHeight || iWidth > fixWidth)){ iHeight = (iWidth = fixWidth) / scale; }
+
+	return { Width: iWidth, Height: iHeight }
+  }
+}
+//solid
+
+
+function refresh_pic()
+{
+	var timestamp = new Date();
+
+	ic.Url = "../img/snapshot.cgi?size=2&quality=1&ts="+timestamp.getTime();
+	ic.Init();
+}
+*/
+// End Script -->
+</script>
+
+
+</head>
+<!--
+<style type="text/css">
+#rRightDown,#rLeftDown,#rLeftUp,#rRightUp,#rRight,#rLeft,#rUp,#rDown{
+	position:absolute;
+	background:#03F;
+	border: 1px solid #333;
+	width: 4px;
+	height: 4px;
+	z-index:500;
+	font-size:0;
+	opacity: 1;
+	filter:alpha(opacity=100);
+}
+
+#rLeftDown,#rRightUp{cursor:ne-resize;}
+#rRightDown,#rLeftUp{cursor:nw-resize;}
+#rRight,#rLeft{cursor:e-resize;}
+#rUp,#rDown{cursor:n-resize;}
+
+#rLeftDown{left:-2px;bottom:-2px;}
+#rRightUp{right:-2px;top:-2px;}
+#rRightDown{right:-2px;bottom:-2px;}
+#rLeftUp{left:-2px;top:-2px;}
+#rRight{right:-2px;top:50%;margin-top:-2px;}
+#rLeft{left:-2px;top:50%;margin-top:-2px;}
+#rUp{top:-2px;left:50%;margin-left:-2px;}
+#rDown{bottom:-2px;left:50%;margin-left:-2px;}
+
+#bgDiv{width:320px; height:240px; border:1px solid #666666; position:relative;}
+#dragDiv{border:1px solid #03F; width:100px; height:75px; top:83px; left:110px; cursor:move; opacity:1; filter:alpha(opacity=100); background-color: #888888;}
+</style>
+-->
+<body onLoad="init();showMsg()" >
+<form name="image" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="subhead" nowrap colspan="2">Basic Video Adjustments </td>
+</tr>
+
+
+	 <tr>
+	  <td nowrap class="lc">Power Line Frequency: </td>
+	  <td nowrap class="rc">
+	  	<select name="pfreq" style="{width:70}" width=70>
+		  <option value="50">50Hz</option>
+			<option value="60">60Hz</option>	
+		  </select> (for fluorescent lighting)
+	  </td>
+	 </tr>
+	 <!--tr>
+	  <td nowrap class="lc">Video System: </td>
+	  <td nowrap class="rc">
+	  	<select name="pfreq" >
+		  <option value="50">PAL @ 25fps</option>
+			<option value="60">NTSC @ 30fps</option>		  
+		  </select>
+	  </td>
+	 </tr-->
+	 
+	<tr>
+	 <td nowrap class="lc">White Balance: </td>
+	<td nowrap class="rc">
+	 <select name="color_type" size="1" >
+	 <option value="0">Auto</option>
+	 <option value="1">Indoor (Incandescent)</option>
+	 <option value="2">Fluorescent (white light)</option>
+	 <option value="3">Fluorescent (yellow light)</option>
+	 <option value="4">Outdoor</option>
+	 <option value="5">Black &amp; White</option>
+	 </select>
+	</td>
+	</tr>
+	
+	<tr>
+	 <td nowrap class="lc">Brightness: </td>
+	<td nowrap class="rc">
+	  <select name="exposure" size="1">
+	  <option value="1">- 3</option>
+	  <option value="2">- 2</option>
+	  <option value="3">- 1</option>
+	  <option value="4">Normal</option>
+	  <option value="5">+ 1</option> 	
+	  <option value="6">+ 2</option>
+	  <option value="7">+ 3</option>
+	  </select> 
+	 </td>
+	</tr>
+	
+	<tr>
+	 <td nowrap class="lc">Sharpness: </td>
+	 <td nowrap class="rc">
+	 <select name="sharpness" size="1">
+	  <option value="1">- 3</option>
+	  <option value="2">- 2</option>
+	  <option value="3">- 1</option>
+	  <option value="4">Normal</option>
+	  <option value="5">+ 1</option> 	
+	  <option value="6">+ 2</option>
+	  <option value="7">+ 3</option>
+	 </select> 
+	 </td>
+	</tr>
+	 <td nowrap class="lc">Contrast: </td>
+	 <td nowrap class="rc">
+	 <select name="contrast" size="1">
+	  <option value="1">- 3</option>
+	  <option value="2">- 2</option>
+	  <option value="3">- 1</option>
+	  <option value="4">Normal</option>
+	  <option value="5">+ 1</option> 	
+	  <option value="6">+ 2</option>
+	  <option value="7">+ 3</option>
+	 </select> 
+	 </td>
+	</tr>
+	<tr>
+	 <td nowrap class="lc">Saturation: </td>
+	 <td nowrap class="rc">
+	 <select name="saturation" size="1">
+	  <option value="1">- 3</option>
+	  <option value="2">- 2</option>
+	  <option value="3">- 1</option>
+	  <option value="4">Normal</option>
+	  <option value="5">+ 1</option> 	
+	  <option value="6">+ 2</option>
+	  <option value="7">+ 3</option>
+	 </select> 
+	 </td>
+	</tr>
+
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<!--tr>  
+ <td class="subhead" nowrap colspan="2">Advanced Video Adjustments </td>
+</tr-->
+
+	 <!--tr>
+		 <td nowrap class="lc">
+		 <input type="checkbox" name="adv_vnf" value="disable"> Enable Noise Filter
+	  </td>
+	 </tr-->
+	 
+	<!--tr>
+	 <td nowrap class="lc">Lens Distortion Correction: </td>
+	<td nowrap class="rc">
+	 <input type="checkbox" name="adv_ldc" value="disable"> Enable
+	</td>
+	</tr-->
+	
+	<!--tr>
+	 <td nowrap class="lc">Video Stabilization: </td>
+	<td nowrap class="rc">
+	 <input type="checkbox" name="adv_vs" value="disable"> Enable
+	 </td>
+	</tr-->
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="subhead" nowrap colspan="2">Day/Night Switch </td>
+</tr>
+
+<tr>
+ <td nowrap class="lc"> Switching Method: </td>
+ <td nowrap class="rc">
+	 <select name="dnsch" size="1">
+	 <option value="0">Auto</option>
+	 <option value="2">Manual (Day Mode)</option>
+	 <option value="3">Manual (Night Mode)</option>
+	 </select>
+ </td>
+</tr>
+
+<!--tr>
+ <td nowrap class="lc"> IRLED Luminance: </td>
+ <td nowrap class="rc">
+	 <select name="irled_lum" size="1">
+	 <option value="0">Auto</option>
+	 <option value="1">Manual (Lightest)</option>
+	 <option value="2">Manual (Lighter)</option>
+	 <option value="3">Manual (Normal)</option>
+	 <option value="4">Manual (Stronger)</option>
+	 <option value="5">Manual (Strongest)</option>
+	 </select>
+ </td>
+</tr-->
+
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+<tr>  <!-- layout row, do not delete -->
+ <td class="subhead" nowrap colspan="2">Options </td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">
+ <input type="checkbox" name="mic" value="mic" onClick="set_au_type();"> Enable Microphone
+ </td>
+ 
+<td nowrap class="rc"> Audio Type: 
+  <select name="enco_aud" size="1" >
+<!-- <option value="0">G.711 A-Law</option> -->
+	 <option value="2">G.726</option>
+	 <option value="1">G.711</option>
+	 <option value="3">LPCM</option>
+	 <!--option value="5">AAC</option-->
+  </select>
+ </td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">
+ <input type="checkbox" name="speaker" value="speaker" onClick="showVol();"> Enable Speaker 
+ </td>
+ 
+<!--td nowrap class="rc"> &nbsp &nbsp &nbsp Volume:
+  <select name="speaker_vol" size="1" >
+		<option value="1">Low</option>
+		<option value="10">Normal</option>
+		<option value="16">High</option>
+  </select>
+ </td-->
+</tr>
+
+<tr>
+ <td nowrap class="lc">
+ 	<input type="checkbox" name="flip" value="disable"> Flip </td>
+ <td nowrap class="rc"><input type="checkbox" name="mirror" value="disable"> Mirror </td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">
+ <input type="checkbox" name="time_stamp" value="time_stamp"> Enable Time Stamp 
+ </td>
+ <td nowrap class="rc"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">
+ <input type="checkbox" name="text_overlay" value="text_overlay" onclick="set_text_overlay()"> Enable Text Display 
+ </td>
+<td nowrap class="rc">
+ <input type="text" size="15" maxlength="20" name="overlay" value="" style="{width:180}">
+ </td>
+</tr>
+<!--
+<tr>
+	<td nowrap class="lc"> 
+	<input type="checkbox" id="mask_window1" name="mask_window1" value="mask_window1" onClick="show_mask_div()";> Enable Privacy Mask 
+	</td>
+	<td nowrap class="rc"></td>
+</tr>
+
+<tr>
+	<td nowrap class="lcauto" colspan="2" > 
+<div id="privcay_mask" style="display:block">
+	<table  align="left">
+		<tr>
+		<td width = "12%">
+		</td>
+			<td width = "57%">
+				<table border="0" cellspacing="0" >
+					<tr>
+						<td colspan="3">
+							<div id="bgDiv">
+								<div id="dragDiv" >
+									<div id="rRightDown"> </div>
+									<div id="rLeftDown"> </div>
+									<div id="rRightUp"> </div>
+									<div id="rLeftUp"> </div>
+									<div id="rRight"> </div>
+									<div id="rLeft"> </div>
+									<div id="rUp"> </div>
+									<div id="rDown"></div>
+								</div>
+							</div>	
+						</td>
+					</tr>
+					<tr>
+						<td height=4px></td>
+					</tr>	
+					<tr>
+						<td align="center">
+							<input id="idImg"  type="button" value="Refresh  Image" onclick ="refresh_pic()" />
+						</td>
+					</tr>	  
+				</table>    
+			</td>
+			<td width = "35%">
+				<table>
+					<tr>
+						<td class="mask_tb" nowrap>X: <input id="idLeft"  name="idLeft" type="text" size=5 value="" /></td>
+					</tr>
+					<tr>
+						<td class="mask_tb" nowrap>Y: <input id="idTop"  name="idTop" type="text" size=5 value="" />  
+					</tr>
+
+					<tr>
+						<td class="mask_tb" nowrap>W: <input id="idWidth"  name="idWidth" type="text" size=5 value="" /></td>
+					</tr>
+					<tr>
+						<td class="mask_tb" nowrap>H: <input id="idHeight" name="idHeight" type="text" size=5 value="" /></td>
+					</tr>
+				</table>
+			</td>
+		 </tr>
+	</table>
+</div>
+	</td>
+</tr>
+-->
+
+<!--tr>
+ <td nowrap class="lc">&nbsp; IR LED: </td>
+ <td nowrap colspan="2"> 
+ <input type="checkbox" name="irled" value="disable"> Auto Detect
+ <!-- select name="wled" size="1" style="{width:100}" width=100>
+  <option value="0">Auto
+  <option value="1">Default On
+  <option value="2">Default Off
+ </select -->  <!--&nbsp; </td>
+</tr>-->
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+	<td class="leftbuttonrow">&nbsp;  </td>
+	<td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();"> 
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_image.htm')"> 
+ </td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table> 
+</td>
+</tr> 
+</table>
+</div> <!-- pagemain -->  
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+<input type="Hidden" id="enco_aud_tmp" name="enco_aud_tmp" value="">
+
+<!--input type="Hidden" name="h_adv_ldc" value=""-->
+<!--input type="Hidden" name="h_adv_vs" value=""-->
+
+<!--input type="Hidden" name="h_mask_position1" value=""-->
+<!--input type="Hidden" name="h_mask_window1" value=""-->
+<!--input type="Hidden" name="h_mask_color1" value=""-->
+<!--input type="Hidden" name="h_mask_position1" value="639,479,0,0">
+<input type="Hidden" name="h_mask_window1" value="1"-->
+
+<!--input type="Hidden" name="h_irled" value="@h_irled#"-->
+
+<!--input type="hidden" name="video_file" value=""-->
+
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>

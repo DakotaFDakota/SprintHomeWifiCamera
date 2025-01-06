@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+
+<title>Network Camera - Administration</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var HL = "white";
+var STD = "black";
+var HLbg = "white";
+var STDbg = "";
+
+var oldEL = "sysDIV";
+function highLight(el)
+{
+    if (document.all)
+	{
+		document.all(oldEL).style.background = STDbg;
+		document.all(el).style.background = HLbg;
+	}
+    else if (document.getElementById)
+	{
+        document.getElementById(oldEL).style.background = STDbg;
+		document.getElementById(el).style.background = HLbg;
+	}
+	oldEL = el;
+}
+
+// End Script -->
+</script>
+
+<style type="text/css">
+<!--
+body {
+	background:transparent
+}
+-->
+</style>
+
+</head>
+
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table border="0" cellspacing="2" cellpadding="2">
+<tr>
+  <td class="menuhead" width="130">Setup</td>
+</tr>
+
+<tr> 
+ <td align="left" height="4"></td>
+</tr>
+
+<tr>
+  <td align="left" ID="sysDIV">
+ <a href="system.htm" target="_parent" class="mainmenu" 
+ onClick="highLight('sysDIV')">System</a>
+ </td>
+</tr>
+
+<tr>
+  <td align="left" ID="netDIV">
+  <a href="network.htm" target="_parent" class="mainmenu" onClick="highLight('netDIV')">Network</a></td>
+</tr>
+
+<tr ID="wireDIVtr">
+  <td align="left" ID="wireDIV">
+  <a href="wireless.htm" target="_parent" class="mainmenu" onClick="highLight('wireDIV')">Wireless</a></td>
+</tr>
+
+<!--tr>
+ <td align="left" ID="httpsDIV">
+ <a href="https.htm" target="_parent" class="mainmenu"  onClick="highLight('httpsDIV')">HTTPS Cert.</a>
+ </td>
+</tr-->
+
+<!--tr>
+  <td align="left" ID="ioDIV">
+  <a href="io.htm" target="_parent" class="mainmenu" onClick="highLight('ioDIV')">I/O Port</a></td>
+</tr-->
+
+<tr> 
+ <td align="left" height="4"></td>
+</tr>
+
+<tr>
+  <td class="menuhead">Video &amp; Audio</td>
+</tr>
+
+<tr> 
+ <td align="left" height="4"></td>
+</tr>
+
+<tr> 
+ <td align="left" ID="streamDIV">
+ <a href="streams.htm" target="_parent" class="mainmenu" 
+ onClick="highLight('streamDIV')">Streamings</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="imageDIV">
+ <a href="image.htm" target="_parent" class="mainmenu" 
+ onClick="highLight('imageDIV')">Video &amp; Audio</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="accessDIV">
+ <a href="access.htm" target="_parent" class="mainmenu" 
+ onClick="highLight('accessDIV')">Video Access</a>
+  </td>
+</tr>
+
+<tr> 
+  <td align="left" ID="userdbDIV">
+  <a href="user_db.htm" target="_parent" class="mainmenu" 
+  onClick="highLight('userdbDIV')">User Database</a>
+  </td>
+</tr>
+
+<!-- tr> 
+  <td align="left" ID="ftpUPDIV">
+  <a href="file.cgi?next_file=ftp_up.htm" target="_parent" class="mainmenu" 
+  onClick="highLight('ftpUPDIV')">FTP Upload</a>
+  </td>
+</tr -->
+
+<tr> 
+ <td align="left" height="4"></td>
+</tr>
+
+<tr>
+  <td class="menuhead">Event</td>
+</tr>
+
+<tr> 
+ <td align="left" height="4"></td>
+</tr>
+
+<tr> 
+ <td align="left" ID="ivaDIV">
+ <a href="iva_detect.htm" target="_parent" class="mainmenu" onClick="highLight('ivaDIV')">Video Analysis</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="auDIV">
+ <a href="au_trig.htm" target="_parent" class="mainmenu" onClick="highLight('auDIV')">Audio Detection</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="alertDIV">
+ <a href="alerts.htm" target="_parent" class="mainmenu" onClick="highLight('alertDIV')">E-Mail</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="ftpDIV">
+ <a href="ftp.htm" target="_parent" class="mainmenu" onClick="highLight('ftpDIV')">FTP</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="imDIV">
+ <a href="im.htm" target="_parent" class="mainmenu" onClick="highLight('imDIV')">HTTP</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="mcDIV">
+ <a href="mcard.htm" target="_parent" class="mainmenu" onClick="highLight('mcDIV')">SD Card</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="eventDIV">
+ <a href="event_table.htm" target="_parent" class="mainmenu" onClick="highLight('eventDIV')">Trigger & Recording</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" height="4"></td>
+</tr>
+
+<tr>
+  <td class="menuhead">Administration</td>
+</tr>
+
+<tr> 
+ <td align="left" height="4"></td>
+</tr>
+
+<tr> 
+ <td align="left" ID="loginDIV">
+ <a href="password.htm" target="_parent" class="mainmenu" 
+ onClick="highLight('loginDIV')">Maintenance</a>
+ </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="statusDIV">
+ <a href="status.htm" target="_parent" class="mainmenu" onClick="highLight('statusDIV')">Status</a>
+  </td>
+</tr>
+
+<tr> 
+ <td align="left" ID="logDIV">
+ <a href="log.htm" target="_parent" class="mainmenu" 
+ onClick="highLight('logDIV')">Log</a>
+  </td>
+</tr>
+</table>
+
+<form name="dummy" onSubmit="return false">
+<input type="Hidden" name="h_crop" value="@h_crop#">
+<input type="Hidden" name="h_v_mode" value="@h_v_mode#">
+
+</form>
+
+</body>
+</html>
+

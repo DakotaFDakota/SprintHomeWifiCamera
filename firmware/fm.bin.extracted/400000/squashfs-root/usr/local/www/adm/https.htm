@@ -1,0 +1,403 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<style type="text/css">
+
+.cer_sub {
+	width:250px; 
+	border:solid 1px #999; 
+	background-color:#EEE;
+	font-size:12px;
+	margin-bottom:3px
+}
+
+.cer_sub_button {
+	width:65px;
+}
+
+</style>
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+
+
+function state_Change()
+{
+	if (xmlhttp.readyState == 4)
+  	{	
+		//alert(xmlhttp.responseText);
+		init();
+  	}
+}
+
+function init_xmlhttp()
+{
+	if (xmlhttp.readyState == 4)
+  	{	
+		document.getElementsByName("cer_sub")[0].value = xmlhttp.responseText;
+		document.getElementById("ongoing").style.display="none";
+		document.getElementById("mubd").style.display="block";
+  	}
+}
+
+function init()
+{
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],	
+		];
+	read.get(array_get);			
+
+	menuframe.highLight('httpsDIV');
+	var url="https_cert.cgi?action=download&type=self_signed_cert&format=subject";
+	xmlhttp=null;
+	if (window.XMLHttpRequest)
+	{// code for IE7, Firefox, Opera, etc.
+	  	xmlhttp=new XMLHttpRequest();
+	}
+	else if (window.ActiveXObject)
+	{// code for IE6, IE5
+	  	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	if (xmlhttp!=null)
+	{
+		try
+		{
+			xmlhttp.onreadystatechange = init_xmlhttp;
+			xmlhttp.open("GET",url,true);
+		}
+		catch(e)
+		{
+			return;
+		}
+	  	try
+	  	{
+			xmlhttp.send();
+	  	}
+	  	catch(e)
+	  	{
+			return;
+	  	}
+	}
+	else
+	{
+		alert("Your browser does not support XMLHTTP.");
+	}
+}
+
+function query_root_cert()
+{
+	if (document.getElementsByName("cer_sub")[0].value == "No certificate installed."
+		|| document.getElementsByName("cer_sub")[0].value == "")
+	{
+		alert("No certificate installed.");
+		return;
+	}
+	window.open("./https_cert.cgi?action=download&type=self_signed_cert&format=xhtml", null, "directories=no, width=535px, location=no, resizable=yes, menubar=yes, toolbar=yes, scrollbars=yes");
+	return;
+/*	var url="https_cert.cgi?action=download&type=self_signed_cert";
+	xmlhttp=null;
+	if (window.XMLHttpRequest)
+	{// code for IE7, Firefox, Opera, etc.
+	  	xmlhttp=new XMLHttpRequest();
+	}
+	else if (window.ActiveXObject)
+	{// code for IE6, IE5
+	  	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	if (xmlhttp!=null)
+	{
+		try
+		{
+			xmlhttp.onreadystatechange = state_Change;
+			xmlhttp.open("GET",url,true);
+		}
+		catch(e)
+		{
+			return;
+		}
+	  	try
+	  	{
+			xmlhttp.send();
+	  	}
+	  	catch(e)
+	  	{
+			return;
+	  	}
+	}
+	else
+	{
+		alert("Your browser does not support XMLHTTP.");
+	}*/
+}
+
+function remove_root_cert()
+{
+	if (document.getElementsByName("cer_sub")[0].value == "No certificate installed."
+		|| document.getElementsByName("cer_sub")[0].value == "")
+	{
+		alert("No certificate installed.");
+		return;
+	}
+	var r=confirm("Remove certificate?");
+	if (r!=true)
+	{
+	  return;
+	}
+
+	var url="https_cert.cgi?action=remove&type=self_signed_cert";
+	xmlhttp=null;
+	if (window.XMLHttpRequest)
+	{// code for IE7, Firefox, Opera, etc.
+	  	xmlhttp=new XMLHttpRequest();
+	}
+	else if (window.ActiveXObject)
+	{// code for IE6, IE5
+	  	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	if (xmlhttp!=null)
+	{
+		try
+		{
+			xmlhttp.onreadystatechange = state_Change;
+			xmlhttp.open("GET",url,true);
+		}
+		catch(e)
+		{
+			return;
+		}
+	  	try
+	  	{
+			xmlhttp.send();
+	  	}
+	  	catch(e)
+	  	{
+			return;
+	  	}
+	}
+	else
+	{
+		alert("Your browser does not support XMLHTTP.");
+	}
+}
+
+var win_selfsign;
+function wait()
+{
+	if (win_selfsign.closed)
+	{
+		document.getElementsByName("btn_create_root_cert")[0].disabled = false;
+		return;
+	}
+	setTimeout("wait()", 1000);
+}
+
+function create_root_cert()
+{
+	if (document.getElementsByName("cer_sub")[0].value != "No certificate installed."
+		&& document.getElementsByName("cer_sub")[0].value != "")
+	{
+		alert("A certificate already exists, please firstly remove the old one.");
+		return;
+	}
+	document.getElementsByName("btn_create_root_cert")[0].disabled = true;
+	win_selfsign = window.open("./https_sub.htm", "root_cert", "directories=no, height=285px, width=388px, location=no, menubar=no, resizable=no, scrollbars=no, toolbar=no");
+	setTimeout("wait()", 1000);
+}
+
+function create_cert_request()
+{
+	window.open("./https_sub.htm", "cert_request", "directories=no, height=270px, width=388px, location=no, menubar=no, resizable=yes, toolbar=no");
+}
+
+function install_cert()
+{
+	if (document.getElementsByName("cer_sub")[0].value != "No certificate installed."
+		&& document.getElementsByName("cer_sub")[0].value != "")
+	{
+		alert("A certificate already exists, please firstly remove the old one.");
+		return;
+	}
+	window.open("./https_upl.htm", null, "directories=no, height=100px, width=508px, location=no, menubar=no, scrollbars=no, resizable=yes, toolbar=no");
+}
+
+
+
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();">
+<FORM method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap colspan="2">HTTPS Certificate (server)</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Installed certificate:</td>
+ <td class="rc" nowrap><input type="text" align="middle" class="cer_sub" name="cer_sub" readonly="1" size="25" >&nbsp;&nbsp;	
+ <input type="button" class="cer_sub_button" value="Details" onClick="query_root_cert()">&nbsp;
+ <input type="button" class="cer_sub_button" value="Remove" onClick="remove_root_cert()"></td>
+</tr>
+<tr>
+ <td nowrap style="padding-top:0px"></td>
+ <td nowrap style="padding-top:0px"></td>
+</tr>
+
+
+<tr>
+ <td class="lc" nowrap>Certificate Authority certificate:</td>
+ <td class="rc" nowrap><input type="button" size="25" maxlength="64" value="Create request" onClick="create_cert_request();" style="width:150px">
+  &nbsp;&nbsp;<input type="button" size="25" maxlength="64" value="Install certificate" style="width:150px" onClick="install_cert();"></td>
+</tr>
+
+<!--
+<tr>
+ <td class="lc" nowrap align="middle">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Created reqeust:</td>
+ <td nowrap><input type="text" name="http_login" size="25" class="cer_sub" readonly="1" value="C=CA , ST=JS , O=SC , OU=ISBU , CN=SAM ">&nbsp;&nbsp;	
+  <input type="button" class="cer_sub_button" name="http_url" value="Details">&nbsp;
+ <input type="button" class="cer_sub_button" name="http_url" value="Remove"></td>
+</tr>
+-->
+
+
+
+<tr>
+ <td class="lc" nowrap>Self-signed certificate:</td>
+ <td nowrap><input type="button" name="btn_create_root_cert" size="25" maxlength="64" value="Create & Install" style="width:150px" onClick="create_root_cert();"></td>
+ </tr>
+
+
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc">&nbsp;</td>
+ <td class="rc">&nbsp;</td>
+</tr> 
+
+<!--
+<tr>
+  <td class="subhead" nowrap colspan="2">HTTPS Certificate (client)</td>
+</tr>
+
+<tr>
+  <td class="lc" nowrap>&nbsp;</td>
+  <td nowrap><input type="checkbox" name="http_pws2" value="Create & Install">    Enable certificate check</td>
+</tr>
+
+<tr>
+  <td class="lc" nowrap>Installed certificate:</td>
+  <td nowrap><input type="text" name="http_login2" class="cer_sub"  size="25" readonly="1" value="C=CA , ST=JS , O=SC , OU=ISBU , CN=SAM ">&nbsp;&nbsp;	
+  <input type="button" class="cer_sub_button" name="http_url" value="Details">&nbsp;
+ <input type="button" class="cer_sub_button" name="http_url" value="Remove"></td>
+</tr>
+
+<tr>
+  <td class="lc" nowrap></td>
+  <td nowrap><input type="button" name="http_pws2" size="25" maxlength="64" value="Install" style="width:100px"></td>
+</tr> 
+-->
+
+<tr>  <!-- layout row, pushes data up, buttons down -->
+  <td class="lc" height="100%"> </td>
+  <td class="rc" height="100%"> </td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+	  <td class="lcbt" colspan="2" > </td>
+	  </tr> 
+<!-- table footer -->
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+    <table class="maintab2" cellspacing="0"><tr>
+    <td align="center">
+	    <img src="format_wait.gif" alt="" border="0">
+    </tr></td>
+    </table>
+</div>
+
+<input type="Hidden" name="h_http_post_en" value="@h_http_post_en#">
+<input type="Hidden" name="h_method" value="@h_method#">
+<input type="Hidden" name="pwd_chg_httpnotify" value="0">
+<input type="Hidden" name="pwd_chg_httpnotify_proxy" value="0">
+<input type="Hidden" name="h_im_1" value="@h_im_1#">
+<input type="Hidden" name="h_im_pir" value="@h_im_pir#">
+<input type="Hidden" name="h_im_md" value="@h_im_md#">
+<input type="Hidden" name="pwd_chg_http_post" value="0">
+
+<input type="Hidden" name="this_file" value="im.htm">
+<input type="Hidden" name="next_file" value="im.htm">
+<input type="Hidden" name="todo" value="save">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

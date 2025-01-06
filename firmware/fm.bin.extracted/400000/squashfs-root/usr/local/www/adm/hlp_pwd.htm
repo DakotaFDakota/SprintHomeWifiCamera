@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<head>
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<TITLE>Help - Maintenance</TITLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+//<![CDATA[
+
+var h_curr_wifi_bundle;
+var WIRELESS = false;
+
+function set_model_num()
+{
+	WIRELESS = (h_curr_wifi_bundle == 1) ? true : false;	
+	if (WIRELESS)
+	{ 
+		document.getElementById('wire1').innerHTML = "&nbsp;Wireless";
+	}
+	else
+	{
+		document.getElementById('wire1').innerHTML = "";
+	}
+}
+
+function init()
+{
+	var read = new GroupCtrl();
+	var array_get=[
+			//["SYSTEM", "model_num", "h_model_num"],
+			["WIRELESS", "curr_wifi_bundle", "h_curr_wifi_bundle"]
+		];
+	read.callback = set_model_num;
+	read.getvalue(array_get);	
+
+}
+
+//]]>
+</script>
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus();init();">
+<table width="100%">
+<tr>
+  <th class="help">Help - Maintenance</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+
+<p><b> Administrator Login </b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+
+<tr>
+  <td nowrap valign="top" class="itemhead"> Administrator ID</td>
+   <td><ul>
+   <li>Enter the name for the Administrator here. Spaces, punctuation, and special characters must NOT be used in the name.</li>
+   <li>The name is case insensitive (case is ignored), so you can not have 2 names which differ only by case. </li>
+   </ul> </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead"> Administrator Password</td>
+   <td>The password for the Administrator. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead"> Verify Password</td>
+   <td>Re-enter the password for the Administrator, to ensure it is correct. </td>
+</tr>
+</table>
+
+
+<p><b>Firmware Upgrade</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+
+<tr>
+  <td nowrap valign="top" class="itemhead"> Upgrade File</td>
+   <td>Click the "Browse" button and browse to the location on your PC where you stored the Firmware file. Select this file.  </td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead"> Start Upgrade</td>
+   <td>Click this button to start the Firmware. When the upgrade is finished, the <!--script>if (WIRELESS) document.write("Wireless")</script--><a id="wire1"></a> Network Camera will restart, and this management connection will be unavailable during the restart. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead">Clear File Name</td>
+   <td>This does NOT stop the Upgrade process if it has started. It only clears the input for the "Upgrade File" field.</td>
+</tr>
+</table>
+
+<p><b>Backup & Restore </b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+
+<tr>
+  <td valign="top" class="itemhead"> Backup Configuration File </td>
+   <td>Click this button to save the current configuration information to a text file.  </td>
+</tr>
+
+<tr>
+  <td valign="top" class="itemhead"> Restore Configuration File</td>
+   <td>Click this button to reinitialize the camera to load the new updated software. Do this after loading the upgrade file. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead">Clear File Name</td>
+   <td>This does NOT stop the Upgrade process if it has started. It only clears the input for the "Upgrade File" field.</td>
+</tr>
+</table>
+
+<p><b>Buttons </b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead">Factory Defaults </td>
+   <td>Click this button to reload all default settings on the camera. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead">Restart Camera </td>
+   <td>Click this button to restart the camera firmware with the new settings. </td>
+</tr>
+</table>
+
+
+</body>
+</html>
+

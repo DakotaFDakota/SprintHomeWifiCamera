@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Administration</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+//
+function create_cert_request_xmlhttp()
+{
+	if (xmlhttp.readyState == 4)
+  	{	
+		document.getElementsByName("show_request")[0].value = xmlhttp.responseText;
+		document.getElementById("request_div").style.display = "block";
+		document.getElementsByName("show_request")[0].style.height = (document.getElementsByName("show_request")[0].scrollHeight + 10) + "px";
+		document.getElementById("waiting_div").style.display = "none";
+		document.getElementById("mubd").style.display = "none";
+		window.resizeTo(620, (document.getElementsByName("show_request")[0].scrollHeight + 170));
+	}
+}
+
+function isDigit(s)
+{
+	var r,re;
+	re = /\d/;
+	r = s.search(re);
+	return (r!=-1)?1:0;
+}
+
+
+function create_cert_request()
+{
+	if (document.getElementsByName("C")[0].value.length != 2 || isDigit(document.getElementsByName("C")[0].value))
+	{
+		alert("Country Name should be a two-letter ISO country code.");
+		return;
+	}
+
+	var url="https_cert.cgi?action=create&type=auth_cert_req";
+
+	url += "&c=" + document.getElementsByName("C")[0].value;
+	url += "&st=" + document.getElementsByName("ST")[0].value;
+	url += "&l=" + document.getElementsByName("L")[0].value;
+	url += "&o=" + document.getElementsByName("O")[0].value;
+	url += "&ou=" + document.getElementsByName("OU")[0].value;
+	url += "&cn=" + document.getElementsByName("CN")[0].value;
+	xmlhttp=null;
+	if (window.XMLHttpRequest)
+	{// code for IE7, Firefox, Opera, etc.
+	  	xmlhttp=new XMLHttpRequest();
+	}
+	else if (window.ActiveXObject)
+	{// code for IE6, IE5
+	  	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	if (xmlhttp!=null)
+	{
+		document.getElementById("waiting_div").style.display = "block";
+		document.getElementById("mubd").style.display = "none";
+
+		try
+		{
+			xmlhttp.onreadystatechange = create_cert_request_xmlhttp;
+			xmlhttp.open("GET",url,true);
+		}
+		catch(e)
+		{
+			return;
+		}
+	  	try
+	  	{
+			xmlhttp.send();
+	  	}
+	  	catch(e)
+	  	{
+			return;
+	  	}
+	}
+	else
+	{
+		alert("Your browser does not support XMLHTTP.");
+	}
+}
+
+function create_root_cert_xmlhttp()
+{
+	if (xmlhttp.readyState == 4)
+  	{	
+		window.opener.location.reload();
+		window.close();
+  	}
+}
+
+function create_root_cert()
+{
+	if (document.getElementsByName("C")[0].value.length != 2)
+	{
+		alert("Country Name should be a two-letter code.");
+		return;
+	}
+	var url="https_cert.cgi?action=create&type=self_signed_cert";
+	url += "&c=" + document.getElementsByName("C")[0].value;
+	url += "&st=" + document.getElementsByName("ST")[0].value;
+	url += "&l=" + document.getElementsByName("L")[0].value;
+	url += "&o=" + document.getElementsByName("O")[0].value;
+	url += "&ou=" + document.getElementsByName("OU")[0].value;
+	url += "&cn=" + document.getElementsByName("CN")[0].value;
+	url += "&days=" + document.getElementsByName("days")[0].value;
+	xmlhttp=null;
+	if (window.XMLHttpRequest)
+	{// code for IE7, Firefox, Opera, etc.
+	  	xmlhttp=new XMLHttpRequest();
+	}
+	else if (window.ActiveXObject)
+	{// code for IE6, IE5
+	  	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	if (xmlhttp!=null)
+	{
+		document.getElementById("waiting_div").style.display = "block";
+		document.getElementById("mubd").style.display = "none";
+
+		try
+		{
+			xmlhttp.onreadystatechange = create_root_cert_xmlhttp;
+			xmlhttp.open("GET",url,true);
+		}
+		catch(e)
+		{
+			return;
+		}
+	  	try
+	  	{
+			xmlhttp.send();
+	  	}
+	  	catch(e)
+	  	{
+			return;
+	  	}
+	}
+	else
+	{
+		alert("Your browser does not support XMLHTTP.");
+	}
+}
+
+function create()
+{
+	if (window.name == "root_cert")
+	{
+		create_root_cert();
+	}
+	else if (window.name == "cert_request")
+	{
+		create_cert_request();
+	}
+}
+
+function init()
+{
+	if (window.name == "cert_request")
+	{
+		document.getElementById("div_validity").style.display = "none";
+	}
+	
+	
+}
+
+
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();">
+<div ID="waiting_div" style="left:4px; top:4px; display:none">
+<table>
+<tr>
+<td><img src="./wait.gif"></td><td>Waiting...</td>
+</tr>
+</table>
+</div>
+
+<div ID="request_div" style="left:4px; top:4px; display:none">
+<table>
+<tr>
+<td width="550px">Copy the PEM format request below and send it to a CA for signing. When the signed certificate is returned, install it by clicking the Install certificate button on the main HTTPS page.</td>
+</tr>
+<tr>
+<td ><textarea name="show_request" readonly style="border: dashed #600 1px; width:550px; height:180px; overflow:hidden;"></textarea></td>
+</tr>
+<tr>
+<td align="middle"><input type="button" onClick="window.close();" value=" Close "></td>
+<tr>
+</table>
+</div>
+
+<div ID="mubd" style="left:4px; top:4px;">
+ <table class="maintab2" style="width:380px; border:0">
+ <tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>Self-signed Certificate</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Country Name:</td>
+ <td class="rc" nowrap><input type="text" name="C" size="25" maxlength="2" style="width:30px"> 
+ (2 letter code)</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>State or Province Name:</td>
+ <td class="rc" nowrap><input type="text" name="ST" size="25" maxlength="40" style="width:160px"></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Locality Name:</td>
+ <td class="rc" nowrap><input type="text" name="L" size="25" maxlength="40" style="width:160px"></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Organization Name:</td>
+ <td class="rc" nowrap><input type="text" name="O" size="25" maxlength="40" style="width:160px"></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Organizational Unit Name:</td>
+ <td class="rc" nowrap><input type="text" name="OU" size="25" maxlength="40" style="width:160px"></td>
+</tr>
+ 
+ <tr>
+ <td class="lc" nowrap>Common Name:</td>
+ <td class="rc" nowrap><input type="text" name="CN" size="25" maxlength="64" style="width:160px"></td>
+</tr>
+
+<tr id="div_validity">
+ <td class="lc" nowrap>Days of Validity:</td>
+ <td class="rc" nowrap><input type="text" name="days" size="25" maxlength="4" value="365" style="width:60px"> 
+ days (1-9999)</td>
+</tr>
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc">&nbsp;</td>
+ <td class="rc">&nbsp;</td>
+</tr>
+
+<tr >
+<td colspan="2" align="middle">
+<input type="button" value="OK" style="width:60px;" onClick="create();">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Cancel" style="width:60px;" onClick="window.close();">
+</td>
+</tr>
+
+<tr>
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+
+ </table>
+</div>  <!-- pagemain -->
+
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

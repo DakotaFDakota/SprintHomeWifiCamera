@@ -1,0 +1,299 @@
+#!/bin/sh
+
+if [ $# -lt 2 ]
+then
+	echo "Usage: $0 {start|stop} {schedule} {resolution} {second} {video bitrate}"
+	echo "Example: FullTimeRecord start schedule 1080p 60 10000000 &"
+	exit 1
+fi
+
+#Setting Cache
+#echo 1048576 > /proc/sys/vm/dirty_bytes
+#echo 131072 > /proc/sys/vm/dirty_background_bytes
+#echo 0 > /proc/sys/vm/dirty_ratio
+#echo 0 > /proc/sys/vm/dirty_background_ratio
+echo 0 > /proc/sys/vm/dirty_expire_centisecs
+echo 0 > /proc/sys/vm/dirty_writeback_centisecs
+
+echo 3 > /proc/sys/vm/drop_caches
+asstime=0
+vsstime=0
+
+SERIAL=REC
+DATE=`date +%Y%m%d`
+TIME=`date +%H%M%S`
+
+FF_STATUS=/tmp/ff_status
+REC_STATUS=/tmp/rec_status
+LED_STATUS=/tmp/record_status
+if [ $3 == "1080p" ]; then
+	RESOLUTION=1920x1080
+elif [ $3 == "720p" ]; then
+	RESOLUTION=1280x720
+elif [ $3 == "360p" ]; then
+	RESOLUTION=480x360
+else
+	RESOLUTION=1920x1080
+fi
+
+if [ $4 == 0 ] || [ $4 == "" ] || [ $4 == "&" ]; then
+	RECORD_INTERVAL=60
+else
+	RECORD_INTERVAL=$4
+fi
+SLEEP_INTERVAL=$(($RECORD_INTERVAL+10))
+
+if [ $5 == 0 ] || [ $5 == "&" ]; then
+	VIDEO_BR=12000000
+else
+	VIDEO_BR=$5
+fi
+
+ALERT_PATH=/mnt/sdcard/DCIM/record/
+RECORD_PATH=$ALERT_PATH
+FTR_PID=/tmp/ftr_pid
+
+if [ "$1" = "start" ]; then
+	if [ -f "$FTR_PID" ]; then
+		echo "Full time record is runing.."
+		exit 1
+	else
+		if [ "`pidof ffmpeg`" = "" ]; then
+			echo "Start full time record. PID is "$$
+			echo $$ > $FTR_PID
+			echo "Start FFmpeg for record..."
+			#ffmpeg -recorder 1 -livestream 0 -r 30 -s $RESOLUTION -flicker 60 -vbrate 12000000 -minqp 10 -gop 30 -f v4l2x -i /dev/video0 -c:v copy -c:a copy -f segment -flush_packets 0 -segment_time $RECORD_INTERVAL -reset_timestamps 1 -strftime 1 $RECORD_PATH$SERIAL-%y%m%d-%H%M%S.mp4 &
+		else
+			echo "FFmpeg is runing.."
+			exit 1
+		fi
+	fi
+else
+	if [ "`pidof ffmpeg`" = "" ]; then
+		echo "FFmpeg already done ..."
+		FTR_PID=`cat /tmp/ftr_pid`
+		kill -15 $FTR_PID
+	else
+		echo "Stop FFmpeg ..."
+	fi
+fi
+
+MMC_BLK=`mount | grep /mnt/sdcard | awk '{print $1}'`
+#mirrorflip=`nvconf get mirror.flip.mode`
+#if [ $mirrorflip == 3 ]
+#then
+#        mirrorflipmode=flipmirror
+#else
+#        if [ $mirrorflip == 2 ]
+#        then
+#                mirrorflipmode=flip
+#        else
+#                if [ $mirrorflip == 1 ]
+#                then
+#                        mirrorflipmode=mirror
+#                else
+#                        mirrorflipmode=normal
+#                fi
+#        fi
+#fi
+
+mount | grep /mnt/sdcard > /dev/null && RealRec=0 || RealRec=1
+if [ $RealRec == 0 ]; then
+	case "$1" in
+	start)
+		# Add control file
+		test -e $FF_STATUS
+		if [ $? == 0 ];	then
+			rm $FF_STATUS
+		fi
+		touch $FF_STATUS
+
+		test -e $REC_STATUS
+		if [ $? == 0 ]; then
+			rm $REC_STATUS
+		fi
+		touch $REC_STATUS
+
+		# Create record folder
+		test -d $RECORD_PATH
+		if [ $? == 1 ];	then
+			echo "Create folder $RECORD_PATH ..."
+			mkdir -p $RECORD_PATH
+		fi
+
+		# Check SD card record space
+		FREE_SPACE=`df $MMC_BLK -h | awk '/[0-9]+\.[0-9]*/ {print $4}'`
+		echo "SD CARD FREE_SPACE $FREE_SPACE"
+		USE_SPACE=`df $MMC_BLK -h | awk '/[0-9]+\.[0-9]*/ {print $5}'`
+		if [ "$USE_SPACE" == "100%" ]; then
+			cd $RECORD_PATH
+			FIRST_FILE=`ls -1tr $RECORD_PATH | awk 'NR==1 {print $1}'`
+			echo "Remove first file $FIRST_FILE"
+			rm $RECORD_PATH$FIRST_FILE
+			sync
+		fi
+		FREE_SPACE=`df $MMC_BLK -h |awk '/[0-9]+\.[0-9]*/ {print $4}' | grep M`
+		if [ "$FREE_SPACE" == "" ]; then
+			echo "SD CARD FREE_SPACE is enough - "
+		else
+			#FREE_SPACE=`echo $FREE_SPACE | cut -d'M' -f 1`
+			FREE_SPACE=`echo $FREE_SPACE | cut -d'.' -f 1`
+			if [ $FREE_SPACE -le 640 ]; then
+				cd $RECORD_PATH
+				FIRST_FILE=`ls -1tr $RECORD_PATH | awk 'NR==1 {print $1}'`
+				echo "Remove first file $FIRST_FILE"
+				rm $RECORD_PATH$FIRST_FILE
+				sync
+			else
+				echo "SD CARD FREE_SPACE is enough + "
+			fi
+		fi
+
+		# Start to record
+		if [ $2 == "schedule" ]; then
+			REC_ING=1
+			ffmpeg -v error -ss "$asstime" -f alsa -ar 16000 -ac 2 -i hw:0,0 -ss "$vsstime" -r 30 -s $RESOLUTION -input_format h264 -osd 0 -flicker 60 -vbrate $VIDEO_BR -gop 30 -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v $VIDEO_BR -c:a aac -b:a 48k -ar 16000 -ac 2 -strict -2 -async 2 -vsync 1 -aac_2nd_cpu 1 -f segment -segment_time $RECORD_INTERVAL -reset_timestamps 1 -strftime 1 $RECORD_PATH$SERIAL-%y%m%d-%H%M%S.mp4 -y < $FF_STATUS &
+			echo "1" > $REC_STATUS
+			echo 0 > /tmp/RECORD_END
+			echo "1" > $LED_STATUS
+			
+			ScheduleCheck() {
+				Parent_PID=$$
+				echo "Parant PID is "$Parent_PID
+				while [ 1 ]; do
+					if [ $REC_ING == 1 ]; then
+						Filenumber=`ls -1 $RECORD_PATH | awk 'END{print NR}'`
+						echo "Video File number: $Filenumber"
+						while [ $Filenumber -gt 999 ]; do
+							echo "Video File number is $Filenumber > 999 "           
+							cd $RECORD_PATH
+							FIRST_FILE=`ls -1tr $RECORD_PATH | awk 'NR==1 {print $1}'`
+							echo "Remove first file $FIRST_FILE"
+							rm $RECORD_PATH$FIRST_FILE
+									sync
+							if [ $Filenumber == 1000 ]; then
+								break
+							else
+								Filenumber=`ls -1 $RECORD_PATH | awk 'END{print NR}'`
+							fi
+						done
+						#FREE_SPACE=`df $MMC_BLK -h | awk '/[0-9]+\.[0-9]*/ {print $4}'`
+						#echo "SD CARD FREE_SPACE $FREE_SPACE"
+						FREE_SPACE=`df $MMC_BLK -h | awk '/[0-9]+\.[0-9]*/ {print $4}' | grep M`
+						if [ "$FREE_SPACE" == "" ]; then
+							USE_SPACE=`df $MMC_BLK -h |awk '/[0-9]+\.[0-9]*/ {print $5}'`
+							if [ "$USE_SPACE" == "100%" ]; then
+								cd $RECORD_PATH
+								FIRST_FILE=`ls -1tr $RECORD_PATH | awk 'NR==1 {print $1}'`
+								echo "Remove first file $FIRST_FILE"
+								rm $RECORD_PATH$FIRST_FILE
+								sync
+								CheckSdcardFree &
+							else
+								echo "SD CARD FREE_SPACE is enough - "
+							fi
+						else
+							#FREE_SPACE=`echo $FREE_SPACE | cut -d'M' -f 1`
+							FREE_SPACE=`echo $FREE_SPACE | cut -d'.' -f 1`
+							rmcunt=0
+							while [ $FREE_SPACE -le 640 ]; do
+								rmcunt=`expr $rmcunt + 1`
+								if [ $FREE_SPACE -le 640 ]; then
+									cd $RECORD_PATH
+									FIRST_FILE=`ls -1tr $RECORD_PATH | awk 'NR==1 {print $1}'`
+									echo "Remove first file $FIRST_FILE"
+									rm $RECORD_PATH$FIRST_FILE
+									sync
+								else
+									echo "SD CARD FREE_SPACE is enough + "
+								fi
+								FREE_SPACE=`df $MMC_BLK -h |awk '/[0-9]+\.[0-9]*/ {print $4}'`
+								echo "SD CARD FREE_SPACE $FREE_SPACE"
+								FREE_SPACE=`df $MMC_BLK -h |awk '/[0-9]+\.[0-9]*/ {print $4}' | grep M`
+								#FREE_SPACE=`echo $FREE_SPACE | cut -d'M' -f 1`
+								FREE_SPACE=`echo $FREE_SPACE | cut -d'.' -f 1`
+								if [ $rmcunt -gt 50 ]; then
+									break	
+								fi
+							done
+						fi  #End of check FREE_SPACE 
+					else
+						break
+					fi  #End of REC_ING ==1
+					REC_ING=`cat $REC_STATUS`
+
+					NOW_PID=`cat $FTR_PID`
+					if [ $Parent_PID == $NOW_PID ]; then
+						select_sleep $SLEEP_INTERVAL
+						REC_ING=`cat $REC_STATUS`
+					else
+						echo "Stop past check, current full time record is "$NOW_PID
+						break
+					fi
+				done
+			}
+			ScheduleCheck &
+
+			while [ $REC_ING == 1 ]; do
+				# Avoid FFmpeg disappear
+				if [ "`pidof ffmpeg`" == "" ]; then
+					RECORD_END=`cat /tmp/RECORD_END`
+					if [ $RECORD_END == 0 ]; then
+						fulltimerecord=`nvconf get record.set.level`
+					else
+						fulltimerecord=0
+					fi
+					if [ $fulltimerecord == 1 ]; then
+						LAST_FILE=`ls -alt $RECORD_PATH | awk 'NR==4 {print $9}'`
+						LAST_FILE_NUMBER=`echo $LAST_FILE | cut -b 4-11`
+						LAST_FILE_NUMBERFIRSTWORD=`echo $LAST_FILE_NUMBER | cut -b 1`
+						serach_number=1
+						while [ $LAST_FILE_NUMBERFIRSTWORD == 0 ]; do
+							serach_number=`expr $serach_number + 1`
+							LAST_FILE_NUMBERFIRSTWORD=`echo $LAST_FILE_NUMBER | cut -b $serach_number`
+						done
+						LAST_FILE_NUMBER=`echo $LAST_FILE | cut -b $serach_number-11`	
+						echo "Full time record restart"
+						ffmpeg -v error -ss "$asstime" -f alsa -ar 16000 -ac 2 -i hw:0,0 -ss "$vsstime" -r 30 -s $RESOLUTION -input_format h264 -osd 0 -flicker 60 -vbrate $VIDEO_BR -gop 30 -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v $VIDEO_BR -c:a aac -b:a 48k -ar 16000 -ac 2 -strict -2 -async 2 -vsync 1 -aac_2nd_cpu 1 -f segment -segment_time $RECORD_INTERVAL -reset_timestamps 1 -strftime 1 $RECORD_PATH$SERIAL-%y%m%d-%H%M%S.mp4 -y < $FF_STATUS &
+					else
+						echo "0" > $REC_STATUS
+						echo "FFmpeg done"
+						REC_ING=`cat $REC_STATUS`
+					fi
+				else # FFmpeg alive
+					select_sleep 2
+					REC_ING=`cat $REC_STATUS`
+				fi
+			done
+			echo "REC_ING = " $REC_ING
+		fi
+		sync
+		rm $FTR_PID
+		echo "0" > $LED_STATUS
+		echo "Record done"
+		;;
+	stop)
+		echo "Prepare stop full time record"
+		echo "q" > $FF_STATUS
+		killall ffmpeg
+		#ffcom stop
+		sync
+		#ffcom exit
+		if [ "$2" == "schedule" ]; then
+			echo 1 > /tmp/RECORD_END
+			echo "0" > $REC_STATUS
+			echo "Stop schedule record"
+		fi
+		echo "0" > $LED_STATUS
+		;;
+	*)
+		echo "Usage: $0 {start|stop} {schedule} {resolution} {second} {video bitrate}"
+		echo "Example: FullTimeRecord start schedule 1080p 60 10000000 &"
+		exit 1
+		;;
+	esac
+else
+	echo "Cannot record MP4 without SD card!"
+fi
+exit 0
+

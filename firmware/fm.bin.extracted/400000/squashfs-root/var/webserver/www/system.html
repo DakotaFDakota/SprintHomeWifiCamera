@@ -1,0 +1,168 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
+		<link rel="stylesheet" href="/css/style.css">
+		<!--<script type="text/javascript" src="/file/javascript.js"></script>-->
+		<title>System Mainenance</title>
+	</head>
+<body class="background">
+<script>
+	var myxml;
+function createXMLHttpRequest() {
+    var xmlHttp;
+    if (window.XMLHttpRequest) { //if we can get XMLHttpRequest
+        xmlHttp = new XMLHttpRequest();  // Mozilla、Firefox、Safari
+    }
+    else if (window.ActiveXObject) { //if we can get ActiveXObject
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); // Internet Explorer
+    }
+    return xmlHttp;
+}
+
+
+
+
+function select_val_idx(id,setval,defval){
+  var  e = document.getElementById(id);
+  //selval=e.options[e.selectedIndex].value;
+  //alert(e.options[e.selectedIndex].value)
+  //alert(setval)
+  for(i=0;i<defval.length;i++){
+     //alert(setval);
+     //alert(defval[i])
+     if(setval==defval[i])
+        e.selectedIndex=i;
+  }
+}
+
+
+function parsevalue(tmpstr){
+
+   var data=tmpstr.split("&");
+   //alert("data :" +data);
+   key_value = data[0].split("=");
+   //alert("key_value 0:" +key_value[0]);
+   document.getElementById("id_productname").value=key_value[1];
+}
+
+ 
+function handleGetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response:" + myxml.responseText);
+	parsevalue(myxml.responseText);
+      //document.GetVal.t1.value=myxml.responseText; 
+     }
+   }
+}
+function handleSetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response" + myxml.responseText);
+          //document.SetVal.t2.value=myxml.responseText;
+	  alert(myxml.responseText);
+	  //parsevalue(myxml.responseText);
+     }
+   }
+}
+
+
+ 
+function startGetRequest()
+{
+    
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    myxml.open("GET", "/cgi-bin/devinfo?devinfo.product.name&end",true); 
+    myxml.send("");
+
+}
+function startSetRequest()
+{
+
+   var str_value = new Array();
+   str_value[0] = document.devinfo.devinfo_appver.value;
+   str_value[1] = document.devinfo.devinfo_fwver.value;
+   str_value[2] = document.devinfo.devinfo_macaddr.value;
+  
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleSetStateChange;
+    myxml.open("POST", "/cgi-bin/devinfo",true);
+    
+    myxml.send("devinfo.appver"+str_value[0]+"&devinfo.fwver"+str_value[1]+"&devinfo.macaddr"+"&end");
+}
+ 
+
+</script>
+<form action="/cgi-bin/devinfo" method=POST name="devinfo">
+	
+		
+	<table border=0 width="700" cellspacing=1>
+			<tr>
+			<td>
+			<p class=title><b>System Mainenance</p>
+			</br>
+			</br>
+			</td>
+			</tr>
+	</table>
+<form action="/cgi-bin/devifo" method=POST name="devinfo">
+<table>		
+			<tr>
+			<td width="35%">
+				Product Name
+			</td>
+			<td width="65%">
+				<input type="text" name="devinfo_productname" id="id_productname" size="20" maxlength="20" value="" >
+			</td>
+
+		</tr>
+		<tr>
+		<td>
+		<input type="submit" value="apply" class="button" >
+		</td>
+		</tr>
+</table>
+</form>
+<table>
+		<tr>
+		<td>
+			<a href="fw_upload.html" target='main' style="text-decoration: none"><FONT COLOR="BLUE">Firmware upgrade</a></br>
+		</td>
+		</tr>
+</table>
+<br>
+<form action="/cgi-bin/cmd" method=POST name="reset">
+<table>
+		<tr>
+			<td>
+			<input type="submit" value="reset to default" name="reset_default" class="button">
+			</td>
+		</tr>
+</table>
+</form>
+<form action="/cgi-bin/cmd" method=POST name="reboot">
+	<table>
+		<tr>
+			<td>
+			<input type="submit" value="reboot" name="reboot_apply" class="button">
+			</td>
+		</tr>
+	</table>
+</form>
+	<table>
+	<tr>
+	<td>
+	</td>
+	</tr>
+	</table>
+<script type="text/javascript">startGetRequest();</script>
+</form>
+
+</body>
+
+</html>

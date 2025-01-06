@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<head>
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<TITLE>Help - DDNS</TITLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus()">
+<table width="100%">
+<tr>
+  <th class="help">Help -  DDNS</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+<p><b> DDNS</b>
+<p>By using a DDNS (Dynamic DNS) Service, users can connect to your Server
+using a Domain name even if you have a dynamic IP address.  When your dynamic IP
+address changes, the DDNS client embedded in this Server will automatically update
+the servers' name  that host your DNS records. 
+<ul>
+<li>If your Router/Gateway supports DDNS, you should use the DDNS feature
+in the Router/Gateway, rather than this one.
+<li>You do NOT need to use DDNS "client" software on your PC to perform IP address
+updates, since updates are performed by this server.
+
+</ul>
+
+<p><b>DDNS Settings</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Enable DDNS</td>
+   <td>Enable or disable the DDNS function, as required. <br>
+   Only enable this feature if you have registered for the DDNS Service with a DDNS Server provider. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Service Provider</td>
+   <td>Choose a service provider from the list. 
+   <!--
+   <p>Note: The <b>GnuDIP</b> software is implemented in the DDNS service provided by "DynDSL.com".
+   It can provide the Network Camera with a static DNS name even if its IP address is dynamically assigned.
+   -->
+   </td>
+</tr>
+<tr>
+<td nowrap valign="top">Web Site<BR>Button</td>
+<td>Click this button to open a new window and connect to the Web site for the selected DDNS service provider. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Domain (Host) Name</td>
+   <td>Enter the Domain Name (host name) allocated to you by the DDNS Server provider. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Account</td>
+   <td>Enter your login name for the DDNS account. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Password</td>
+   <td>Enter your password for the DDNS account. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Check WAN IP Address</td>
+   <td>Set the schedule for checking if the Internet IP address has changed. If the IP address has changed, the DDNS Server will be notified. 
+<p>NOTE: If the DDNS Service provided some software to perform this IP address update or notification, you should NOT use this software. The update is performed by the camera.</td>
+</tr>
+</table>
+
+
+
+</body>
+</html>
+

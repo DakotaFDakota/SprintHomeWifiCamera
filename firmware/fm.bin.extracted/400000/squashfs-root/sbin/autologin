@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 0</dev/$1 1>/dev/$1 2>&1
+shift
+exec $*

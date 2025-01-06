@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Network Camera - Administration</title>
+<style type="text/css">body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+</style>
+<!--script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script-->
+<script language="JavaScript" type="text/javascript">
+/* UPNP Traversal Ports status */
+/*
+ *Note: Needn't do any update to Javascript code here for all models, 
+ *   just need update the HTML code for difference modele.
+ */
+var port_info_list = new Array(
+											//ID + flag(not support/disable/enable) + Application + Port + Protocal
+											["TCP.HTTP", "-1", "HTTP", "", "TCP"],
+											["TCP.HTTPS", "-1", "HTTPS", "", "TCP"],
+											["TCP.RTSP", "-1", "RTSP", "", "TCP"],
+											["UDP.RTP_RTCP1", "-1", "RTP/RTCP #1", "", "UDP"],
+											["UDP.RTP_RTCP2", "-1", "RTP/RTCP #2", "", "UDP"],
+											["UDP.RTP_RTCP3", "-1", "RTP/RTCP #3", "", "UDP"],
+											["UDP.RTP_RTCP4", "-1", "RTP/RTCP #4", "", "UDP"],
+											["UDP.RTP_RTCP5", "-1", "RTP/RTCP #5", "", "UDP"],
+											["UDP.RTP_RTCP6", "-1", "RTP/RTCP #6", "", "UDP"],
+											["UDP.RTP_RTCP7", "-1", "RTP/RTCP #7", "", "UDP"],
+											["UDP.RTP_RTCP8", "-1", "RTP/RTCP #8", "", "UDP"],
+											["UDP.RTP_RTCP9", "-1", "RTP/RTCP #9", "", "UDP"],
+											["UDP.RTP_RTCP10", "-1", "RTP/RTCP #10", "", "UDP"]
+										);
+var port_flag_list = new Array(
+											["UPNPTRAV", ""],		//0
+											["HTTP_MODE", ""],	//1
+											["HTTPS_MODE", ""]	//2	
+										);
+var port_valid_list = new Array(
+											["HTTP", ""],	//0
+											["HTTPS", ""],	//1
+											["RTSP", ""],	//2
+											["RTP", ""]	//3
+										);
+var port_status_list = new Array(
+											["Disabled"],	//0
+											["Punched"],	//1
+											["Not Punched"],	//2
+											["N/A"]	//3
+										);
+
+var upnptrav_ports = parent.document.forms[0].upnp_trav_ports.value;//"@upnp_trav_ports#";
+var ui_port_width = new Array(
+										"319", "110", "58", "65", "86"
+										);
+	
+function ShowUPNPTravState()
+{
+	var i = 0, j = 0, k = 0;
+	var info_k = 0;
+	var upnptrav_list;
+	var upnptrav_value;
+	var upnptrav_rtps;
+	var port_info_rtps;
+	var listtag = "&";
+	var valuetag = "=";
+	var ui_msg = "";
+	
+	//alert(upnptrav_ports);
+	/* Get upnp traversal information */
+	upnptrav_list = upnptrav_ports.split(listtag);
+	
+	/* Get port_flag_list */
+	for (k = 0; k < port_flag_list.length; k++)
+	{
+		for (i = 0; i < upnptrav_list.length; i++)
+		{
+			upnptrav_value = upnptrav_list[i].split(valuetag);
+			//alert(port_flag_list[k][0] +" "+ upnptrav_value[0]);
+			if (port_flag_list[k][0] == upnptrav_value[0])
+			{
+				port_flag_list[k][1] = upnptrav_value[1];
+				upnptrav_list.splice(i, 1);
+				break;
+			}
+		}
+	}
+	/* Check port_flag_list */
+	if ("0" == port_flag_list[0][1])
+	{
+		return 0;	
+	}
+	for (k = 1; k < port_flag_list.length; k++)
+	{
+		if ("1" == 	port_flag_list[k][1])
+		{
+			//port_info_list[k-1][1] = "1";
+		}
+		else if ("0" == 	port_flag_list[k][1])
+		{
+			port_info_list[k-1][1] = "0";
+		}
+	}
+	
+	/* Get port_valid_list and init port_info_list */
+	info_k = 0;
+	for (k = 0; k < port_valid_list.length; k++)
+	{
+		for (i = 0; i < upnptrav_list.length; i++)
+		{
+			upnptrav_value = upnptrav_list[i].split(valuetag);
+			//alert(port_valid_list[k][0] +" "+ upnptrav_value[0]);
+			if (port_valid_list[k][0] == upnptrav_value[0])
+			{
+				port_valid_list[k][1] = upnptrav_value[1];
+				upnptrav_list.splice(i, 1);
+				break;
+			}
+		}
+		switch(k)
+		{
+			case 0://HTTP
+			case 1://HTTPS
+			case 2://RTSP
+				if (port_valid_list[k][1].length > 0)
+				{
+					port_info_list[info_k][3] = port_valid_list[k][1];
+					if ("-1" == port_info_list[info_k][1])
+					{
+						port_info_list[info_k][1] = "1";
+					}
+				}
+				//alert(port_info_list[info_k][1]+ " " + port_info_list[info_k][2] + " " + port_info_list[info_k][3] + " " + port_info_list[info_k][4]);;
+				info_k++;
+				break;
+			case 3://RTP
+				if (port_valid_list[k][1].length > 0)
+				{
+					for (j = 0; j < 10; j++)
+					{
+						 port_info_list[info_k+j][1] = "1";
+						 port_info_list[info_k+j][3] = ""+(parseInt(port_valid_list[k][1])+parseInt(4*j))+
+																			","+(parseInt(port_valid_list[k][1])+parseInt(4*j+1))+
+																			","+(parseInt(port_valid_list[k][1])+parseInt(4*j+2))+
+																			","+(parseInt(port_valid_list[k][1])+parseInt(4*j+3));
+						//alert(port_info_list[info_k+j][1]+ " " + port_info_list[info_k+j][2] + " " + port_info_list[info_k+j][3] + " " + port_info_list[info_k+j][4]);;
+					}
+				}
+				info_k++;
+				break;
+			default:
+				break;
+		}
+	}
+	
+	/* Update the traversal port status and show in UI */
+	ui_msg = '<table width="' + ui_port_width[0] +'" border="0" cellspacing="0" cellpadding="0" style="font: normal 9pt Arial, Helvetica, sans-serif;">';
+	for (k = 0; k < port_info_list.length; k++)
+	{
+		if (k <= 2)
+		{
+			if (port_info_list[k][1] == "1")
+			{
+				for (i = 0; i < upnptrav_list.length; i++)
+				{
+					upnptrav_value = upnptrav_list[i].split(valuetag);
+					if (port_info_list[k][0] == upnptrav_value[0])
+					{
+						ui_msg += '<tr>'
+											+ '<td width="' + ui_port_width[1] +'">' + port_info_list[k][2] + '</td>'
+									    + '<td width="' + ui_port_width[2] +'">' + port_info_list[k][3] + '</td>'
+									    + '<td width="' + ui_port_width[3] +'">' + port_info_list[k][4] + '</td>';
+						ui_msg += '<td width="' + ui_port_width[4] +'">';
+						if (port_info_list[k][3] == upnptrav_value[1])
+							ui_msg += port_status_list[1];
+						else
+							ui_msg += port_status_list[2];
+						ui_msg += '</td></tr>';
+						upnptrav_list.splice(i, 1);
+						break;
+					}
+				}
+			}
+			else if (port_info_list[k][1] == "0")
+			{
+				ui_msg += '<tr>'
+									+ '<td width="' + ui_port_width[1] +'">' + port_info_list[k][2] + '</td>'
+							    + '<td width="' + ui_port_width[2] +'">' + port_info_list[k][3] + '</td>'
+							    + '<td width="' + ui_port_width[3] +'">' + port_info_list[k][4] + '</td>'
+							    + '<td width="' + ui_port_width[4] +'">' + port_status_list[0] + '</td>'
+				ui_msg += '</tr>';
+			}
+		}
+		else
+		{
+			if (port_info_list[k][1] == "1")
+			{
+				for (i = 0; i < upnptrav_list.length; i++)
+				{
+					upnptrav_value = upnptrav_list[i].split(valuetag);
+					if (port_info_list[k][0] == upnptrav_value[0])
+					{
+						port_info_rtps = port_info_list[k][3].split(",");
+						if (upnptrav_value[1].length > 0 && "0" != upnptrav_value[1])
+						{
+							upnptrav_rtps = upnptrav_value[1].split(",");
+						}
+						else
+						{
+							upnptrav_rtps = "0,0,0,0".split(",");
+						}
+						for (j = 0; j < upnptrav_rtps.length; j++)
+						{
+							ui_msg += '<tr><td width="' + ui_port_width[1] +'">';
+							if (0 == j)
+							{
+								ui_msg += port_info_list[k][2];
+							}
+							else
+							{
+								ui_msg += '&nbsp;';
+							}
+							ui_msg += '</td>';
+							ui_msg += '<td width="' + ui_port_width[2] +'">' + port_info_rtps[j] + '</td>'
+											+ '<td width="' + ui_port_width[3] +'">' + port_info_list[k][4] + '</td>';
+							ui_msg += '<td width="' + ui_port_width[4] +'">';
+							if (upnptrav_rtps[j] == port_info_rtps[j])
+								ui_msg += port_status_list[1];
+							else
+								ui_msg += port_status_list[2];
+							ui_msg += '</td></tr>';						
+						}
+						upnptrav_list.splice(i, 1);
+						break;
+					}
+				}
+			}
+		}
+	}
+	ui_msg += '</table>';
+	
+	document.getElementById("upnptravports").innerHTML = ui_msg;
+}
+
+function init()
+{
+	ShowUPNPTravState();
+}
+
+</script>
+</head>
+
+<body onLoad="init();">
+<div ID="upnptravports">
+</div>
+</body>
+</html>

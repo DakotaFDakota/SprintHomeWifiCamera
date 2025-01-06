@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<head>
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<TITLE>Help - I/O Ports</TITLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus()">
+<table width="100%">
+<tr>
+  <th class="help">Help -  I/O Ports</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+<p>This page allows configuration of the input port and output port supported by the Network Camera. Port's triggering condition can be configured.
+
+<p><b>Input Port</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Current State</td>
+  <td>
+  This indicates the current status of input device (ex. Alarm Sensor or Smoke Sensor) that you connected.   
+  <!-- An input will be inactive as long as its triggering condition equals its <B>Current State</B>. -->
+  </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Triggering Condition</td>
+  <td>
+  There are <B>High</B>, <B>Low</B>, <B>Rising</B>, and <B>Falling</B> - 4 triggering conditions can be set. The input port will be activated if the triggering condition changes so that it no longer equals to the current State.
+  <!-- <p>For example, when <b>Current State</b> is <em>High</em> and the triggering condition sets as <em>Trigger When...</em> <b>High</b>, <b>Rising</b>, or <b>Falling</b>, trigger will be activate and vice versa. -->
+  </td>
+</tr>
+</table>
+
+<p><b>Output Port</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Current and<br> Default State</td>
+  <td>
+In the Network Camera, as 
+long as both output's <strong>Default and Current State</strong> is <em>High</em>, the output 
+is disconnected (floating). When the 
+current State change to <em>Low</em> or <em>Low Pulse</em>, the output will be activated. 
+<BR>
+<BR>
+The default <b>Default State</b> for output on  the Network Camera is <em>High</em>. While the 
+Network Camera is restarting, the output will be in the <strong>Default State</strong> (i.e. <em>High</em>) for at least as long as it takes 
+for the Network Camera to fully initialize. Please consider this 
+carefully when connecting equipment to the output. After a 
+completed restart, the unit will then switch to <em>Low</em> or <em>Low Pulse</em> (but only if configured to do so.) 
+</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Manual Trigger</td>
+  <td>Manual trigger action type is depends on  output's default State.
+  <!-- When the default State changed, the <strong>Action Type</strong> will be changed to the same state as well. -->
+  Changing and saving <b>Action Definition</b> setting. When manually trigger, the state will  be changed as you configured.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Action When Triggered</td>
+  <td><p>Changing and saving 
+<strong>Action When Triggered</strong> settings on this page will also reset output to their 
+Default States. The output state will be correct on the next time when 
+triggering event activates the output.</td>
+</tr>
+</table>
+
+<p><b>Pin Definition</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr >
+  <td colspan="3"><img src="pin_definition.gif"></td>
+</tr>
+<tr>
+	<td valign="top" width="50">Pin No.</td>
+	<td valign="top" width="50">Function</td>
+	<td>Description</td>
+</tr>
+<tr>
+	<td>01</td>
+	<td>DI</td>
+	<td><b>Photo Coupler Input:</b>
+	<BR>
+	Isolated digital input port which can be used to connect DI/GND.
+	<BR>
+	Connect to DI GND to activate or leave floating (or unconnected) to deactivate.
+	</td>
+</tr>
+<tr>
+	<td>02</td>
+	<td>GND</td>
+	<td>DI GND</td>
+</tr>
+<tr>
+	<td>03</td>
+	<td>DO</td>
+	<td><b>Open Collector Output:</b>
+	<BR>
+	Type: NPN transistor.
+	<BR>
+	Collector (Pin3) to emitter input voltage (Pin4) :+24VDC.
+	<BR>
+	Collector current: 100mA.
+	<BR>
+	This output has an open collector NPN transistor with the emitter connected to GND (Pin4). If it is to be used with an external relay, a diode must be connected in parallel with the load for protection against any voltage transients. 
+	</td>
+</tr>
+<tr>
+	<td>04</td>
+	<td>GND</td>
+	<td>DO GND</td>
+</tr>
+</table>
+
+
+
+
+</body>
+</html>
+

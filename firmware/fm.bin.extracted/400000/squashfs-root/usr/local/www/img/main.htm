@@ -1,0 +1,1840 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>Network Camera - Live Video</title>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<script language="JavaScript" type="text/javascript" src="../plugins.js"></script>
+<script language="JavaScript" type="text/javascript" src="../ac_quicktime.js"></script>
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../slider.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+//####################################################################
+// Please remember update these information when OCX updated
+//####################################################################
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_MODE = 28;
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_POS= 29;
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_REF_COOR= 30;
+var	DEVICE_COMMAND_SHAPE_MOTION_CLEAR = 31;
+var	DEVICE_COMMAND_SHAPE_MOTION_RESET= 32;
+var	DEVICE_COMMAND_SHAPE_MOTION_SAVE= 33;
+var	DEVICE_COMMAND_ZOOM_ENABLE_CGI= 34;
+
+var	DEVICE_COMMAND_OBJ_DETECT_REAL_RECT_SHOW = 37;
+var	DEVICE_COMMAND_OBJ_DETECT_STABLE_RECT_SHOW = 38;
+var	DEVICE_COMMAND_OBJ_DETECT_STABLE_RECT_DLT = 39;
+
+
+var viewer_ocx_classid="clsid:4B90BBA0-9621-48CB-810B-5A75E9CA6270";
+var viewer_ocx_codebase="MediaAccess.cab#Version=1,2,0,49";//JavaApplet version:1.0.0.59
+var viewer_ocx_id="Viewer";
+
+var stream_ch = 1;
+
+//var IE = document.all?true:false;
+var IE = isIE();
+if (!IE) document.captureEvents(Event.MOUSEMOVE);
+
+var isIpad = navigator.userAgent.toLowerCase().match(/ipad/i) == "ipad";
+
+document.onkeydown = function()
+{
+	//when the ESC button is pressed, we may need to exit the full screen view
+	window.event.returnValue = true;
+}
+
+// Set-up to use getMouseXY function onMouseMove
+document.onmousemove = getMouseXY;
+
+// Temporary variables to hold mouse x-y pos.s
+var tempX = 0
+var tempY = 0
+
+// Main function to retrieve mouse x-y pos.s
+
+function getMouseXY(e) {
+	if (IE) { // grab the x-y pos.s if browser is IE
+		tempX = event.clientX + document.body.scrollLeft;
+		tempY = event.clientY + document.body.scrollTop;
+	} else { // grab the x-y pos.s if browser is NS
+		tempX = e.pageX;
+		tempY = e.pageY;
+	}
+	// catch possible negative values in NS4
+	if (tempX < 0){tempX = 0}
+	if (tempY < 0){tempY = 0}
+	return true;
+}
+function getElemPosLeft(obj){
+        var pos = {"top":0, "left":0};
+         if (obj.offsetParent){
+           while (obj.offsetParent){
+             pos.top += obj.offsetTop;
+             pos.left += obj.offsetLeft;
+             obj = obj.offsetParent;
+           }
+         }else if(obj.x){
+           pos.left += obj.x;
+         }else if(obj.x){
+           pos.top += obj.y;
+         }
+         return pos.left;
+} 
+function getElemPosTop(obj){
+        var pos = {"top":0, "left":0};
+         if (obj.offsetParent){
+           while (obj.offsetParent){
+             pos.top += obj.offsetTop;
+             pos.left += obj.offsetLeft;
+             obj = obj.offsetParent;
+           }
+         }else if(obj.x){
+           pos.left += obj.x;
+         }else if(obj.x){
+           pos.top += obj.y;
+         }
+         return pos.top;
+}
+
+function vertical_change(y, target)
+{
+	var tt = document.getElementById("Tilt");
+	var interval=y-getElemPosTop(tt)-(1/9)*tt.height;
+	var height= tt.height * 74/90;	
+	var y_percent = (interval/height) * 1000;
+	//alert(interval+":"+height);
+
+	if (y_percent<0)
+	{
+		y_percent = 0;
+	}
+	if (y_percent>1000)
+	{
+		y_percent = 1000;
+	}
+	var timestamp = new Date();
+	var variables = "?mv=T," + y_percent + "&channel="+ stream_ch +"&ts=" + timestamp;
+	document.getElementById("hiddenframe").src = IP+variables;
+}
+
+function horzontal_change(x, target)
+{
+	var pp = document.getElementById("Pan");	
+	var interval=x-getElemPosLeft(pp)-(1/9)*pp.width;
+	var width = pp.width * 74/90;
+	var x_percent = (interval/width) * 1000;
+	//alert(interval+":"+width);
+
+	if (x_percent<0)
+	{
+		x_percent = 0;
+	}
+	if (x_percent>1000)
+	{
+		x_percent = 1000;
+	}
+
+	var timestamp = new Date();
+	var variables = "?mv=P," + x_percent + "&channel="+ stream_ch + "&ts=" + timestamp;
+	document.getElementById("hiddenframe").src = IP+variables;
+}
+
+
+var http_request1 = null;
+
+function register1()
+{
+	if(http_request1 == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request1 = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request1 = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch (e)
+			{
+				try
+				{ http_request1 = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch (e)
+				{ http_request1 = null; }
+			}
+		}
+	}
+
+	if (!http_request1)
+	{
+		alert('Giving up :( Cannot create an XMLHTTP instance');
+		return false;
+	}
+
+	http_request1.onreadystatechange = function() { userContents(http_request1); };
+
+	url = "main.cgi?next_file=viewer.htm";
+	
+	http_request1.open('GET', url, true);
+	http_request1.setRequestHeader("If-Modified-Since","0"); 
+	http_request1.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+	http_request1.send(null);
+}
+
+function userContents()
+{
+    var i = 0,j=0;
+    var format_str = "";
+    var channel_chg=0;
+    
+	if (http_request1.readyState == 4)
+	{
+    	var control_list = http_request1.responseText;       //"User,PT,"
+        var control_elements = control_list.split(",");
+
+    	for(i=2;i<control_elements.length && i<11;i++)
+    	{
+            if (i%3 ==0)
+            {
+                j = (i-2)/3 +1;
+                format_str = "view_v"+j+"_mode";
+            }
+            else if (i%3 ==1)
+            {
+                j = (i-3)/3 +1;
+                format_str = "view_v"+j+"_res";
+            }
+            else
+            {
+                j = (i-4)/3 +1;
+        		format_str = "view_v"+j+"_format";
+            }
+            if (document.getElementById(format_str).value != control_elements[i])
+            {
+                channel_chg ++;
+        		document.getElementById(format_str).value = control_elements[i];
+            }
+       	}
+        if (control_elements.length>11)
+        {
+            if (document.forms[0].h_dnsch.value != control_elements[11])
+            {
+                document.forms[0].h_dnsch.value = control_elements[11];
+            	show_day_night_div();
+            }
+        }
+        if (channel_chg)
+        {
+            set_video_list();
+            channel_chg = 0;
+        }
+        
+		http_request1 = null;
+		setTimeout("register1();", 2000);
+	}	
+}
+function set_video_list() 
+{
+	var cf = document.forms[0];
+	var i = 0,j=0;
+	var cfv = document.getElementById("video_format");
+	var format_str = "";
+    var org_index = cfv.selectedIndex;
+    var org_value = cfv.options[org_index].value;
+    var need_reload_video = 0;
+    var list_length = 0;
+    
+	cfv.options.length = 3;	
+	for(i=1;i<4;i++)
+	{
+        format_str = "view_v"+i+"_mode";
+        if (document.getElementById(format_str).value == 1)
+        {
+        	format_str = "view_v"+i+"_format";
+    		
+    		if (document.getElementById(format_str).value == 1) //h264
+    		{
+                list_length ++;
+                if (cfv.options[list_length-1].value != "H264")
+                {
+        			cfv.options[list_length-1].value = "H264";
+        			cfv.options[list_length-1].text = list_length+". H264";
+                }
+    		}
+    		else  if (document.getElementById(format_str).value == 3) //MJPEG
+    		{
+                list_length ++;
+                if (cfv.options[list_length-1].value != "MJPEG")
+                {
+        			cfv.options[list_length-1].value = "MJPEG";
+        			cfv.options[list_length-1].text = list_length+". MJPEG";	
+                }
+    		} 
+        }
+	}
+	cfv.options.length = list_length;
+    if (org_index >= list_length)
+    {
+        org_index = 0;
+    }
+    cfv.selectedIndex = org_index;
+    if (org_value != cfv.options[cfv.selectedIndex].value)
+    {
+        change_video(1);
+    }
+    org_index = org_index+1;
+	format_str = "view_v"+org_index+"_res";
+    
+	if((document.getElementById(format_str).value == 4) || (document.getElementById(video_str).value == 5))
+	{
+		document.getElementById("full_size_pic").style.display = "block";
+	}
+	else
+	{
+		document.getElementById("full_size_pic").style.display = "none";
+    	if (has_full_size)
+    	{
+    		fullsize();
+    	}
+	}
+}
+
+var channels = new Array();
+
+function Channel()
+{
+    this.enabled = false;
+    this.format = "";
+    this.resolution = "";
+    this.gui_option_index = -1;
+}
+
+function init_channels() 
+{
+	var cf = document.forms[0];
+	var i = 0,j=0;
+	var format_str = "";
+    var opt_list_length = 0;
+    
+	for(i=0; i<3; i++)
+	{
+        format_str = "view_v"+(i+1)+"_mode";
+        channels[i] = new Channel();
+        if (document.getElementById(format_str).value == 1)
+        {
+            opt_list_length ++;
+            channels[i].enabled = true;
+            channels[i].gui_option_index = opt_list_length-1;
+
+    		format_str = "view_v"+(i+1)+"_format";
+    		if (document.getElementById(format_str).value == 1)
+    		{	
+                channels[i].format = "H264";
+    		}
+			else  if (document.getElementById(format_str).value == 3)
+    		{
+                channels[i].format = "MJPEG";
+    		}
+
+    		format_str = "view_v"+(i+1)+"_res";
+            channels[i].resolution = document.getElementById(format_str).value;
+        }
+        else
+        {
+            channels[i].enabled = false;
+        }
+	}
+}
+
+function get_gui_option_index_by_channel(channel)
+{
+    for(i=0; i<3; i++)
+    {
+        if(i+1 == channel)
+            return channels[i].gui_option_index;
+    }
+    return -1;
+}
+function get_channel_by_gui_option_index(index)
+{
+    for(i=0; i<3; i++)
+    {
+        if(channels[i].gui_option_index == index)
+            return i+1;
+    }
+    return -1;
+}
+
+function init()
+{ 
+//var cf = document.forms[0];
+	d_pt();
+    init_channels();
+	show_day_night_div();
+	init_preset_list();
+	//setLED();
+	setVopt();
+	change_video(1);
+//	alert("h_set_wport="+cf.h_set_wport.value);
+//	alert("wport="+cf.wport.value);
+	//setTimeout("register1();", 5000);
+}
+
+function show_or_hide_PT(flag)
+{
+	var pt_preset = document.getElementById("pt_option_button");
+	var pt_dir = document.getElementById("padbox");
+	var pt_zoom_show =  document.getElementById("pt_zoom");
+	
+	//alert("flag"+flag+"pt_preset"+pt_preset.style.display+"pt_zoom_show"+pt_zoom_show.style.display);
+	if(flag)
+	{
+		if(pt_preset.style.display == "none")
+		{
+			pt_preset.style.display = "block";
+		}
+		if(pt_dir.style.display == "none")
+		{
+			pt_dir.style.display = "block";
+		}
+		if (pt_zoom_show.style.display == "none")
+		{
+			pt_zoom_show.style.display = "block";
+		}
+	}
+	else
+	{
+		if(pt_preset.style.display == "block")
+		{
+			pt_preset.style.display = "none";
+		}
+		if(pt_dir.style.display == "block")
+		{
+			pt_dir.style.display = "none";
+		}
+		if (pt_zoom_show.style.display == "block")
+		{
+			pt_zoom_show.style.display = "none";
+		}
+	}
+	//alert("pt_preset"+pt_preset.style.display+"pt_zoom_show"+pt_zoom_show.style.display);
+}
+var direct_pt_flag = false;
+function show_or_hide_directPT(flag)
+{
+			var n2 = document.getElementById("norm02");
+			if(flag)
+			{
+				if(n2.style.display == "none")
+				{
+					n2.style.display = "block";
+				}
+			}
+			else
+			{
+				if(n2.style.display == "block")
+				{
+					n2.style.display = "none";
+				}
+			}
+}
+function dir_up()
+{
+	var n2 = document.getElementById("norm02");
+	if(n2.style.display == "block")
+	{
+		direct_pt_flag = false;
+		document.images["dir"].src = "../buttons/dir_up.gif";
+	}
+}
+
+function d_pt()
+{
+	var cf = document.forms[0];
+	var n2 = document.getElementById("norm02");
+	n2.style.display = "none";
+}
+
+/* OCX Video init */
+var ipadd = self.location.hostname;
+var http_port = self.location.port;
+var real_protocol = self.location.protocol;
+var lpp = '@h_authorization#';
+var brow;
+var protocol_str = "rtsp://";
+var url_str = "/img/media.sav?padding=yes";
+var http_sec_port_en="@h_set_wport#";
+var http_sec_port="@wport#";
+
+if (http_port.length <= 0 || real_protocol != "http:")
+{
+    if(http_sec_port_en==1)
+    {
+        http_port = http_sec_port;
+    }
+    else
+    {
+    		http_port = 80;
+		}
+}
+
+if(isIE()) 
+{ 
+	var brow = "IE"; 
+}
+
+if(isNS()) 
+{ 
+	var brow = "MZ"; 
+}
+
+var stream_width = 640;
+var stream_height = 480;
+var stream_type = "H264";
+var TM_RTP_HTTP	            =	0x80;
+var ocx_has_int = 0;
+
+var dw_push = 	'<img border="0" alt="Video for other Platform/OS" src="video.mjpeg">';
+
+function setVopt() 
+{
+	var cf = document.forms[0];
+	var i = 0,j=0;
+	var cfv = document.getElementById("video_format");
+	var format_str = "";
+    var opt_list_length = 0;
+    
+	cfv.options.length = 3;	
+	for(i=1;i<4;i++)
+	{
+        format_str = "view_v"+i+"_mode";
+        if (document.getElementById(format_str).value == 1)
+        {
+    		format_str = "view_v"+i+"_format";
+    		if (document.getElementById(format_str).value == 1) //h264
+    		{
+                opt_list_length	++;	
+    			cfv.options[opt_list_length-1].value = "H264";
+    			cfv.options[opt_list_length-1].text = opt_list_length+". H264";	
+    		}
+    		else  if (document.getElementById(format_str).value == 3)//MJPEG
+    		{
+                opt_list_length	++;	
+    			cfv.options[opt_list_length-1].value = "MJPEG";
+    			cfv.options[opt_list_length-1].text = opt_list_length+". MJPEG";	
+    		}
+        }
+	}
+	cfv.options.length = opt_list_length;	
+	if (document.getElementById("h_def_stream_ch").value >=1 && document.getElementById("h_def_stream_ch").value <=3)
+	{
+		document.getElementById("video_format").selectedIndex = get_gui_option_index_by_channel(document.getElementById("h_def_stream_ch").value);
+	}
+	else
+	{
+		document.getElementById("video_format").selectedIndex = 1;
+	}
+    setviewClient();
+}
+
+function getResolution(channel)
+{
+	    var res = 3;
+    var cf = document.forms[0];
+
+    if (1 == channel)
+    {
+        res = "@view_v1_res#";
+    }
+    else if (2 == channel)
+    {
+        res = "@view_v2_res#";
+    }
+    else if (3 == channel)
+    {
+        res = "@view_v3_res#";
+    }
+
+    return res;
+}
+
+function setDisplayRes(channel)
+{
+    var res = 3;
+    var cf = document.forms[0];
+
+    if (1 == channel)
+    {
+        res = "@view_v1_res#";
+    }
+    else if (2 == channel)
+    {
+        res = "@view_v2_res#";
+    }
+    else if (3 == channel)
+    {
+        res = "@view_v3_res#";
+    }
+
+    if (1 == res)
+    {
+        stream_width = 160;
+        stream_height = 120;
+    }
+    else if (2 == res)
+    {
+        stream_width = 320;
+        stream_height = 240;
+    }
+    else if (3 == res)
+    {
+        stream_width = 640;
+        stream_height = 480;
+    }
+    else if (4 == res)
+    {
+        stream_width = 640;
+        stream_height = 360;
+    }
+	else if (5 == res)
+	{
+        stream_width = 640;
+        stream_height = 360;
+	}
+}
+
+function setviewClient() 
+{
+	var cf = document.forms[0];
+	var i = 0;
+	var cfv = document.getElementById("view_client");
+	var format_str = "";
+	var video_str=document.getElementById("video_format").value;
+  	var client_str=document.getElementById("view_client").value;
+    var select_index = 0;
+    
+	if (isIpad)
+	{
+		cfv.style.display = "none";
+		cfv.disabled = true;
+		return;
+	}
+	
+	cfv.options.length = 5;	
+	if (isIE())
+	{
+		cfv.options[i].value = "ocx";
+		cfv.options[i].text = "ActiveX";
+        i++;
+	}
+	cfv.options[i].value = "quicktime";
+	cfv.options[i].text = "QuickTime";
+    i++;
+    if (video_str == "H264")
+    {
+    	cfv.options[i].value = "flash";
+    	cfv.options[i].text = "FlashPlayer";	
+        i++;
+    }
+    else if (video_str == "MJPEG")
+    {
+    	cfv.options[i].value = "javaapplet";
+    	cfv.options[i].text = "JavaApplet";	
+        i++;
+    	if (!isIE())
+    	{
+        	cfv.options[i].value = "serverpush";
+        	cfv.options[i].text = "Server Push";	
+            i++;
+    	}
+        cfv.options[i].value = "flash";
+        cfv.options[i].text = "FlashPlayer";	
+        i++;
+   }
+	cfv.options.length = i;	
+	cfv.selectedIndex = 0;
+    for(i=0;i<cfv.options.length;i++)
+    {
+        if (client_str == cfv.options[i].value)
+        {
+    		cfv.selectedIndex = i;
+        }
+    }
+}
+
+
+function change_view_client()
+{
+    change_video(0);
+    return;
+}
+
+var current_client= "";
+
+function change_video(flag)
+{
+	var video_str=document.getElementById("video_format").value;
+	var video_index = get_channel_by_gui_option_index(document.getElementById("video_format").selectedIndex);
+	var SetURL_URL = protocol_str + ipadd + ':' + http_port + url_str;
+    var client_str ="";
+
+	stream_type = video_str;
+	stream_ch = video_index;
+	stream_width="640";
+	stream_height="496";
+	
+    dir_up();
+    if (flag == 1)
+    {
+        setviewClient();
+    }
+    client_str=document.getElementById("view_client").value;
+    
+	if (SetURL_URL.indexOf('?') >0)
+	{
+       // alert(SetURL_URL.length);
+        if (SetURL_URL.indexOf('?')+1 < SetURL_URL.length)
+        {
+			SetURL_URL += "&channel="+stream_ch;
+        }
+        else
+        {
+			SetURL_URL += "channel="+stream_ch;
+        }
+	}
+    else
+    {
+			SetURL_URL += "?channel="+stream_ch;
+    }
+  
+	/*if (video_index ==3)
+	{
+		show_or_hide_PT(1);
+		show_or_hide_directPT(1);
+	}
+	else*/
+	{
+		show_or_hide_PT(0);
+	} 
+       
+	if (isIpad)
+	{
+		if(video_str == "MJPEG")
+			client_str = "serverpush";
+		else
+			client_str = "stream_ts";
+	}
+	
+	if(client_str == "stream_ts")
+	{
+		show_or_hide_directPT(0);
+		doStop();
+		ocx_has_int = 0;
+		setDisplayRes(stream_ch);
+		stream_height += 16;
+		document.getElementById("v_play").height = stream_height;
+		document.getElementById("v_play").width = stream_width;
+		
+		var dw_qt_plug ='<embed src="stream_ts.m3u8?channel='+stream_ch+'&ipaddr='+ipadd+'&port='+http_port+'&authinfo='+lpp+'" width="'+stream_width+'" height="'+stream_height+
+						'" qtsrc="http://'+ipadd+':'+http_port+'/img/stream_ts.m3u8?channel='+stream_ch+'&authinfo='+lpp+'" autoplay="true" controller="true" scale="Aspect" bgcolor="#000000">'+
+						'</embed>';
+		
+		//alert("dw_qt_plug="+dw_qt_plug);
+		setHTML(self, "doPlay", dw_qt_plug);
+	}
+	else if (client_str =="ocx")
+	{
+		stream_height="524";
+		type_v = TM_RTP_HTTP;
+		var num = 0;
+		if(video_str == "MJPEG")
+		{
+				var res_java=getResolution(stream_ch);
+				if (4 == res_java || 5 == res_java)
+				{
+					num = 2;
+				}
+				else
+				{
+					num = 0;
+				}
+		}
+
+		num = 40;   //for object detection
+		{
+			var dw_video_ocx = 	'<object classid="'+viewer_ocx_classid+'" CODEBASE="'+viewer_ocx_codebase+'" id="'+viewer_ocx_id+
+								'" width="'+stream_width+'" height="'+stream_height+'">'+
+				  					'<param name="Text" value="'+
+                                      SetURL_URL+									  
+									  ' '+
+									  lpp+
+									  ' '+
+									  num+
+									  ' '+
+									  brow+
+									    ' '+'dimX='+stream_width+' dimY='+stream_height+
+									  '">' + 
+									  '<param name="BackColor" value="12632256">'+
+									  '<param name="_Version" value="65536">'+
+									  '<param name="_ExtentX" value="11774">'+
+									  '<param name="_ExtentY" value="6562">'+
+										'</object>';
+				
+			//alert("dw_video_ocx="+dw_video_ocx);
+			setHTML(self, "doPlay", dw_video_ocx);
+			ocx_has_int = 1;
+		}
+							
+		//Let the decoder link display after OCX load sucessfully
+		if( video_str == "H264")
+		{
+			document.getElementById("v_downloaddecoder").style.display = "block";
+		}
+		else
+		{
+			document.getElementById("v_downloaddecoder").style.display = "none";
+		}
+		current_client = "ocx";
+        setOCXcmd();
+//		if (video_index ==3)
+//		{
+//			document.Viewer.SetCommand(DEVICE_COMMAND_ZOOM_ENABLE_CGI, 1, 0);
+//		}
+	}
+	else if (client_str =="quicktime")
+	{
+		show_or_hide_directPT(0);
+		doStop();
+        ocx_has_int = 0;
+		setDisplayRes(stream_ch);
+		if (detectQT())
+		{
+            stream_height += 16;
+			document.getElementById("v_play").height = stream_height;
+			document.getElementById("v_play").width = stream_width;
+            
+			var dw_qt_plug ='<object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '+
+							'width='+stream_width+'" height="'+stream_height+
+							'" codebase="http://www.apple.com/qtactivex/qtplugin.cab" type="video/quicktime" id="qtViewer">'+ 
+			                '<param name="src" value="'+'media.sdp?channel='+stream_ch+'&ipaddr='+ipadd+
+			                '&port='+http_port+'&authinfo='+lpp+'">'+
+			                '<param name="autoplay" value="true">'+
+			                '<param name="controller" value="true">'+
+			                '<param name="scale" value="Aspect">'+
+			                '<param name="bgcolor" value="#000000">'+
+			                '<param name="qtsrc" value= "rtsp://'+ipadd+':'+http_port+'/img/media.sav?channel='+stream_ch+'&authinfo='+lpp+'">'+
+			                '<embed id="qtViewer1" src="media.sdp?channel='+stream_ch+'&ipaddr='+ipadd+'&port='+http_port+'&authinfo='+lpp+'" width="'+stream_width+'" height="'+stream_height+
+			                '" qtsrc="rtsp://'+ipadd+':'+http_port+'/img/media.sav?channel='+stream_ch+'&authinfo='+lpp+'" autoplay="true" controller="true" scale="Aspect" bgcolor="#000000">'+
+			                '</embed>'+
+			                '</object>';
+			
+			//alert("dw_qt_plug="+dw_qt_plug);
+			setHTML(self, "doPlay", dw_qt_plug);
+		}
+		else
+		{
+			setHTML(self, "doPlay", "");
+		}
+		
+		current_client = "quicktime";
+		document.getElementById("v_downloaddecoder").style.display = "none";
+	}
+	else if(client_str =="javaapplet")
+	{ 
+		show_or_hide_directPT(1);
+  		doStop();
+  		ocx_has_int = 0;
+		var res_java=getResolution(stream_ch);
+		if (4 == res_java)
+		{
+			stream_height="404";
+		}
+		else
+		{
+			stream_height="524";
+		}
+		if(detectJAVA())
+		{
+			var dw_java = '<applet name="JavaViewer" id="JavaViewer" code="com.sc.ipcam.IpCamViewer" archive="IpCamViewer.jar" width="'+stream_width+'" height="'+stream_height+'">'+
+		                    '<param name="protocol"	value="objdetect"/>';
+		                    if (real_protocol != "http:")
+		                    {
+		                    	  if(http_sec_port_en==1)
+												    {
+												        dw_java +='<param name="port"		value="'+http_sec_port+'"/>';
+												    }
+												    else
+												    {
+												    		dw_java +='<param name="port"		value="80"/>';
+														}
+		                    }
+		                    dw_java +='<param name="uri"  value="/img/media.sav?video=mjpeg&padding=yes&channel='+stream_ch+'"/>'+
+		                    '<param name="motion"		value="false"/>'+
+                            '<param name="protocol"		value="objdetect"/>'+
+		                    '<param name="controlpanel"	value="true"/>'+
+		                    '<param name="language"	value="English"/>'+
+		                    '<param name="bgc"		value="000000000"/>'+
+		                    '<param name="syslog"		value="7"/>'+
+		                    '<param name="X-1"		value="Authorization:Basic '+lpp+'"/>'+
+		                    '</applet>';
+			//alert("dw_java="+dw_java);
+			setHTML(self, "doPlay", dw_java);
+		}
+		else
+		{
+			setHTML(self, "doPlay", "");
+		}
+		
+		current_client = "javaapplet";
+		document.getElementById("v_downloaddecoder").style.display = "none";
+        setJavaAppletcmd();
+	}
+    else if(client_str =="flash")
+    {
+    	show_or_hide_directPT(0);
+        ocx_has_int = 0;
+        
+        //detectFLASH();
+        setDisplayRes(stream_ch);
+        if (video_str == "H264")
+        {
+        		var sc_flvplayer = "sc_flvplayer.swf?vesion=v1.0.03&ts="+ new Date();
+            var dw_flash_flv =  '<object id="flv_player_obj" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '+
+                				'codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab" '+
+                                'width="'+stream_width+'" height="'+stream_height+'" data="'+sc_flvplayer+'" '+
+																'type="application/x-shockwave-flash"> '+
+																'<param name="movie" value="'+sc_flvplayer+'" /> '+
+																'<param name="bgcolor" value="#000000 " />'+
+																'<param name="quality" value="medium" /> '+
+																'<param name="menu" value="false" /> '+
+																'<param name="allowfullscreen" value="true" />'+
+																'<param name="flashvars" value="clip=media-sc-channel-'+stream_ch+'.flv" />'+
+								'<embed ID="flv_player_emb" src="'+sc_flvplayer+'" '+
+                                'pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash" '+
+                                'type="application/x-shockwave-flash" width="'+stream_width+'" height="'+stream_height+'" allowfullscreen="true" menu="false" flashvars="clip=media-sc-channel-'+stream_ch+'.flv"></embed></object>';
+			//alert("dw_flash_flv="+dw_flash_flv);
+    		setHTML(self, "doPlay", dw_flash_flv);
+        }
+        else if (video_str == "MJPEG")
+        {
+            var dw_flash_flv = '<object ID="flv_player_obj" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '+
+                               'codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab" '+
+                               'width="'+stream_width+'" height="'+stream_height+'">' + 
+                               '<param name="movie" value="/img/media.swf?starttime=256&fps=30&startlevel=1&level=1&size=268435&channel='+stream_ch+'" />'+
+                               '<param name="quality" value="high" />'+
+                               '<param name="bgcolor" value="#000000" />'+
+                               '<embed ID="flv_player_emb" src="/img/media.swf?starttime=256&fps=30&startlevel=1&level=1&size=268435&channel='+stream_ch+'" '+
+                               'quality="high" bgcolor="#000000" pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash" '+
+                               'type="application/x-shockwave-flash" width="'+stream_width+'" height="'+stream_height+'"></embed></object>';
+			//alert("dw_flash_flv="+dw_flash_flv);
+    		setHTML(self, "doPlay", dw_flash_flv);
+        }
+        else
+        {
+    		setHTML(self, "doPlay", "");
+        }
+        
+        current_client = "flash";
+        document.getElementById("v_downloaddecoder").style.display = "none";
+    }
+    else if(client_str =="serverpush")
+    {
+    	show_or_hide_directPT(0);
+        ocx_has_int = 0;
+ 		setHTML(self, "doPlay", "");
+        setDisplayRes(stream_ch);
+        var dw_server_push = ' <img border="0" ID="server_push" alt="Video for other Platform/OS" src="/img/video.mjpeg?channel='+stream_ch+'"'+'width="'+stream_width+'" height="'+stream_height+'">';
+		setHTML(self, "doPlay", dw_server_push);
+		document.getElementById("v_downloaddecoder").style.display = "none";
+	current_client = "serverpush";
+    }
+    else
+    {
+        ocx_has_int = 0;
+		setHTML(self, "doPlay", "");
+		document.getElementById("v_downloaddecoder").style.display = "none";
+	current_client = "";
+    }
+	video_str = "view_v"+video_index+"_res";
+	if((document.getElementById(video_str).value == 4) || (document.getElementById(video_str).value == 5))
+	{
+		document.getElementById("full_size_pic").style.display = "block";
+	}
+	else
+	{
+		document.getElementById("full_size_pic").style.display = "none";
+	}
+	if (has_full_size)
+	{
+		fullsize();
+	}
+}
+
+function setOCXcmd()
+{
+    var flag = false;
+    
+    setTimeout(
+        function()
+        {
+            try
+            {
+                var ocx = document.getElementById(viewer_ocx_id);	
+                ocx.SetCommand(DEVICE_COMMAND_OBJ_DETECT_STABLE_RECT_SHOW , 1, 0);
+                ocx.SetCommand(DEVICE_COMMAND_OBJ_DETECT_REAL_RECT_SHOW , 0, 0);
+                ocx.SetCommand(DEVICE_COMMAND_OBJ_DETECT_STABLE_RECT_DLT , 10, 0);
+                flag = true;
+            }
+            catch(ex)
+            {
+            }
+            
+            if(!flag)
+            {
+                setOCXcmd();
+            }
+        }, 
+        100);
+}
+
+function setJavaAppletcmd()
+{
+    var flag = false;
+    
+    setTimeout(
+        function()
+        {
+            try
+            {
+                var javaapp = document.getElementById('JavaViewer');	
+                javaapp.setObjDetectReal(0);
+                javaapp.setObjDetectStable(1);
+                javaapp.setObjDetectStableDlt(10);
+                flag = true;
+            }
+            catch(ex)
+            {
+            }
+            
+            if(!flag)
+            {
+                setJavaAppletcmd();
+            }
+        }, 
+        100);
+}
+
+
+/* OCX Video End */
+function doStop() 
+{	
+ 	if(current_client == "ocx")
+	{
+		document.Viewer.Stop();
+	}
+	else if(current_client == "javaapplet")
+	{
+		document.JavaViewer.stop();
+	}
+}
+
+function detectFLASH()
+{
+   	// detect if user didn't install QuickTime
+	if (dt_shockwave_flash())
+	{
+		return true;
+	}
+	else
+	{
+		if (confirm("Please install Adobe Flash Player or allow the Adobe Flash Player plugin"))
+		{
+			window.open('http://www.macromedia.com/shockwave/download/');
+		}
+		else
+		{
+			;
+		}
+		return true;
+	}
+}
+
+function detectQT()
+{
+   	// detect if user didn't install QuickTime
+	if (dt_quciktime())
+	{
+		return true;
+	}
+	else
+	{
+		if(confirm("Please install QuickTime or allow the QuickTime plugin"))
+		{
+			window.open('http://www.apple.com')
+		}
+		else
+		{
+			;
+		}
+		return false;
+	}
+}
+
+function detectJAVA()
+{
+	// detect if user didn't install Java
+	var jres = deployJava.getJREs(); 
+	if(navigator.userAgent.indexOf('Opera')>=0 && jres == "")//Opera browser without JAVA plug-in
+	{
+		//jres = java.lang.System.getProperty("java.version");
+		if(!navigator.javaEnabled())
+		{
+			alert("Please enable Java in Preperence option setting.");
+			return false;
+		}
+	}
+	else if (jres!="")
+	{
+		//detect java version if version < 1.4 ths ask to update
+		var java_ver=parseFloat(jres);
+		
+		if(java_ver< 1.4)
+		{
+			if(confirm("Your JAVA version is too old, please update:\n\tcurrent version:"+jres+"\n\trequested version: 1.4 and above"))
+			{
+				window.open('http://www.sun.com','_blank');
+			}
+			else
+			{
+				;
+			}
+			return false;
+		}
+	}
+	else
+	{
+		if(confirm("Please install JAVA"))
+		{
+			window.open('http://www.sun.com')
+		}
+		else
+		{
+			;
+		}
+		return false;
+	}
+
+	return true;
+}
+	
+
+// Admin
+var is_admin = false; // set by init()
+function chkAdmin()
+{
+	if(!is_admin)
+		return confirm(msg_admin_config);
+	else
+		return true;
+}
+
+
+/*  P/T  */
+function toggleButtonOver_pad(original,over)
+{
+	if (document.getElementById("pad").src.indexOf(original.replace('..','')) > -1)
+	{ document.getElementById("pad").src = over; }
+	else
+	{ document.getElementById("pad").src = original; }
+}
+
+// Move
+var IP ="../pt/ptctrl.cgi";
+
+function move(d) 
+{
+	var timestamp = new Date();
+	document.getElementById("hiddenframe").src = IP + "?mv=" + d + ",0&ts=" + timestamp + "&channel="+stream_ch;
+}
+
+function goPreset(position) 
+{
+	//passes cgi command to camera
+	var timestamp = new Date();
+	var variables = "?preset=move," + position + "&ts=" + timestamp + "&channel="+stream_ch;
+	document.getElementById("hiddenframe").src = IP + variables;
+}
+
+function doZoom(flag)
+{
+	var cgi = "../pt/ptctrl.cgi";
+	var zoomcmd;
+	if(flag == 1)    zoomcmd = "in,1";
+	else if(flag == 0)    zoomcmd = "out,1";
+
+	var timestamp = new Date();
+	query = cgi + "?zoom=" + zoomcmd + + "&ts="+timestamp + "&channel="+stream_ch;
+	document.getElementById("hiddenframe").src = query;
+}
+
+function press_dir()
+{
+	netcamObj = document.Viewer;
+	
+	direct_pt_flag = !direct_pt_flag;
+
+	DirectPT(direct_pt_flag);
+
+	if (true == direct_pt_flag)
+	{ document.images["dir"].src = "../buttons/dir_down.gif"; }
+	else
+	{ document.images["dir"].src = "../buttons/dir_over.gif"; }
+	
+}
+function DirectPT(boolflag)
+{
+	netcamObj = document.Viewer;
+	if (netcamObj == null)
+	{
+		netcamObj = document.JavaViewer;
+		if(netcamObj == null)
+		{
+			return;
+		}
+	}
+
+	if(boolflag)
+	{ netcamObj.SetDirectPT(1); }
+	else
+	{ netcamObj.SetDirectPT(0); }
+}
+
+// Preset Option List
+function init_preset_list()
+{
+	var pre_slist = document.forms[0].pslist;
+
+	for (var i=0; i<pre_slist.length; i++)
+	{
+		if(pre_slist.options[i].text == "") 
+		{
+			pre_slist.remove(i);
+			if (i > 0)
+			{
+				i--;	
+			}
+		}
+	}
+}
+
+function do_pslist_action()
+{
+    var cf = document.forms[0];
+    var pre_slist = cf.pslist;
+		goPreset(pre_slist.options[pre_slist.selectedIndex].value);
+}
+
+// Night Vision
+function PressNV(dev, act)
+{
+	var cgi = "../io/daynight.cgi";
+	var devcmd;
+	var actcmd;
+	if(dev == 1)    devcmd = "action=set&mode";
+
+	if(act == "off")        actcmd = "0";
+	else if(act == "on")    actcmd = "1";
+
+	var timestamp = new Date();
+	query = cgi + "?" + devcmd + "=" + actcmd + "&ts="+timestamp;
+	document.getElementById("hiddenframe").src = query;
+}
+
+
+// IO
+function PressButton(dev, act)
+{
+	var cgi = "../io/ioctrl.cgi";
+	var devcmd;
+	var actcmd;
+	if(dev == 1)    devcmd = "output_1";
+	else if(dev == 2)       devcmd = "output_2";
+
+	if(act == "off")        actcmd = "0";
+	else if(act == "on")    actcmd = "1";
+
+	var timestamp = new Date();
+	query = cgi + "?" + devcmd + "=" + actcmd + "&ts="+timestamp;
+	document.getElementById("hiddenframe").src = query;
+}
+
+// LED
+/*
+function setLED()
+{
+	var cf = document.forms[0];
+	var tt = document.getElementById("Tilt");
+	var pp = document.getElementById("Pan");
+
+		tt.style.top = "319px";
+		pp.style.top = "414px";
+
+}
+
+function PressLED(dev, act)
+{
+	var cgi = "../io/wlledctrl.cgi";
+	var devcmd;
+	var actcmd;
+	if(dev == 1)    devcmd = "action";
+
+	if(act == "off")        actcmd = "0";
+	else if(act == "on")    actcmd = "1";
+
+	var timestamp = new Date();
+	query = cgi + "?" + devcmd + "=" + actcmd + "&ts="+timestamp;
+	document.getElementById("hiddenframe").src = query;
+}
+*/
+var has_full_size = 0;
+
+function fullsize()
+{
+	var obj_id = null;
+	var obj_id1 = null;
+	var obj_id_2 = null;
+	var obj_height = 524; 
+	var video_str=document.getElementById("video_format").value;
+	var video_index = get_channel_by_gui_option_index(document.getElementById("video_format").selectedIndex);
+  	var client_str=document.getElementById("view_client").value;
+	var video_res_str = "view_v"+video_index+"_res";
+	var resolution = document.getElementById(video_res_str).value;
+	
+	if (client_str == "ocx")
+	{
+        obj_id= document.getElementById(viewer_ocx_id);
+		if (has_full_size)
+		{
+			obj_height = 524;
+		}
+		else if (resolution == 4)
+		{
+			obj_height = 764;
+		}
+		else
+		{
+			obj_height = 1124;
+		}
+	}
+	else if (client_str == "quicktime")
+	{
+        obj_id= document.getElementById("qtViewer");
+		obj_id1= document.getElementById("qtViewer1");
+		if (has_full_size)
+		{
+			obj_height = 496;
+		}
+		else if (resolution == 4)
+		{
+			obj_height = 736;
+		}
+		else
+		{
+			obj_height = 1096;
+		}
+	}
+	else if (client_str == "javaapplet")
+	{ 
+        obj_id= document.getElementById("JavaViewer");
+		if (has_full_size)
+		{
+			obj_height = 360;
+		}
+		else if (resolution == 4)
+		{
+			obj_height = 764;
+		}
+		else
+		{
+			obj_height = 1124;
+		}
+	}
+	else if (client_str == "flash")
+	{
+        obj_id= document.getElementById("flv_player_obj");
+        obj_id_2= document.getElementById("flv_player_emb");
+		if (has_full_size)
+		{
+			obj_height = 360;
+		}
+		else if (resolution == 4)
+		{
+			obj_height = 720;
+		}
+		else
+		{
+			obj_height = 1080;
+		}
+        
+	}
+	else if (client_str == "serverpush")
+	{ 
+        obj_id= document.getElementById("server_push");
+		if (has_full_size)
+		{
+			obj_height = 360;
+		}
+		else if (resolution == 4)
+		{
+			obj_height = 720;
+		}
+		else
+		{
+			obj_height = 1080;
+		}
+	}
+	//alert("obj_id="+obj_id+",obj_id_2="+obj_id_2+",has_full_size="+has_full_size+",obj_height="+obj_height);
+	if (has_full_size)
+	{
+		document.getElementById("view_table").height = 530;
+		document.getElementById("view_table").width = 815;
+		
+    	if (obj_id != null)
+		{
+    		obj_id.width = 640;
+    		obj_id.height = obj_height;
+		}
+		if (obj_id1 != null)
+		{
+			obj_id1.width = 640;
+			obj_id1.height = obj_height;
+		}
+		if (obj_id_2!= null)
+		{
+			obj_id_2.width = 640;
+			obj_id_2.height = obj_height;
+		}
+		document.getElementById("headimage").style.display = "block";
+		document.getElementById("headimage3").style.display = "none";
+		document.images["full_size"].title = "Full Size";
+		has_full_size = 0;
+	}
+	else
+	{
+		if (resolution == 4)
+		{
+			document.getElementById("view_table").height = 770;
+			document.getElementById("view_table").width = 1440;
+			
+		    if (obj_id != null)
+			{
+	    		obj_id.width = 1280;
+	    		obj_id.height = obj_height;
+			}
+			if (obj_id1 != null)
+			{
+	    		obj_id1.width = 1280;
+	    		obj_id1.height = obj_height;
+			}
+		    if (obj_id_2 != null)
+		    {
+	    		obj_id_2.width = 1280;
+	    		obj_id_2.height = obj_height;
+			}
+		}
+		else
+		{
+			document.getElementById("view_table").height = 1130;
+			document.getElementById("view_table").width = 2080;
+			
+		    if (obj_id != null)
+			{
+	    		obj_id.width = 1920;
+	    		obj_id.height = obj_height;
+			}
+			if (obj_id1 != null)
+			{
+	    		obj_id1.width = 1920;
+	    		obj_id1.height = obj_height;
+			}
+		    if (obj_id_2 != null)
+		    {
+	    		obj_id_2.width = 1920;
+	    		obj_id_2.height = obj_height;
+			}
+		}
+		document.getElementById("headimage3").style.display = "block";
+		document.getElementById("headimage").style.display = "none";
+		document.images["full_size"].title = "Normal Size";
+		has_full_size = 1;
+	}
+}
+
+function show_day_night_div()
+{
+	if(document.forms[0].h_dnsch.value !=0)
+	{
+		document.getElementById("day_night_div").style.display = "block";
+	}
+	else
+	{
+		document.getElementById("day_night_div").style.display = "none";		
+	} 
+}
+
+// End Script -->
+</script>
+</head>
+
+<body bgcolor="#ffffff" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0" onbeforeunload="doStop();" onLoad="init();">
+<FORM name="video" method="post" action="file.cgi" onSubmit="return false">
+
+<div ID="headimage3"  style="display:none">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel">@h_model_num#</div>
+</div>
+
+<div ID="headimage"  style="display:block">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab" >
+<tr>
+	<td nowrap height="75" align="right" valign="top" ></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel">@h_model_num#</div>
+</div>
+
+
+
+
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../adm/file.cgi?next_file=system.htm" class="topmenulink" target="_top">Administration</a>
+</div>
+
+
+<div ID="mubd">
+<table class="maintab2" cellspacing="0" id="view_table">
+	<tr valign="top">
+		<td>
+			<table border="0" cellspacing="3" cellpadding="0" align="center" valign="top">
+				<tr>
+					<td height="6">
+					</td>
+					<td>
+					</td>
+				</tr>
+				<tr>
+					<td width="26" height="26" valign="middle" align="left">
+						<select id="video_format" name="video_format" size="1"  style="width:110px" onchange="change_video(1);" >
+					    <option value="H264">1. H264</option>
+					    <option value="MJPEG">3. MJPEG</option>
+					    </select>
+					</td>		
+					<td valign="middle" align="right">
+						<div id="full_size_pic" style="display:none">
+							 <img src="../buttons/fullsize_up.gif" name="full_size" width="26" height="26" title="Full Size" onMouseDown="pressImg(this);fullsize();" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);" onError="reloadOnErr(this)">  
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td width="52" height="26" colspan="2" valign="top" align="left">
+							<select id="view_client" name="view_client" size="1"  style="width:136px" onchange="change_view_client();" >
+							    <option value="ocx">ActiveX</option>
+							    <option value="quicktime">QuickTime</option>
+							    <option value="javaapplet">JavaApplet</option>
+							    <option value="serverpush">Server Push</option>
+							    <option value="flash">FlashPlayer</option>
+						    </select>
+							
+						</td>
+
+						<!--td valign="top" align="right">
+						</td-->
+					</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+
+				<tr>
+					<td width="100%" height="26" colspan="2" valign="top" align="center">
+				  		<div id="day_night_div" style="display:block">
+							<table border=0 cellspacing=0 cellpadding=0 width="93" height="54" class="port">
+								<tr>
+									<td nowrap class="bmenu" align="center" colspan="3">D/N Mode</td>
+								</tr>
+								<tr>
+									<td nowrap width="40%" align="center" valign="top">
+										<img name="Day Vision" src="../buttons/dv_up.gif" width="26" height="26" title="Day Vision" onMouseDown="pressImg(this);PressNV(1,'off');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+									</td>
+									<td nowrap width="20%">&nbsp;</td>
+									<td nowrap width="40%" align="center" valign="top">
+										<img src="../buttons/nv_up.gif" name="Night Vision" width="26" height="26" title="Night Vision" onMouseDown="pressImg(this);PressNV(1,'on');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);" onError="reloadOnErr(this)">
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+					
+					<!--td valign="top" align="right">
+					</td-->
+				</tr>
+
+
+				<!--tr>
+					<td width="100%" height="26" valign="top" colspan="2" align="center">
+				  		<div id="io_button" style="display:block">	
+							<table border=0 cellspacing=0 cellpadding=0 width="93" height="54" class="port">
+								<tr>
+									<td nowrap class="bmenu" colspan="3">Output</td>
+								</tr>
+								<tr>
+									<td nowrap width="40%" align="center" valign="top">
+										<img title="ON" name="ON" src="../buttons/ll_up.gif" onMouseDown="pressImg(this);PressButton(1,'on');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+									</td>
+									<td nowrap width="20%">&nbsp;</td>
+									<td nowrap width="40%" align="center" valign="top">
+										<img title="OFF" name="OFF" src="../buttons/hh_up.gif" onMouseDown="pressImg(this);PressButton(1,'off');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+					
+					<td valign="top" align="right">
+					</td>
+				</tr-->
+				
+				<!--tr>
+					<td width="100%" height="26" colspan="2" valign="top" align="center">
+				  		<div id="white_led" style="display:block">
+							<table border=0 cellspacing=0 cellpadding=0 width="93" height="54" class="port">
+								<tr>
+									<td nowrap class="bmenu" align="center" colspan="3">LED</td>
+								</tr>
+								<tr>
+									<td nowrap width="40%" align="right" valign="top">
+	                					  <img src="../buttons/lton_up.gif" name="LED On" width="31" height="31" title="LED On" onMouseDown="pressImg(this);PressLED(1,'on');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+								</td>
+									<td nowrap width="20%">&nbsp;</td>
+									<td nowrap width="40%" align="left" valign="top">
+										<img src="../buttons/ltoff_up.gif" name="LED Off" width="31" height="31" title="LED Off" onMouseDown="pressImg(this);PressLED(1,'off');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+					
+					<td valign="top" align="right">
+					</td>
+				</tr-->
+				<tr>
+					<td width="26" height="26" valign="top" colspan="2" align="center">
+						<div id="pt_option_button" style="display:block">		
+							<table border=0 cellspacing=3 cellpadding=2>
+
+								<tr>
+									<td nowrap valign="bottom" align="center">
+										<img title="Camera Patrol" name="pat" src="../buttons/pat_up.gif" onMouseOver="rolloverImg(this);" onMouseOut="rolloverImg(this);" onMouseDown="pressImg(this);goPreset('101');" onMouseUp="pressImg(this);" onload="preloadImg(this);"/ >
+									</td>
+									<td nowrap valign="bottom" align="center">
+										<img title="Camera Auto Pan" name="upp" src="../buttons/upp_up.gif" onMouseOver="rolloverImg(this);" onMouseOut="rolloverImg(this);" onMouseDown="pressImg(this);goPreset('102');" onMouseUp="pressImg(this);" onload="preloadImg(this);"/ >
+									</td>
+									<!--td nowrap valign="bottom" align="center">
+										<img title="Motion Detection" name="md" src="../buttons/md_up.gif" onMouseOver="rolloverImg(this);" onMouseOut="rolloverImg(this);" onMouseDown="pressImg(this);goPreset('100');" onMouseUp="pressImg(this);" onload="preloadImg(this);"/ >
+									</td-->
+									<td nowrap valign="bottom" align="center" id="norm02" style="display:none">
+										<img title="Direct P/T" name="dir" src="../buttons/dir_up.gif" onMouseOver="rolloverImg(this);" onMouseOut="rolloverImg(this);" onMouseDown="pressImg(this);" onMouseUp="pressImg(this);press_dir();" onload="preloadImg(this);"/ >
+									</td>
+								</tr>
+							</table>
+							<br>
+							<table border=0 cellspacing=3 cellpadding=2>
+								<tr>
+									 <td align="center"><b>Preset Points</b> &nbsp; </td>
+								</tr>
+								<tr>
+									 <td nowrap align="center">
+										<select name="pslist" size="1" style="width:130px" onChange="do_pslist_action();">
+											<option value="1">@preset1#</option>
+											<option value="2">@preset2#</option>
+											<option value="3">@preset3#</option>
+											<option value="4">@preset4#</option>
+											<option value="5">@preset5#</option>
+											<option value="6">@preset6#</option>
+											<option value="7">@preset7#</option>
+											<option value="8">@preset8#</option>
+											<option value="9">@preset9#</option>
+										</select>
+									 </td>
+								</tr>
+							</table>
+						</div>
+					</td>
+					
+					<!--td valign="top" align="right">
+					</td-->
+				</tr>
+				<tr>
+					<td width="100%" height="26" colspan="2" valign="top" align="center">
+					   <div class="padbox" id="padbox" style="display:block">  <!--  style="display:none" -->
+						   <table cellspacing="0" cellpadding="0" class="p_pt">     <!--  class="p_pt" -->
+							    <tr>
+								     <td align="center" valign="middle">
+										 <table border="0" cellspacing="0" cellpadding="0">
+												<tr>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_01_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('UL');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_02_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('U');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_03_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('UR');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+												</tr>
+											
+												<tr>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_04_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('L');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_05_up.gif" width="26" height="26" onMouseDown="pressImg(this);goPreset('103');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_06_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('R');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+												</tr>
+											
+												<tr>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_07_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('DL');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_08_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('D');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_09_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('DR');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+												</tr>							 							 
+										 </table>
+									 </td>
+								     <td  align="center" valign="middle">
+										<img name="Tilt" id="Tilt" src="../buttons/tilt.gif" width="13" height="90" onMouseDown="vertical_change(tempY, this)">	     	
+									 </td>
+							    </tr>
+							    <tr>
+								     <td  align="center" valign="middle">
+											<img name="Pan" id="Pan" src="../buttons/pan.gif" width="90" height="13" onMouseDown="horzontal_change(tempX, this)" >
+									 		</td>
+								     <td></td>
+							    </tr>
+						   </table>
+					   </div>
+					</td>
+					
+					<!--td valign="top" align="right">
+					</td-->
+				</tr>
+				<tr>
+					<td width="26" height="26" valign="top" colspan="2" align="center">
+						<div class="pt_zoom" id="pt_zoom" style="display:block">		
+							<table border=0 cellspacing=3 cellpadding=2>
+								<tr>
+								<td nowrap valign="bottom" align="center">
+										<img title="Zoom in" src="../buttons/b_zoomin.jpg" width="26" height="26" title="Zoom in" onMouseDown="pressImg(this);doZoom(1);" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+									</td>
+									<td nowrap valign="bottom" align="center">
+										<img title="Zoom out" src="../buttons/b_zoomout.jpg" width="26" height="26" title="Zoom out" onMouseDown="pressImg(this);doZoom(0);" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+				</tr>
+				
+			</table>			
+		</td>
+		<td align="center" valign="middle">
+			<table cellspacing="0" cellpadding="0" border="0" class="v_video">
+				<tr>
+				  <td nowrap align="center" valign="middle" bgcolor="#000000">
+					<div ID="v_play" align="center" valign="middle" style="display:block">
+						<table border=0 cellspacing=0 cellpadding=0>
+							<tr>
+								<td nowrap align="center" valign="middle">
+									<div name="doPlay" id="doPlay" align="center" valign="middle">
+									</div>					
+								</td>
+							</tr>
+						</table>
+					</div>
+				  </td>
+				</tr>
+				<tr>
+				  <td nowrap align="center" valign="top" height="26">
+					<div ID="v_downloaddecoder" style="display:none">
+						<table border=0 cellspacing=3 cellpadding=2>
+							<tr>
+								<td nowrap>
+									<a href="../img/license.htm" class="bluelink" target="_blank">Click here to install or upgrade the H.264 decoders.</a>		
+														
+								</td>
+							</tr>
+						</table>
+					</div>
+				  </td>
+				</tr>
+			</table>
+		</td>		
+	</tr>
+
+</table>
+</div>
+
+<input type="Hidden" name="h_dnsch" value="@h_dnsch#">
+<input type="Hidden" name="h_wled" value="@h_wled#">
+<input type="hidden" name="todo" value="connect">
+
+<DIV ID="hidden_div1" style="position: absolute; visibility:visible; top: -50; left: -50; z-index:1"><INPUT TYPE="text" NAME="test_txt"></DIV>
+
+</form>
+
+<iframe name="hiddenframe" id="hiddenframe" width="1" height="2" src="" style="visibility:hidden;"></iframe>
+<iframe name="hiddenframe_2" id="hiddenframe_2" width="1" height="2" src="" style="visibility:hidden;"></iframe>
+
+<!--input type="hidden" name="h_set_wport" value="@h_set_wport#"-->
+<!--input type="hidden" name="wport" value="@wport#"-->
+
+<input type="hidden" name="view_v1_mode" id="view_v1_mode" value="@view_v1_mode#">
+<input type="hidden" name="view_v1_res" id="view_v1_res" value="@view_v1_res#">
+<input type="hidden" name="view_v1_format" id="view_v1_format" value="@view_v1_format#">
+<input type="hidden" name="view_v2_mode" id="view_v2_mode" value="@view_v2_mode#">
+<input type="hidden" name="view_v2_res" id="view_v2_res" value="@view_v2_res#">
+<input type="hidden" name="view_v2_format" id="view_v2_format" value="@view_v2_format#">
+<input type="hidden" name="view_v3_mode" id="view_v3_mode" value="@view_v3_mode#">
+<input type="hidden" name="view_v3_res" id="view_v3_res" value="@view_v3_res#">
+<input type="hidden" name="view_v3_format" id="view_v3_format"  value="@view_v3_format#">
+<input type="hidden" name="h_def_stream_ch" id="h_def_stream_ch"  value="@h_def_stream_ch#">
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>

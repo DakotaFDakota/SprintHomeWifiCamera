@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<head>
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<TITLE>Help -  Status</TITLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+//<![CDATA[
+
+var h_curr_wifi_bundle;
+var WIRELESS = false;
+
+function set_model_num()
+{
+	WIRELESS = (h_curr_wifi_bundle == 1) ? true : false;	
+	if (WIRELESS)
+	{ 
+		document.getElementById('wire1').innerHTML = "&nbsp;Wireless";
+		document.getElementById('wire2').innerHTML = "&nbsp;Wireless";
+		document.getElementById('wire3').innerHTML = "&nbsp;Wireless";
+		//document.getElementById('wire4').innerHTML = "<br><b>Wireless</b>";
+	}
+	else
+	{
+		document.getElementById('wire1').innerHTML = "";
+		document.getElementById('wire2').innerHTML = "";
+		document.getElementById('wire3').innerHTML = "";
+		//document.getElementById('wire4').innerHTML = "";
+		document.getElementById('wireless_hlp').style.display = "none";
+	}
+}
+
+function init()
+{
+	var read = new GroupCtrl();
+	var array_get=[
+			//["SYSTEM", "model_num", "h_model_num"]
+			["WIRELESS", "curr_wifi_bundle", "h_curr_wifi_bundle"]
+		];
+	read.callback = set_model_num;
+	read.getvalue(array_get);	
+
+}
+
+//]]>
+</script>
+
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus();init();">
+<table width="100%">
+<tr>
+  <th class="help">Help -  Status</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+
+<p><b>System</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Device Name</td>
+   <td>This shows the name of the<!--script>if (WIRELESS) document.write(" Wireless")</script--><a id="wire1"></a> Network Camera. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Description</td>
+   <td>This shows the description of the<!--script>if (WIRELESS) document.write(" Wireless")</script--><a id="wire2"></a> Network Camera, such as location. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> F/W version</td>
+   <td>The version of the current firmware installed. 
+  </td>
+</tr>
+</table>
+
+
+<p><b>Network</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> MAC Address</td>
+   <td>This address is a low-level network identifier for this device. It may be called "MAC Address", "Hardware Address", or "Physical Address". On a PC, this address is associated with the Network card or adapter.  </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> IP Address</td>
+   <td>The IP Address of the<!--script>if (WIRELESS) document.write(" Wireless")</script--><a id="wire3"></a> Network Camera. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Network Mask</td>
+   <td>The Network Mask (Subnet Mask) for the IP Address above. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Gateway</td>
+   <td>The IP Address of the remote Gateway associated with the IP Address above. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> WINS Address</td>
+   <td>The WINS server address for SMB/CIFS usage.</td>
+</tr>
+</table>
+
+
+<!--script>if (WIRELESS) document.write("<p><b>Wireless</b>")</script-->
+<!--a id="wire4"></a-->
+<!--table border=1 cellspacing=0 cellpadding=2 width="100%" id="wireless_hlp"-->
+<!--script>if (!WIRELESS) document.getElementById('wireless_hlp').style.display = "none";</script-->
+<p><b>Wireless</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">WSC PIN Code</td>
+   <td>This shows the WSC PIN Code of the Wireless Network Camera.</td>
+</tr>
+
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Network Type</td>
+   <td>It shows the Network Type currently is use (Ad-hoc or Infrastructure). </td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> SSID</td>
+   <td>This displays the wireless SSID. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Channel</td>
+   <td>This shows the wireless channel currently used. </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Security</td>
+   <td>The current security setting for Wireless's connections.  </td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Signal Strength</td>
+   <td>This shows the current signal strength of Wireless's connections.  </td>
+</tr>
+</table>
+
+
+
+<p><b>Streaming 1/2/3</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Video Format </td>
+   <td>This displays the current encode format for the specific "Streaming Channel".</td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Resolution </td>
+   <td>This displays the image size of the video stream.</td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Video Quality</td>
+   <td>This displays the image quality of the video stream.</td>
+</tr>
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Frame Rate</td>
+   <td>This displays the frame rate of the video stream. </td>
+</tr>
+</table>
+
+<p><b>UPnP Traversal (Port Mapping)</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Status </td>
+   <td>This displays the current status of UPnP Traversal.</td>
+</tr>
+</table>
+
+</body>
+</html>
+

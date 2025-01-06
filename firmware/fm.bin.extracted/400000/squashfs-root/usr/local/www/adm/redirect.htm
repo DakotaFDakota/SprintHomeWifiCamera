@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+
+// End Script -->
+</script>
+
+
+
+<title>Network Camera - Redirect</title>
+
+<STYLE TYPE="text/css">
+BODY, P, TABLE, TD, UL, OL, LI, DD 
+        { color: black;   font: bold 10pt    Arial,Helvetica,sans-serif; }
+B       { font-weight: bold; }
+b.main  { color: white; font: bold 10pt    Arial Narrow,Helvetica,sans-serif; }
+b.wh    { color: black; font-weight: bold; }
+big     { color: black;  font: bold 10pt    Arial,Helvetica,sans-serif; text-indent: 10pt; }
+caption { color: black;   font: bold 8pt      Arial,Helvetica,sans-serif; }
+DL, DT  { color: #666666; font: bold 10pt     Arial,Helvetica,sans-serif; }
+H1      { color: #333366;   font: bold 14pt   Arial,Helvetica,sans-serif; }
+H2      { color: black;   font: bold 16pt    Arial,Helvetica,sans-serif; }
+H3      { color: black;   font: bold 14pt      Arial,Helvetica,sans-serif; }
+H4      { color: white;   font: bold 12pt     Arial,Helvetica,sans-serif; }
+small   { color: black;   font: normal 8pt  Arial,Helvetica,sans-serif; }
+TH      { color: #00ada4;  font: bold 10pt Arial,Helvetica,sans-serif; padding-top:6px;}
+TH.help { color: black; font: bold 10pt Arial,Helvetica,sans-serif; text-align:left;}
+</style>
+
+</head>
+
+<body bgcolor="white" >
+
+<script language="JavaScript">
+	var msg_invalid = "";
+	var address = "";
+	var https_sport_enabled = "@h_set_ssport#";
+	var http_sport_enabled = "@h_set_wport#";
+	var https_port = "@ssport#";
+	var http_port = "@wport#";
+	
+	if(https_port != "" && https_sport_enabled != "0")
+		https_port = ":" + https_port;
+	else
+		https_port = "";
+	
+	if(http_port != "" && http_sport_enabled != "0")
+		http_port = ":" + http_port;
+	else 
+		http_port = "";
+
+	if(self.location.protocol == "http:")
+	{
+		msg_invalid = '<P align="center">This page is not accessible through HTTP. Use the following address instead:<BR><BR>';
+		address = '<a href="https://' +  self.location.hostname + https_port + '" align="center">https://' + self.location.hostname + https_port + '</a>';
+	}
+	else
+	{
+		msg_invalid = '<P align="center">This page is not accessible through HTTPS. Use the following address instead:<BR><BR>';
+		address = '<a href="http://' +  self.location.hostname + http_port + '" align="center">http://' + self.location.hostname + http_port + '</a>';
+	}
+	document.write(msg_invalid);	
+	document.write(address);
+</script>
+
+</body>
+</html>

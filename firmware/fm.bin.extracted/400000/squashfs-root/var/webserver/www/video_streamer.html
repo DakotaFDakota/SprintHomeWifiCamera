@@ -1,0 +1,416 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
+		<link rel="stylesheet" href="/css/style.css">
+		
+		<title>Streamer</title>
+	</head>
+	<body class="background">
+	<script type="text/javascript">
+		var myxml;
+function createXMLHttpRequest() {
+    var xmlHttp;
+    if (window.XMLHttpRequest) { //if we can get XMLHttpRequest
+        xmlHttp = new XMLHttpRequest();  // Mozilla、Firefox、Safari
+    }
+    else if (window.ActiveXObject) { //if we can get ActiveXObject
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); // Internet Explorer
+    }
+    return xmlHttp;
+}
+
+
+
+
+function select_val_idx(id,setval,defval){
+  var  e = document.getElementById(id);
+  //selval=e.options[e.selectedIndex].value;
+  //alert(e.options[e.selectedIndex].value)
+  //alert(setval)
+  for(i=0;i<defval.length;i++){
+     //alert(setval);
+     //alert(defval[i])
+     if(setval==defval[i])
+        e.selectedIndex=i;
+  }
+}
+
+
+function parsevalue(tmpstr){
+
+   var data=tmpstr.split("&");
+
+
+   //data[0];
+   //data[1];
+
+   //for(i=0;i<data.length;i++){
+   
+     //alert(key_value)
+   //}
+
+   var off_on = ["0","1"];
+   var resolution = ["QVGA","VGA","HD","FULLHD"];
+   var pixfmt=["H.264","MJPEG"]; 
+   var video_src=["realtime","file"];
+   var samplerate=["8k","16k"];
+   var audio_ch=["Mono","Stereo"];
+   var audio_out_fmt=["MP3","AAC"];
+   var net_proto=["RTSP","UDP"];
+   var net_trans=["TS","MP4"];
+   //var net_ip
+   
+
+   key_value = data[0].split("=");
+
+   select_val_idx("idstream_v_res",key_value[1],resolution);
+   key_value = data[1].split("=");
+   select_val_idx("idstream_v_pix",key_value[1],pixfmt);
+   key_value = data[2].split("=");
+   
+   document.getElementById("idstream_v_fram").value=key_value[1];
+   key_value = data[3].split("=");
+   
+   document.getElementById("idstream_v_bit").value=key_value[1];
+
+   //key_value = data[4].split("=");
+   //select_val_idx("idstream_v_sr",key_value[1],video_src);
+
+   key_value = data[4].split("=");
+   select_val_idx("idstream_a_samp",key_value[1],samplerate);
+/*
+   key_value = data[6].split("=");
+   select_val_idx("idstream_a_ch",key_value[1],audio_ch);
+
+   key_value = data[7].split("=");
+   select_val_idx("idstream_a_o_fmt",key_value[1],audio_out_fmt);
+*/
+   key_value = data[5].split("=");
+   select_val_idx("idstream_n_p_fmt",key_value[1],net_proto);
+/*
+   key_value = data[9].split("=");
+   select_val_idx("idstream_n_t_fmt",key_value[1],net_trans);
+
+   key_value = data[10].split("=");
+   document.getElementById("idstream_n_ip").value=key_value[1];
+ */
+
+}
+
+ 
+function handleGetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response:" + myxml.responseText);
+	parsevalue(myxml.responseText);
+      //document.GetVal.t1.value=myxml.responseText; 
+     }
+   }
+}
+function handleSetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response" + myxml.responseText);
+          //document.SetVal.t2.value=myxml.responseText;
+	  //alert(myxml.responseText);
+	  //parsevalue(myxml.responseText);
+     }
+   }
+}
+
+
+ 
+function startGetRequest()
+{
+    
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    myxml.open("GET", "/cgi-bin/streamer?streamer.video.resolution&streamer.video.pixelfmt&streamer.video.framerate&streamer.video.bitrate&streamer.audio.samplerate&streamer.network.protofmt&end",true); 
+    myxml.send("");
+
+}
+function startStreamRequest()
+{
+    var str_value = new Array();
+    /*
+    str_value[0] = document.streamer.streamer_video_resolution_sel.value;
+    str_value[1] = document.streamer.streamer_video_pixel_fmt_sel.selectedIndex;
+    str_value[2] = document.streamer.streamer_video_framerate.value;
+    */
+
+
+   str_value[0] = document.streamer.streamer_video_resolution_sel.value;
+   //alert(str_value[0]);
+   str_value[1] = document.streamer.streamer_video_pixel_fmt_sel.selectedIndex;
+   str_value[2] = document.streamer.streamer_video_framerate.value;
+   str_value[3] = document.streamer.streamer_video_bitrate.value;
+   //str_value[4] = document.streamer.streamer_video_source_sel.selectedIndex;
+   str_value[4] = document.streamer.streamer_audio_samplerate_sel.selectedIndex;
+   //alert("");
+   //str_value[6] = document.streamer.streamer_audio_channel_sel.selectedIndex;
+   //str_value[7] = document.streamer.streamer_audio_output_fmt_sel.selectedIndex;
+   //str_value[8] = document.streamer.streamer_network_proto_fmt_sel.selectedIndex;
+   //str_value[9] = document.streamer.streamer_network_trans_fmt_sel.selectedIndex;
+   //str_value[10] = document.streamer.streamer_network_remote_ip.value;
+
+
+   
+
+
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    //myxml.open("GET", "/cgi-bin/streamctrl?start=1"+"&resolution="+str_value[0]+"&pixelfmt="+str_value[1]+"&framerate="+str_value[2]+"&bitrate="+str_value[3]+"&samplerate="+str_value[4]+"&end",true);
+    myxml.open("GET", "/cgi-bin/streamer?start&end",true);
+    myxml.send("");
+   
+}
+function stopStreamRequest()
+{
+     myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    //myxml.open("GET", "/cgi-bin/streamctrl?stop=1&end",true); 
+    myxml.open("GET", "/cgi-bin/streamer?stop&end",true); 
+    myxml.send("");
+  
+}
+
+
+
+
+function startSetRequest()
+{
+   var e = document.getElementById("ddlViewBy");
+   var strUser = e.options[e.selectedIndex].text;
+
+   var str_value = new Array();
+
+   //if(){
+   //document.streamer.streamer_video_resolution_sel.options[e.selectedIndex].value;
+
+   //}
+
+   str_value[0] = document.streamer.streamer_video_resolution_sel.value;
+   //alert(str_value[0]);
+   str_value[1] = document.streamer.streamer_video_pixel_fmt_sel.selectedIndex;
+   str_value[2] = document.streamer.streamer_video_framerate.value;
+   str_value[3] = document.streamer.streamer_video_bitrate.value;
+   //str_value[4] = document.streamer.streamer_video_source_sel.selectedIndex;
+   str_value[4] = document.streamer.streamer_audio_samplerate_sel.selectedIndex;
+   //str_value[6] = document.streamer.streamer_audio_channel_sel.selectedIndex;
+   //str_value[7] = document.streamer.streamer_audio_output_fmt_sel.selectedIndex;
+   //str_value[8] = document.streamer.streamer_network_proto_fmt_sel.selectedIndex;
+   //str_value[9] = document.streamer.streamer_network_trans_fmt_sel.selectedIndex;
+   //str_value[10] = document.streamer.streamer_network_remote_ip.value;
+
+
+/*
+   // key_value = data[0].split("=");
+   setvar1=document.GetVal.freq.value;
+   //alert(setvar1);
+   //key_value = data[1].split("=");
+   setvar2=document.GetVal.aa.value;
+   //alert(setvar2);
+   //key_value = data[2].split("=");
+   setvar3=document.getElementById('id_audio_sensor_select').selectedIndex;
+   //alert(setvar3);
+*/
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleSetStateChange;
+    myxml.open("POST", "/cgi-bin/runcgi",true);
+    
+    myxml.send("streamer"+str_value[0]+"&streamer.video.pixelfmt"+str_value[1]+"&streamer.video.framerate"+str_value[2]+"&streamer.video.bitrate"+str_value[3]+"&streamer.audio.samplerate"+str_value[4]+"&end");
+
+    //myxml.send("streamer"+str_value[0]+"&streamer.video.pixelfmt"+str_value[1]+"&streamer.video.framerate"+str_value[2]+"&streamer.video.bitrate"+str_value[3]+"&streamer.video.source"+str_value[4]+"&streamer.audio.samplerate"+str_value[5]+"&streamer.audio.channel"+str_value[6]+"&streamer.audio.outputfmt"+str_value[7]+"&streamer.network.protofmt"+str_value[8]+"&streamer.network.transfmt"+str_value[9]+"&streamer.network.ipaddr"+str_value[0]+"&end");
+}
+ 
+
+	</script>
+
+	<form action="/cgi-bin/streamer" method=POST name="streamer">
+		<table border=0 width="700" cellspacing=1>
+			<tr>
+			<td>
+			<p class=title><b>Streamer</p>
+			</br>
+			</br>
+			</td>
+			</tr>
+			
+			<tr>
+
+			<td  width="35%">
+				Video Resolution
+			</td>
+
+	   
+           		<td  width="65%">
+				<select name="streamer_video_resolution_sel" id="idstream_v_res">
+				 
+				<option value="QVGA">QVGA</option>
+				<option value="VGA" >VGA</option>
+				<option value="HD"  >HD</option>
+				<option value="FULLHD"  >FULLHD</option>
+				<script>
+            			</script>
+				</select>
+			</td>
+		</tr>
+			<tr>
+			<td  width="35%">
+				Video Pixel Format
+			</td>
+			<td  width="65%">
+				<select name="streamer_video_pixel_fmt_sel" id="idstream_v_pix">
+				<option value="H264" >H.264</option>
+				<option value="MJPEG">MJPEG</option>
+		
+				</select>
+			</td>
+			
+		</tr>
+
+		<tr>
+			<td  width="35%">
+				Video Framerate
+			</td>
+			<td  width="65%">
+				<input type="text" name="streamer_video_framerate" id="idstream_v_fram" size="20" maxlength="20" value="">(5~30 fps)
+				
+			</td>
+		</tr>
+
+		
+			<tr>
+			<td  width="35%">
+				Video Bitrate
+			</td>
+			<td width="65%">
+				<input type="text" name="streamer_video_bitrate" id="idstream_v_bit" size="20" maxlength="20" value="">(?~300000)
+			</td>
+		</tr>
+		<!--
+		<tr>
+			<td  width="35%">
+				Video Source
+			</td>
+			<td  width="65%">
+				<select name="streamer_video_source_sel" id="idstream_v_sr">
+				<option value="realtime">realtime</option>
+				<option value="file" >file</option>
+		
+				</select>
+			</td>
+			</td>
+		</tr>
+		-->
+		
+		<tr>
+			<td  width="35%">
+				Audio Samplerate
+			</td>
+			<td  width="65%">
+				<select name="streamer_audio_samplerate_sel" id="idstream_a_samp" >
+				<option value="8k" >8k</option>
+				<option value="16k" >16k</option>
+		
+				</select>
+			</td>
+			</td>
+		</tr>
+		<!--
+		<tr>
+			
+			<td  width="35%">
+				Audio Channel
+			</td>
+			<td  width="65%">
+				<select name="streamer_audio_channel_sel" id="idstream_a_ch" >
+				<option value="Mono" >Mono</option>
+				<option value="Stereo">Stereo</option>
+		
+				</select>
+			</td>
+			</td>
+		</tr>
+
+
+<tr>
+			<td  width="35%">
+				Audio Output Format
+			</td>
+			<td  width="65%">
+				<select name="streamer_audio_output_fmt_sel" id="idstream_a_o_fmt">
+				<option value="MP3" >MP3</option>
+				<option value="AAC" >AAC</option>
+		
+				</select>
+			</td>
+			</td>
+		</tr>
+-->
+
+<tr>
+			<td  width="35%">
+				Network Protocol
+			</td>
+			<td  width="65%">
+				<select name="streamer_network_proto_fmt_sel" id="idstream_n_p_fmt">
+				<option value="RTSP" >RTSP</option>
+				<option value="UDP" >UDP</option>
+        			</select>
+			</td>
+			
+</tr>
+
+<!--
+<tr>
+			<td  width="35%">
+				Network Transport
+			</td>
+			<td  width="65%">
+				<select name="streamer_network_trans_fmt_sel" id="idstream_n_t_fmt">
+				<option value="TS" >TS</option>
+				<option value="MP4">MP4</option>
+		
+				</select>
+			</td>
+			</td>
+		</tr>
+
+		<tr>
+			<td  width="35%">
+				Network IP Address
+			</td>
+			<td width="65%">
+				<input type="text" name="streamer_network_remote_ip" id="idstream_n_ip" size="20" maxlength="20" value="">
+			</td>
+		</tr>
+
+-->
+	
+		</table>
+		
+	<table>
+<script type="text/javascript">startGetRequest();</script>
+	<tr>
+	<td>
+	<input type="submit" value="apply" name="streamer_apply" class="button" >
+	</td>
+	</tr>
+	</table>
+</form>
+
+<form action="/cgi-bin/streamer" method=POST name="streaming">
+<input type="button" name="start_stream" value="start streaming" id="idstream_start" size="20" maxlength="20" onClick="startStreamRequest();">
+<input type="button" name="stop_stream"  value="stop streaming"  id="idstream_stop"  size="20" maxlength="20" onClick="stopStreamRequest();">
+</form>
+
+</body>
+
+</html>

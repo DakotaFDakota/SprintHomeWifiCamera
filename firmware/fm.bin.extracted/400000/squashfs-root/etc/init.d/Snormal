@@ -1,0 +1,241 @@
+#!/bin/sh
+echo "Enter normal boot up  ..."
+
+# Start all init scripts in /etc/init.d
+
+
+#mount ramdisk to make read/write
+cp -rf /mnt/ramdisk /tmp
+mount -t tmpfs none /mnt/ramdisk
+mv /tmp/ramdisk/* /mnt/ramdisk
+rm -rf /tmp/ramdisk
+
+
+cp -rf /etc/Wireless/RT2870STA /tmp
+mount -t tmpfs none /etc/Wireless/RT2870STA
+mv /tmp/RT2870STA/* /etc/Wireless/RT2870STA
+rm -rf /tmp/RT2870STA
+
+
+insmod /usr/modules/gpio_drv.ko
+#init irled gpio(6) for RC8510A
+echo 6 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio6/direction
+
+if [ "$has_no_usb_hub" = "yes" ];then
+echo 112 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio112/direction
+if [ "$mt_code_fw" == "yes" ];then
+echo 1 > /sys/class/gpio/gpio112/value
+else
+echo 0 > /sys/class/gpio/gpio112/value
+fi
+sleep 1
+fi
+
+/usr/local/bin/chg_mac_address &
+
+# executing them in numerical order.
+#
+for i in /etc/init.d/AIT??* ;do
+	# Ignore dangling symlinks (if any).
+	[ ! -f "$i" ] && continue
+	case "$i" in
+	*.sh)
+	# Source shell script for speed.
+	(
+		trap - INT QUIT TSTP
+		set start
+		. $i
+	)
+	;;
+
+	*)
+	# No sh extension, so fork subprocess.
+	$i start
+	;;
+	esac
+done
+
+ifup -a
+
+#For AEC
+#amixer sset 'Mic PGA',0 31
+#amixer sset 'Mic DGain',0 161
+#amixer sset 'Spk Vol',0 50
+if [ -d /dev/snd ] ;then
+	if [ "$sc_oem_id" == "0062" ];then
+		amixer set 'Mic PGA' 24
+		amixer set 'Mic DGain' 86
+	else
+		amixer set 'Mic PGA' 31
+		amixer set 'Mic DGain' 90
+	fi
+	if [ "$echo_cancel_supp" = "yes" ];then
+		amixer set 'Aud Enh' AEC
+	else
+		amixer set 'Aud Enh' NONE
+	fi
+	if [ "$has_speaker" = "yes" ];then
+		amixer set 'Spk Vol' 34
+	else
+		amixer set 'Spk Vol' 0
+	fi
+fi
+
+#=================================================
+# Create configuration files and dirs
+#=================================================
+/bin/mkdir /mnt/ramdisk/tmp
+/bin/touch /mnt/ramdisk/tmp/mdev.conf
+/bin/echo "mmcblk0 0:0 666 @/usr/local/bin/mmcsd_plug attach" > /mnt/ramdisk/tmp/mdev.conf
+
+/bin/touch /mnt/ramdisk/resolv.conf
+/bin/mkdir /mnt/ramdisk/root
+/bin/mkdir /mnt/ramdisk/var
+/bin/mkdir -p /mnt/ramdisk/var/lib
+/bin/mkdir /mnt/ramdisk/var/lock
+/bin/mkdir /mnt/ramdisk/var/run
+/bin/mkdir /mnt/ramdisk/var/tmp
+/bin/mkdir /mnt/ramdisk/var/run/xl2tpd
+/bin/mkdir /tmp/vlog
+
+#=================================================
+# Init debug and log system
+#=================================================
+/bin/mkdir /tmp/debug
+/bin/mkdir /tmp/debug/user
+/usr/local/bin/debug_daemon 1 > /dev/null 2> /dev/null &
+
+#=================================================
+# Run apps
+#=================================================
+/bin/hostname localhost
+
+# ---- Read Configure File From FLASH ---- #
+/usr/local/bin/r_flash
+
+if [ "$mt_code_fw" == "yes" ];then
+	/usr/local/bin/chg_conn_status
+else
+if [ "$sc_oem_id" == "0062" ];then
+	/usr/local/bin/do_leds power off -c green >/dev/null 2>/dev/null
+	/usr/local/bin/do_leds wireless blink -c red -i 400 >/dev/null 2>/dev/null &
+else
+if [ "$support_webrtc" != "yes" -a "$support_webrtc_native" != "yes" ];then
+        /usr/local/bin/do_leds power blink -c green >/dev/null 2>/dev/null &
+fi	
+fi
+fi
+
+# ---- Set Crond ---- #
+/usr/sbin/crond &
+
+# ---- Set Timezone ---- #
+/usr/local/bin/sc_time_control -i > /dev/null 2> /dev/null &
+
+# ---- Run rc.sethost ---- #
+/etc/rc.sethost
+
+#---  Detect push botton ---#
+/usr/local/bin/read_push &
+
+echo "start sensor daemon..."
+/usr/local/bin/sensor_daemon >/dev/null 2>/dev/null &
+
+
+#=================================================
+#start webrtc monitor and qr scan action
+#=================================================
+# ---- webrtc monitor add by irving----#
+if [ "$support_webrtc" = "yes" -o "$support_webrtc_native" = "yes" ];then
+    /usr/local/bin/webrtc_monitor &
+fi
+
+#--start qr code action add by irving--#
+if [ "$support_qr_code_scan" = "yes" ];then
+	if [ "$support_webrtc" = "yes"  -o "$support_webrtc_native" = "yes" ];then
+		/usr/local/bin/qr_code_action
+	fi
+fi
+#=================================================
+
+#=================================================
+# Start nt_services 
+#=================================================
+/sbin/insmod /usr/modules/asix.ko
+#/usr/local/bin/nt_services -b &
+#/bin/touch /mnt/ramdisk/tmp/.nt_service_ready
+
+#=================================================
+# Support telnetd 
+#=================================================
+mkdir /dev/pts
+chmod 755 /dev/pts
+mount -t devpts devpts /dev/pts
+
+# ----  start dsp daemon ---- #
+/usr/local/bin/dsp_dae &
+
+/usr/local/bin/audio_renderer &
+
+echo "start hydra..."
+if [ "$support_smart_things" != "yes" ];then
+    /usr/local/bin/hydra >/dev/null 2>/dev/null &
+fi
+
+# ---- http/https server ----- #
+cp /etc/lighttpd/lighttpd-secure.conf /mnt/ramdisk/lighttpd/lighttpd.conf
+/usr/local/bin/auth
+/usr/local/bin/httpd start &
+
+#---action dnswtich---#
+/usr/local/bin/dnswitch_action &
+
+if [ "$support_webrtc" = "yes" -o "$support_webrtc_native" = "yes" ];then
+        /usr/local/bin/do_leds power blink -c green >/dev/null 2>/dev/null &
+fi
+/usr/local/bin/nt_services -b &
+/bin/touch /mnt/ramdisk/tmp/.nt_service_ready
+
+# ---- Set DDNS (Register to the server) ---- #
+/usr/local/bin/ddnsinit ddnsinit &
+
+#--log syslog client#
+/usr/local/bin/syslog --daemon &
+
+#--ipcd_handler
+if [ "$support_ipcd" = "yes" ];then
+    /usr/local/bin/ipcd_handler &
+fi
+
+echo "starting stream..."
+/usr/stream/start.sh &
+
+if [ "$mt_code_fw" = "yes" ];then
+	/usr/local/bin/all_leds_blink on &
+fi
+
+# ---- mount sd card ----#
+if [ "$support_mmcsd" = "yes" ];then
+	/usr/bin/sdmount.sh &
+fi
+
+# ---- clean cache ----#
+if [ "$support_webrtc" != "yes"  -a "$support_webrtc_native" != "yes" ];then
+    /usr/bin/cacheclean.sh &
+fi
+
+if [ "$mt_code_fw" == "yes" ];then
+	/usr/bin/iperf -s &
+fi
+
+#--start qr code action for not webrtc--#
+if [ "$support_qr_code_scan" = "yes" ];then
+	if [ "$support_webrtc" != "yes" -a "$support_webrtc_native" != "yes" ];then
+		/usr/local/bin/qr_code_action &
+	fi
+fi
+
+echo "normal boot up down ..."
+

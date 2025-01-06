@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Debug Console</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function dbg_download(mod_id)
+{
+	self.location.href = "admdbg_download.cgi?mod_id="+mod_id;
+}
+
+function checkData()
+{
+	var msg = ""; 
+	var cf = document.forms[0];
+	
+	if (cf.dbg_syslog_server.value.length > 1)
+	{
+		msg += checkDomainName(cf.dbg_syslog_server, msg_log_server, Valid_domain);
+	}
+	if (msg.length > 1)	
+	{
+		alert(msg);
+		return false;
+	}
+	dataToHidden(cf);
+	return true;
+}
+
+function get_debug_status()
+{
+	var xmlFile;
+	var mod_tag;
+	var root_tag;
+	var msg = "";
+	var http_request;
+	
+	if (http_request == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request = null; }
+			}
+		}
+	}
+	
+	if (!http_request)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return ""; }
+	
+	http_request.open('GET', 'admdbg_status.cgi', false);
+	http_request.send(null);
+    if (http_request.status == 200)
+    {
+		xmlFile = http_request.responseXML;
+		root_tag = xmlFile.getElementsByTagName("root");
+		mod_tag = root_tag[0].getElementsByTagName("module");
+	    if (0 == mod_tag.length)
+	    {
+	        return "";
+	    }
+	    
+	    for (var i=0; i<mod_tag.length; i++)
+	    {
+	    	msg += '<tr>';
+	    	
+	    	msg += '<td align="center"><input type="checkbox" class="stdbuttton" name="" ';
+	    	msg += 'checked';
+	    	msg += '></td>';
+	    	
+	    	msg += '<td align="center">';
+	    	msg += mod_tag[i].getElementsByTagName("name")[0].firstChild.nodeValue;
+	    	msg += '</td>';
+	    	
+	    	/*msg += '<td align="center">';
+	    	msg += '<select name="sch_day" size="1">';
+	    	msg += '<option value="9" selected>1. Emerg</option>';
+	    	msg += '<option value="8">2. Alert</option>';
+	    	msg += '<option value="1">3. Critical</option>';
+	    	msg += '<option value="2">4. Error</option>';
+	    	msg += '<option value="3">5. Warning</option>';
+	    	msg += '<option value="4">6. Notice</option>';
+	    	msg += '<option value="5">7. Info</option>';
+	    	msg += '<option value="6">8. Debug</option>';
+	    	msg += '</select>';
+	    	msg += '</td>';*/
+	    	
+	    	msg += '<td align="center"><input type="checkbox" class="stdbuttton" name="input"';
+	    	if (mod_tag[i].getElementsByTagName("local")[0].firstChild.nodeValue == 'yes')
+	    	{
+		    	msg += ' checked';
+	    	}
+	    	msg += '></td>';
+	    	
+	    	msg += '<td align="center"><input type="checkbox" class="stdbuttton" name="input2"';
+	    	if (mod_tag[i].getElementsByTagName("flash")[0].firstChild.nodeValue == 'yes')
+	    	{
+		    	msg += ' checked';
+	    	}
+	    	msg += '></td>';
+	    		    
+	    	msg += '<td align="center"><input type="checkbox" class="stdbuttton" name="input3"';
+	    	if (mod_tag[i].getElementsByTagName("sdcard")[0].firstChild.nodeValue == 'yes')
+	    	{
+		    	msg += ' checked';
+	    	}
+	    	msg += '></td>';
+	    	
+	    	msg += '<td align="center"><input type="checkbox" class="stdbuttton" name="input4"';
+	    	if (mod_tag[i].getElementsByTagName("network")[0].firstChild.nodeValue == 'yes')
+	    	{
+		    	msg += ' checked';
+	    	}
+	    	msg += '></td>';
+	    	
+	    	//msg += '<td><input type="button" class="stdbuttton" name="conf_download" value="Export" style="width:65px" onClick="dbg_download(';
+	    	//msg += i;
+	    	//msg += ');"></td>';
+	    	
+	    	msg += '</tr>'
+	    }
+    }
+	else
+	{
+		alert("Failed to get debug status.");
+	}
+	
+	http_request = null;
+	return msg;
+}
+
+function init()
+{
+	var msg = 	'<table width="788" border="1" cellspacing="0" cellpadding="1">'+
+				'<tr><td width="54" rowspan="2" align="center" bgcolor="#CCCCCC"><p><strong>Enable</strong>'+
+				'<input type="checkbox" class="stdbuttton" name="input7" ></p></td>'+
+				'<td width="157" rowspan="2" align="center" bgcolor="#CCCCCC"><strong>Application</strong></td>'+
+				//'<td width="112" rowspan="2" align="center" bgcolor="#CCCCCC"><strong>Log Level</strong></td>'+
+				'<td height="25" colspan="3" align="center" bgcolor="#CCCCCC"><strong>Log Storage</strong></td>'+
+				'<td width="119" rowspan="2" align="center" bgcolor="#CCCCCC"><strong>Network</strong></td></tr>'+
+				//'<td width="119" rowspan="2" align="center" bgcolor="#CCCCCC">&nbsp;</td></tr>'+
+				'</tr>'+
+				'<tr><td align="center" bgcolor="#CCCCCC"><strong> RAM</strong></td>'+
+				'<td height="25" align="center" bgcolor="#CCCCCC"><strong>Flash</strong></td>'+
+				'<td align="center" bgcolor="#CCCCCC"><strong> SD Card</strong></td>'+
+				//'<td align="center" bgcolor="#CCCCCC"><strong>Network</strong></td>'+
+				'</tr>';
+	
+	msg += get_debug_status();
+	msg += '</table>';
+	
+	//alert("msg="+msg);
+	document.getElementById("DebugStatusDiv").innerHTML = msg;
+}
+
+// End Script -->
+</script>
+</head>
+
+<body onLoad="init();">
+<form name="debug" method="post" action="file.cgi">
+
+<div ID="headimage">
+	<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+		<tr>
+			<td nowrap height="75" align="right" valign="bottom"><b wrap="no">Debug Console</b></td>
+		</tr>
+	</table>
+</div>
+
+<div ID="mubd">
+	<table class="maintab2" cellspacing="0">
+		<tr>
+			<td align="center" valign="top" nowrap>
+				<table width="903" cellspacing="0" class="maintab">
+					<tr>
+					  <td class="" nowrap>Syslog Server:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="input" class="stdbuttton" name="dbg_syslog_server" value="@dbg_syslog_server#"></td>
+					  <td align="right" nowrap class="rc"><input type="submit" class="stdbuttton" name="apply" value="Save" onClick="return checkData();"></td>
+					</tr>
+				 	<tr>
+					  <td colspan="2" class="leftspacer"><hr></td>
+					</tr>
+					<tr>
+						<td valign="bottom" nowrap class="subhead">Debug Logs</td>
+						<td align="right" nowrap class="rc"><span class="rightbuttonrow">
+						  <input type="submit" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+                          <input type="reset" class="stdbuttton" name="cancel" value=" Reset " onClick="setTimeout('init()',250)">
+                          <input type="button" class="stdbuttton" name="help" value=" Download All " onClick="dbg_download('-1')">
+						</span></td>
+					</tr>
+					<tr>
+						<td colspan="2" valign="top" nowrap class="lc">
+							<div align="left" id="DebugStatusDiv"></div>
+				    	</td>
+					</tr>
+					<tr>  <!-- layout row, pushes data up, buttons down -->
+						<td class="lcbt" colspan="2" > </td>
+					</tr> 
+				</table>
+			</td>
+		</tr>
+	</table>
+</div>  <!-- pagemain -->
+
+<input type="Hidden" name="this_file" value="debug.htm">
+<input type="Hidden" name="next_file" value="debug.htm">
+<input type="Hidden" name="todo" value="save">
+</form>
+
+<script>var msgVar="@message#"; </script>
+</body>
+</html>
+

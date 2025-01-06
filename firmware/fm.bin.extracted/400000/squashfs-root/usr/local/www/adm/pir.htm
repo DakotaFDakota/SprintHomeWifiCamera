@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript">
+
+<!-- Start Script
+function init()
+{
+ 	var cf = document.forms[0];
+	dataToVisible(cf);
+	menuframe.highLight('pirDIV');
+}
+
+function checkData()
+{
+	return true;	
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg()">
+<FORM name="pir" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel">@h_model_num#</div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="file.cgi?next_file=logout.htm&adm_todo=logout" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="file.cgi?next_file=menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>PIR Settings</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Range:</td>
+ <td class="rc" nowrap align="left">
+	<select name="pir_range" size="1">
+		<option value="1">1 M</option>
+		<option value="2">2 M</option>
+		<option value="3">3 M</option>
+		<option value="4">4 M</option>
+		<option value="5">5 M</option>
+	</select>
+ </td>
+</tr>
+
+
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="submit" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='file.cgi?next_file=pir.htm'">
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_pir.htm')"> </td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</div>  <!-- pagemain -->
+
+<input type="Hidden" name="h_pir_range" value="@h_pir_range#">
+
+<input type="Hidden" name="this_file" value="pir.htm">
+<input type="Hidden" name="next_file" value="pir.htm">
+<input type="Hidden" name="todo" value="save">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

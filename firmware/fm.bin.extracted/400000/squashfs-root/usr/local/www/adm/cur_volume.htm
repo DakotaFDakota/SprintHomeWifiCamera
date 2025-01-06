@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var h_au_curr_vol;
+
+function set_volume()
+{
+	var current_volume = h_au_curr_vol;
+    var theWidth = parseInt(current_volume)/100;
+    var isIE = navigator.userAgent.indexOf("MSIE") !=  - 1;
+
+    parent.document.getElementById("v_value1").style.width = Number(theWidth*82)+"px";
+    if (isIE)
+    {
+        if (IEVersion()==8)
+        {
+            parent.document.getElementById("v_value1").style.marginTop = "0px";
+        }
+        else
+        {
+            parent.document.getElementById("v_value1").style.marginTop = "0px";
+        }
+    }
+    else
+    {
+        parent.document.getElementById("v_value1").style.marginTop = "12px";
+    }
+}
+
+function RefreshCurrentVolume()
+{
+	var read = new GroupCtrl();
+	var array_get=[
+			["AUDIO", "h_au_curr_vol", "h_au_curr_vol"]
+		];
+	read.callback = set_volume;
+	read.getvalue(array_get);
+}
+// End Script -->
+</script>
+</head>
+
+<body onload="RefreshCurrentVolume();">
+</body>
+</html>
+

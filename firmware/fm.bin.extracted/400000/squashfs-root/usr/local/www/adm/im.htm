@@ -1,0 +1,453 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var proxy_pw_old = "";
+var http_pw_old = "";
+var httppost_pw_old = "";
+
+function init()
+{	
+	var cf = document.forms[0];
+	menuframe.highLight('imDIV');
+	var read= new GroupCtrl();
+	var array_get=[
+	    ["SYSTEM","model_num", "model_num"],
+	    ["HTTP_NOTIFY", "http_url", "http_url"],
+	    ["HTTP_NOTIFY", "http_user", "http_login"],
+	    ["HTTP_NOTIFY", "http_password", "http_pw"],
+	    ["HTTP_NOTIFY", "http_proxy", "proxy_name"],
+	    ["HTTP_NOTIFY", "proxy_user", "proxy_login"],
+	    ["HTTP_NOTIFY", "proxy_password", "proxy_pw"],
+	    ["HTTP_NOTIFY", "http_proxy_no", "proxy_no"],
+	    ["HTTP_NOTIFY", "http_method", "method"],
+	    ["HTTP_EVENT", "http_post_en", "http_post_en"],
+	    ["HTTP_EVENT", "http_post_user", "http_post_user"],
+	    ["HTTP_EVENT", "http_post_pass", "http_post_pass"],
+	    ["HTTP_EVENT", "http_post_url", "http_post_url"]
+	
+	];
+
+	read.callback= set_all;
+	read.get(array_get);
+	
+}
+
+function set_all()
+{
+    set_pwd();
+    setHTTPPOST();
+    //document.getElementById("ongoing").style.display= "none";
+    document.getElementById("mubd").style.display= "block";
+}
+
+function set_pwd()
+{
+    var cf= document.forms[0];
+    
+    if(cf.http_pw.value== "")
+    {
+        http_pw_old= randomString(6, Valid_Strd);
+        cf.http_pw.value= http_pw_old;
+    }
+    else
+    {
+        http_pw_old= cf.http_pw.value;
+    }
+        
+    if(cf.proxy_pw.value== "")
+    {
+        proxy_pw_old= randomString(6, Valid_Strd);
+        cf.proxy_pw.value= proxy_pw_old;
+    }
+    else
+    {
+        proxy_pw_old= cf.proxy_pw.value;
+    }
+        
+    if(cf.http_post_pass.value== "")
+    {
+        httppost_pw_old= randomString(6, Valid_Strd);
+        cf.http_post_pass.value= httppost_pw_old;
+    }
+    else
+    {
+        httppost_pw_old= cf.http_post_pass.value;
+    }
+}
+
+function reset_pwd()
+{
+	var cf = document.forms[0];
+	if(cf.http_pw.value != http_pw_old)
+	{
+		http_pw_old= cf.http_pw.value;
+	}
+	
+	if(cf.proxy_pw.value != proxy_pw_old)
+	{
+		proxy_pw_old= cf.proxy_pw.value;
+	}
+	
+	if(cf.http_post_pass.value != httppost_pw_old)
+	{
+	    httppost_pw_old= cf.http_post_pass.value;
+	}
+}
+
+
+function set_notify_protol()
+{
+	var cf = document.forms[0];
+    	var adm_pro=document.getElementById("adm_protol").value;
+    
+}
+
+function setHTTPPOST()
+{
+	var cf = document.forms[0];
+
+	if (cf.http_post_en.checked == true)
+	{ 
+		cf.http_post_user.disabled = cf.http_post_pass.disabled = cf.http_post_url.disabled = 0;
+	}
+	else
+	{
+		cf.http_post_user.disabled = cf.http_post_pass.disabled = cf.http_post_url.disabled = 1;
+	}
+}
+
+function checkUriHead(in_uri)
+{
+	var error_msg="";
+	
+	if(in_uri.length <7 || ((in_uri.substring(0, 7) !="http://") && (in_uri.substring(0, 8) !="https://")))
+	{
+		error_msg=msg_message_url;
+	}
+
+	return error_msg;
+}
+
+function checkData()
+{
+ 	var cf = document.forms[0];
+	var msg = "";
+	var Valid_String = ':/?&=%#+,';
+	
+	Valid_String +=Valid_Stri;
+
+// HTTP
+	if(cf.h_im_1.value == 1   || cf.h_im_pir.value ==1   || cf.h_im_md.value ==1)
+	{
+		if(cf.http_url.value == "")
+		{ msg+= msg_http_url_empty; }
+		else 
+		{ 
+			if(cf.http_url.value.length >0)
+			{
+				msg+= checkValid(cf.http_url, msg_http_url_illegal_str, Valid_String, 256, false); 
+				msg+= checkUriHead(cf.http_url.value);
+			}
+		}
+
+		if(cf.proxy_name.value.length > 0)
+		{ 
+			msg+= checkDomainName(cf.proxy_name,msg_proxy_name_illegal_str,Valid_domain);
+
+		//msg+= checkValid(cf.proxy_name, msg_proxy_name_illegal_str, Valid_Stri, 256, false); 
+		}
+		msg+= checkInt(cf.proxy_no, msg_proxy_port, 1, 65535, true);	
+	}	
+	else
+	{
+		if(cf.http_url.value.length >0)
+		{
+			msg+= checkValid(cf.http_url, msg_http_url_illegal_str, Valid_String, 256, false); 
+			msg+= checkUriHead(cf.http_url.value);
+		}
+		if(cf.proxy_name.value.length > 0)
+		{ 
+			msg+= checkDomainName(cf.proxy_name,msg_proxy_name_illegal_str,Valid_domain);
+		}
+	
+		if(cf.proxy_no.value.length >0)
+			msg+= checkInt(cf.proxy_no, msg_proxy_port, 1, 65535, true);	
+	}
+	
+	/*
+	if(cf.http_login.value.length >0)
+		msg+= checkValid(cf.http_login, msg_http_username, Valid_Str, 32, false);
+	if((cf.http_pw.value.length >0)&&(cf.http_pw.value != http_pw_old))
+	{
+		msg+= checkValid(cf.http_pw, msg_http_userpwd, Valid_Str, 64, false);
+	}
+	if(cf.proxy_login.value.length >0)
+		msg+= checkValid(cf.proxy_login, msg_proxy_username, Valid_Str, 32, false);
+	if((cf.proxy_pw.value.length >0)&&(cf.proxy_pw.value != proxy_pw_old))
+	{
+		msg+= checkValid(cf.proxy_pw , msg_proxy_userpwd, Valid_Str, 64, false);
+	}
+	*/
+	// HTTP POST
+	if (cf.http_post_en.checked)
+	{
+		if (cf.http_post_url.value == "")
+		{
+			msg += msg_http_url_empty;
+		}
+		else 
+		{ 
+			msg += checkValid(cf.http_post_url, msg_http_url_illegal_str, Valid_String, 256, false); 
+			msg += checkUriHead(cf.http_post_url.value);
+		}
+
+		if (cf.http_post_user.value.length > 0)
+		{ 
+			msg += checkValid(cf.http_post_user, msg_username, Valid_Str, 128, false);
+		}
+		if((cf.http_post_pass.value.length >0)&&(cf.http_post_pass.value != httppost_pw_old))
+		{ 
+			msg += checkValid(cf.http_post_pass, msg_userpwd, Valid_Str, 128, false);
+		}
+	}
+	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	
+	//data checked OK, now send data
+	cf.pwd_chg_httpnotify.value = ( cf.http_pw.value != http_pw_old )?1:0;
+	cf.pwd_chg_httpnotify_proxy.value = ( cf.proxy_pw.value != proxy_pw_old )?1:0;
+	cf.pwd_chg_http_post.value = ( cf.http_post_pass.value != httppost_pw_old )?1:0;
+	
+	var save = new GroupCtrl();
+	var array_set=[
+	    ["SYSTEM","model_num", "model_num"],
+	    ["HTTP_NOTIFY", "http_url", "http_url"],
+	    ["HTTP_NOTIFY", "http_user", "http_login"],
+	    ["HTTP_NOTIFY", "http_proxy", "proxy_name"],
+	    ["HTTP_NOTIFY", "proxy_user", "proxy_login"],
+	    ["HTTP_NOTIFY", "http_proxy_no", "proxy_no"],
+	    ["HTTP_NOTIFY", "http_method", "method"],
+	    ["HTTP_EVENT", "http_post_en", "http_post_en"],
+	    ["HTTP_EVENT", "http_post_user", "http_post_user"],
+	    ["HTTP_EVENT", "http_post_url", "http_post_url"]
+	
+	];
+	
+	if(cf.pwd_chg_httpnotify.value==1)
+		array_set.push(["HTTP_NOTIFY", "http_password", "http_pw"]);
+	if(cf.pwd_chg_httpnotify_proxy.value==1)
+		array_set.push(["HTTP_NOTIFY", "proxy_password", "proxy_pw"]);
+	if(cf.pwd_chg_http_post.value==1)
+		array_set.push(["HTTP_EVENT", "http_post_pass", "http_post_pass"]);
+	
+
+	save.callback = reset_pwd;
+	save.set(array_set);
+	
+	if(cf.pwd_chg_http_post.value==1)
+	{
+		array_set.pop();
+	}
+	if(cf.pwd_chg_httpnotify_proxy.value==1)
+	{
+		array_set.pop();
+	}
+	if(cf.pwd_chg_httpnotify.value==1)
+	{
+		array_set.pop();
+	}
+
+	return true;	
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg();">
+<FORM name="im" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr> 
+ <td class="lc">&nbsp;</td>
+ <td class="rc">&nbsp;</td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>HTTP(s) Notification</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>URL:</td>
+ <td class="rc" nowrap><input type="text" name="http_url" size="25" maxlength="256" value="" style="width:300px"></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>User Name:</td>
+ <td nowrap><input type="text" name="http_login" size="25" maxlength="32" value="" style="{width: 200}"></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Password:</td>
+ <td nowrap><input type="password" name="http_pw" size="25" maxlength="64" value="" onFocus="this.select();" style="{width: 200}"></td>
+ </tr>
+
+<tr>
+ <td class="lc" nowrap>Proxy Server Name:</td>
+ <td class="rc" nowrap><input type="text" name="proxy_name" size="25" maxlength="64" value="" style="width:300px"> (optional)</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Proxy User Name:</td>
+ <td nowrap><input type="text" name="proxy_login" size="25" maxlength="32" value="" style="{width: 200}"> (optional)</td></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Proxy Password:</td>
+ <td nowrap><input type="password" name="proxy_pw" size="25" maxlength="64" value="" onFocus="this.select();" style="{width: 200}"> (optional)</td></td>
+ </tr>
+
+ 
+<tr>
+ <td class="lc" nowrap>Proxy Port Number:</td>
+ <td class="rc" nowrap><input type="text" name="proxy_no" size="5" maxlength="5" value="80" style="width:80px"> (optional)</td></td>
+</tr>
+
+<tr>
+  <td class="lc" nowrap>Method:</td> 
+  <td class="rc" nowrap><select name="method" size="1" style="width:80px">
+<option value="1">GET  	
+<option value="0">POST
+</select></td>
+</tr>
+
+	
+	<!--tr>
+		<td class="lcbb" colspan="2" > </td>
+	</tr--> 
+<tr> 
+ <td class="lc">&nbsp;</td>
+ <td class="rc">&nbsp;</td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>HTTP(s) POST</td>
+ <td class="rc" nowrap><input type="checkbox" name="http_post_en" value="1" onClick="setHTTPPOST();"> Enable</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Login Name:</td>
+ <td class="rc" nowrap><input type="text" name="http_post_user" size="25" maxlength="64" value="" style="width:300px"> (optional)</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Password:</td>
+ <td class="rc" nowrap><input type="password" name="http_post_pass" size="25" maxlength="64" value="" style="width:300px"> (optional)</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>POST URL:</td>
+ <td class="rc" nowrap><input type="text" name="http_post_url" size="25" maxlength="256" value="" style="width:300px"></td>
+</tr>
+
+<tr>  <!-- layout row, pushes data up, buttons down -->
+ <td class="lc" height="80%"> </td>
+ <td class="rc" height="80%"> </td>
+</tr> 
+
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='im.htm'">
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_im.htm')"> </td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</div>  <!-- pagemain -->
+
+<!--input type="Hidden" name="h_http_post_en" value="0"-->
+<input type="Hidden" name="h_method" value="1">
+<input type="Hidden" name="pwd_chg_httpnotify" value="0">
+<input type="Hidden" name="pwd_chg_httpnotify_proxy" value="0">
+<input type="Hidden" name="h_im_1" value="">
+<input type="Hidden" name="h_im_pir" value="">
+<input type="Hidden" name="h_im_md" value="0">
+<input type="Hidden" name="pwd_chg_http_post" value="0">
+
+<input type="Hidden" name="this_file" value="im.htm">
+<input type="Hidden" name="next_file" value="im.htm">
+<input type="Hidden" name="todo" value="save">
+</form>
+
+<script> var msgVar=""; </script>
+</body>
+</html>  

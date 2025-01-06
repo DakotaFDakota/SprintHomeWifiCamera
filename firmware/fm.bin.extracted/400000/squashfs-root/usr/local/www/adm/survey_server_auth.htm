@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="WVC80N">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../survey.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function smb_cancel()
+{
+    if (SupportModalDialog())
+    {
+        window.returnValue = false;
+    }
+    top.close();
+}
+
+function smb_skip()
+{
+    if (SupportModalDialog())
+    {
+        window.returnValue = true;
+    }
+    top.close();
+}
+
+function smb_apply()
+{
+    var pass_cf;    
+    var smb_url = "";
+    var return_val = "";
+    var cf = document.forms[0];
+
+    if (SupportModalDialog())
+    {
+        pass_cf = window.dialogArguments;
+    }        
+    else
+    {
+        survey_window = window.opener;
+        pass_cf = window.opener.document.forms[0];
+    }
+
+    pass_cf.smbc_username.value = cf.smb_auth_name.value;
+    pass_cf.smbc_password.value = cf.smb_auth_pswd.value;
+    window.returnValue = true;
+    top.close();
+}
+
+//end script -->
+</script>
+<script>str='<title>'+smb017+'</title>'; dw(str);</script>
+</head>
+<body LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" BOTTOMMARGIN="0"  onLoad="">
+<script language="JavaScript">
+if (isSafari()) { setInterval('window.focus()',1); }
+</script>
+<FORM>
+
+	<table cellpadding="0" cellspacing="0" border="0" align="center" valign="center">
+
+	<BR>
+	<tr>
+	 <td bgcolor="#cccbcb" valign="top">&nbsp;</td>
+	 <th bgcolor="#cccbcb" class="subwin" align="center"><script>dw(smb017)</script></th>
+	 <td bgcolor="#cccbcb" valign="top" align="right">&nbsp;</td>
+	</tr>
+	
+	<tr>
+		<td></td>
+		<td><BR>
+			<table cellpadding="2" cellspacing="2">
+			<tr>
+				<td class="spauth"><script>dw(smb018)</script></td>
+				<td><input type="text" name="smb_auth_name" value="" maxlength="64" style="width:160px"></td>
+			</tr>
+			<tr>
+				<td class="spauth"><script>dw(smb019)</script></td>
+				<td><input type="password" name="smb_auth_pswd" value="" maxlength="64" style="width:160px"></td>
+			</tr>
+			</table>
+		<BR></td>
+		<td></td>
+	</tr>
+
+	<tr>
+		<td bgcolor="#cccbcb" valign="bottom">&nbsp;</td>
+		<td bgcolor="#cccbcb" align="center">
+			<script>dw('<input type="button" class="btstd80" name="Ok" value="OK" onClick="smb_apply();">')</script>
+			&nbsp; &nbsp;
+			<script>dw('<input type="button" class="btstd80" name="skip" value="Skip" onClick="smb_skip();">')</script>
+			&nbsp; &nbsp;
+			<script>dw('<input type="button" class="btstd80" name="Cancel" value="Cancel" onClick="smb_cancel();">')</script>
+		</td>
+		<td bgcolor="#cccbcb" valign="bottom" align="right">&nbsp;</td>
+	</tr>
+
+	</table>
+
+</FORM>
+</body>
+</html>

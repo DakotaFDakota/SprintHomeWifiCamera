@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Help -  FTP Upload </TITLE>
+
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus()">
+<table width="100%">
+<tr>
+  <th class="help">Help -  FTP Upload </th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+<p>An FTP upload is a set of parameters describing how and when the Network Camera will upload video or snapshot files to a FTP server.
+<p><B>Notes:</B>
+<UL>
+<LI>It is important to note that adding a new schedule will 
+stop any upload that is currently running. A scheduled upload 
+will automatically resume, if the time is still within the 
+scheduled period. A triggered upload will need to be 
+re-triggered. 
+<LI>The Network Camera can be configured for up to 10 FTP upload schedules.<BR>
+    <BR></LI></UL>
+
+<p><b> Scheduled Upload</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead">Enable</td>
+   <td>
+      Check to perform all of the upload(s) that were configured and scheduled.
+   </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead">Interval</td>
+   <td>Select the desired option for the uploads interval.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead">Scheduled Upload</td>
+   <td>
+      The Schedule lists 
+	  all of the uploads currently configured in the  
+	  Network Camera, along with various information about their 
+	  configuration, as listed below: 
+	  <UL>
+		<LI><B>Name</B> - the descriptive name of upload event set by the user 
+		<LI><B>Effective Time Frame</B> - shows when the upload at a set time will be triggered 
+		<LI><B>Attachment</B> - shows what kind of file will be attached when the upload been triggered
+		</LI>
+	  </UL> 
+   </td>
+</tr>
+</table>
+
+<p><b>Add New Schedule</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+  <tr>
+    <td valign="top" class="itemhead">Name</td>
+    <td>Provide a descriptive name for the upload event, using a maximum of 20 characters. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="itemhead">Effective Time Frame</td>
+    <td>Choose the desired option for the period.</td>
+  </tr>
+  <tr>
+    <td valign="top" class="itemhead">Start Time</td>
+    <td>Choose the desired start time using a 24 hr clock. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="itemhead">End Time</td>
+    <td>Choose the desired end time using a 24 hr clock.</td>
+  </tr>
+</table>
+
+<p><b> Attachment</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+  <tr>
+    <td valign="top" class="itemhead">Attachment Type</td>
+    <td>
+      <b>JPEG Image -</b> (MJPEG Mode Only)<br>
+            <table border=0 cellspacing=0 cellpadding=2 width="100%">
+              <tr>
+                <td nowrap valign="top" class="itemhead">Snapshot</td>
+                <td>Select the desired photo shot(s) here. </td>
+              </tr>
+              <tr>
+                <td nowrap valign="top" class="itemhead">Interval</td>
+                <td> Select the desired option for the upload interval.</td>
+              </tr>
+            </table><br>
+      <b>Video Clip -</b> (MPEG-4 Mode Only)<br>
+            <table border=0 cellspacing=0 cellpadding=2 width="100%">
+              <tr>
+                <td nowrap valign="top" class="itemhead">File Format</td>
+                <td>Select the desired format for the video file. </td>
+              </tr>
+			  <tr>
+                <td nowrap valign="top" class="itemhead">Video Length</td>
+                <td>Select the desired length for the video clip. </td>
+              </tr>
+            </table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+

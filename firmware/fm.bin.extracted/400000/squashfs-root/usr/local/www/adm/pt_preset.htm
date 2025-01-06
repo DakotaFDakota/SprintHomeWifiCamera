@@ -1,0 +1,705 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Setup</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+var viewer_ocx_classid="clsid:4B90BBA0-9621-48CB-810B-5A75E9CA6270";
+var viewer_ocx_codebase = "../img/MediaAccess.cab#Version=1,2,0,44";
+var viewer_ocx_codebase_pt = "../img/MediaAccess.cab#Version=1,2,0,44";
+var viewer_ocx_id="Viewer";
+var pnameA = new Array(9);
+
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_MODE = 28;
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_POS= 29;
+var	DEVICE_COMMAND_ELECTRICAL_PTZ_REF_COOR= 30;
+var	DEVICE_COMMAND_SHAPE_MOTION_CLEAR = 31;
+var	DEVICE_COMMAND_SHAPE_MOTION_RESET= 32;
+var	DEVICE_COMMAND_SHAPE_MOTION_SAVE= 33;
+var	DEVICE_COMMAND_ZOOM_ENABLE_CGI= 34;
+
+var i_host = self.location.hostname;
+var i_port = self.location.port;
+
+function GetLocationHostName()
+{
+	return self.location.hostname;
+}
+
+function GetLocationHostPort()
+{
+	var port = self.location.port;
+
+	if(port.length<=0 || self.location.protocol != "http:"){
+		port = 80;
+	}
+	return port;
+}
+
+function GetLocationProtocol()
+{
+	return self.location.protocol;	/* "http:" | "https:" */
+}
+
+function set_all()
+{
+	var cf = document.forms[0];
+	dataToVisible(cf);
+	var ip = self.location.hostname;
+	var port = GetLocationHostPort();
+	var auth = cf.h_authorization.value;
+	var channel = 1;
+
+	pnameA[0]=cf.preset1.value;
+	pnameA[1]=cf.preset2.value;
+	pnameA[2]=cf.preset3.value;
+	pnameA[3]=cf.preset4.value;	
+	pnameA[4]=cf.preset5.value;
+	pnameA[5]=cf.preset6.value;
+	pnameA[6]=cf.preset7.value;
+	pnameA[7]=cf.preset8.value;	
+	pnameA[8]=cf.preset9.value;
+	
+	init_preset_list();
+	displayData();
+	showMsg();
+	//play(new Array(new Stream("rtsp", ip, port, channel, auth, 320, 240)));
+	
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+function init_preset_list()
+{
+	var cf = document.forms[0];
+	for (i=0; i<pnameA.length; i++)
+	{
+		if (pnameA[i] != "")
+		{
+			addOption(cf.pslist,pnameA[i], pnameA[i]);
+		}
+	}
+}
+function init()
+{
+
+	//dataToVisible(document.forms[0]);
+
+//	init_preset_list();
+//	displayData();
+//	showMsg();
+	menuframe.highLight('panDIV');
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			["PTZ", "PtzPanPerstep", "pan_perstep"],
+			["PTZ", "PtzTiltPerstep", "tilt_perstep"],
+			["USER", "h_authorization", "h_authorization"],
+			["PTZ", "Preset1Name", "preset1"],
+			["PTZ", "Preset2Name", "preset2"],
+			["PTZ", "Preset3Name", "preset3"],
+			["PTZ", "Preset4Name", "preset4"],
+			["PTZ", "Preset5Name", "preset5"],
+			["PTZ", "Preset6Name", "preset6"],
+			["PTZ", "Preset7Name", "preset7"],
+			["PTZ", "Preset8Name", "preset8"],
+			["PTZ", "Preset9Name", "preset9"]
+		];
+	read.callback = set_all;
+	read.get(array_get);
+}
+
+function checkData()
+{
+    var cf = document.forms[0];
+    var msg = "";
+
+    if (msg.length > 0)
+	{
+		alert(msg);
+		return false;
+	}
+	dataToHidden(cf);
+
+	return true;
+	
+  location.href='pan_tilt.htm'
+}
+
+/* OCX Video init */
+
+var lpp = '@h_authorization#';       <!-- 'YWRtaW46YWRtaW4='  -->
+var real_protocol = self.location.protocol;
+var camera_hostname	= self.location.hostname;
+var camera_port = self.location.port;
+var camera_host = self.location.host;
+var ipadd;
+var interval_do_type	= 0;
+var def_stream_ch = "3";//"@h_def_stream_ch#";
+var pt_stream_ch = "3";	//only stream 3 supports PT for Neutral
+
+if (camera_port.length <= 0 || real_protocol != "http:")
+{
+    camera_port = 80;
+}
+
+var stream_width = 400;
+var stream_height = 300;
+var SetURL_URL = "rtsp://"+camera_hostname+':'+camera_port+"/img/video.sav?channel="+pt_stream_ch;
+
+
+var dw_video_ocx = 	'<object classid="'+viewer_ocx_classid+'" CODEBASE="'+viewer_ocx_codebase+'" id="'+viewer_ocx_id+'" name="'+viewer_ocx_id+
+			        '" width="'+stream_width+'" height="'+stream_height+'">'+
+					'<param name="Text" value="'+
+                     SetURL_URL+									  
+				  ' '+
+				  lpp+
+				  ' '+
+				  '25'+
+				  ' '+
+				  "IE"+
+				    ' '+'dimX='+stream_width+' dimY='+stream_height+
+				  '">' + 
+				  '<param name="BackColor" value="12632256">'+
+				  '<param name="_Version" value="65536">'+
+				  '<param name="_ExtentX" value="11774">'+
+				  '<param name="_ExtentY" value="6562">'+
+					'</object>';
+
+var dw_push = 	'<img border="0" alt="Video for other Platform/OS" src="../img/video.mjpeg?stream='+pt_stream_ch +'" onError="reloadOnErr(this)" width="400" height="300">'; 				  
+
+var is_auto_reload = true;
+function reloadOnErr(obj)
+{
+	if(!is_auto_reload)
+	return;
+	setTimeout("eval('obj.src = obj.src;'", 500);
+}
+
+if(isIE()) { var brow = "IE"; }
+if(isNS()) { var brow = "MZ"; }
+
+function doPlay() 
+{
+	if(isWin())
+	{
+		if(isIE())
+		{ dw(dw_video_ocx);}
+		else
+		{ dw(dw_push); }
+	}
+	else
+	{ dw(dw_push); }
+}
+/* OCX Video End */
+
+/////////////////////////////////////////////////////////
+
+// Move Camera - Start
+var IP ="../pt/ptctrl.cgi";
+var counter = 0;
+var interval = 100;
+var pt_direction = "";
+var pt_speed = ",0";
+
+function move(d) {
+	var timestamp = new Date();
+	var variables = "?mv=" + d + pt_speed + "&ts=" + timestamp;
+	document.getElementById("hiddenframe").src = IP+variables;
+}
+function movePos(d) {
+	var timestamp = new Date();
+	var variables = "?position=" + d + pt_speed + "&ts=" + timestamp;
+	document.getElementById("hiddenframe").src = IP+variables;
+}
+
+function goPreset(position) 
+{
+	var timestamp = new Date();
+	var variables = "?preset=move," + position + "&ts=" + timestamp;
+	document.getElementById("hiddenframe").src = IP + variables;
+}
+
+// Set Calibration
+function set_cali()
+{
+	goPreset(104);
+}
+function setCalibrationHome()
+{
+	var timestamp = new Date();
+	var variables = "?preset=set,104" + "&ts=" + timestamp;
+	document.getElementById("hiddenframe").src = IP + variables;
+}
+
+function toggleButtonOver_pad(original,over)
+{
+	if (document.getElementById("pad").src.indexOf(original.replace('..','')) > -1)
+	{
+		document.getElementById("pad").src = over;
+	}
+	else
+	{
+		document.getElementById("pad").src = original;
+	}
+}
+// Move Camera - End
+
+
+// Preset List Start
+function displayData()
+{
+    var cf = document.forms[0];
+	if(cf.pslist.length > 0)
+	{
+		//alert("cf.pslist.selectedIndex: "+cf.pslist.selectedIndex+ "  ="+pnameA[cf.pslist.selectedIndex]);
+		cf.pt_pname.value = pnameA[cf.pslist.selectedIndex];
+	}
+}
+
+/*function init_preset_list()
+{
+	var pre_slist = document.forms[0].pslist;
+
+	for (var i=0; i<pre_slist.length; i++)
+	{
+		if(pre_slist.options[i].text == "") 
+		{
+			pre_slist.remove(i);
+			if (i > 0)
+			{
+				i--;
+			}
+		}
+	}
+}*/
+
+var http_request,http_request2;
+function showResponse()
+{
+	var cf = document.forms[0];
+
+	if (http_request2.readyState == 4 || http_request2.readyState == 'complete')
+  	{	
+		if (http_request2.status == 200)
+		{
+			for (i=0; i< pnameA.length; i++)
+			{
+				if(pnameA[i] == "")
+				{
+					pnameA[i] = cf.pt_pname.value;
+					addOption(cf.pslist, pnameA[i], pnameA[i]);
+					break;
+				}
+			}
+		}
+		http_request2.abort();
+		http_request2 = null;
+		cf.apply.disabled = false;
+	}
+}
+function add_pos()
+{
+    var cf = document.forms[0];    
+    var thesame = 0;
+    var i = 0;
+	var src_file;
+	var position = 0;
+	var app_obj = document.getElementById('ob_applet');
+
+	if (cf.pt_pname.value == "")
+	{
+		alert(msg_invalid_resetname);
+		return;
+	}
+    for (ii=0; ii< cf.pslist.length; ii++)
+    {   
+
+    		if (cf.pt_pname.value==cf.pslist.options[ii].value)
+    		{ thesame = 1; break; } 				
+    }
+    
+    if (thesame == 0)
+    {
+		    if (cf.pslist.length >=9)
+		    { alert(msg_in_max); return; }
+   }
+   else
+   {
+		alert(msg_in_ptname);
+		return;
+   }
+//    cf.todo.value = "add_preset";
+//    cf.submit();
+
+	if(http_request2 == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request2 = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request2 = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request2 = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request2 = null; }
+			}
+		}
+	}
+
+	if (!http_request2)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	cf.apply.disabled = true;
+
+	src_file =  '../adm/file.cgi?todo=add_preset&pt_pname='+cf.pt_pname.value+
+							'&'+CGIRequestRandomKey+'='+new Date().getTime();
+
+	http_request2.onreadystatechange = function() { showResponse(); };
+	http_request2.open('GET', src_file, true);
+	http_request2.send(null);
+}
+
+
+function showResponse_del()
+{
+	var cf = document.forms[0];
+	if ((http_request.readyState == 4 || http_request.readyState == 'complete'))
+  	{	
+		if(http_request.status == 200)
+		{
+			for (i=0; i< pnameA.length; i++)
+			{
+				if(pnameA[i] == cf.pt_pname.value)
+				{
+					break;
+				}
+			}
+			for(j= i+1;j<pnameA.length;j++)
+			{
+				pnameA[j-1]=pnameA[j];
+				pnameA[j] = "";
+			}
+
+			delOption(cf.pslist,i);
+			displayData();
+		}
+
+		http_request.abort();
+		http_request = null;
+		cf.remove.disabled = false;
+	}
+}
+
+/* Delete Pos */
+function del_pos()
+{
+	var src_file;
+    var cf = document.forms[0];
+    if(chkSelected(cf.pslist, msg_select_preset))
+	{
+//    cf.todo.value = "delete_preset";
+//    cf.submit();
+		if(http_request == null)
+		{
+			if(window.XMLHttpRequest)
+			{ http_request = new XMLHttpRequest(); } 
+			else if(window.ActiveXObject)
+			{
+				try
+				{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+				catch(e)
+				{
+					try
+					{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+					catch(e)
+					{ http_request = null; }
+				}
+			}
+		}
+
+		if (!http_request)
+		{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+		cf.remove.disabled = true;
+
+		src_file =  '../adm/file.cgi?todo=delete_preset&pt_pname='+cf.pt_pname.value+
+								'&'+CGIRequestRandomKey+'='+new Date().getTime();
+
+		http_request.onreadystatechange = function() { showResponse_del(); };
+		http_request.open('GET', src_file, true);
+		http_request.send(null);
+	}
+}
+// Pre
+
+// Preset List - End
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init()">
+<FORM name="presets" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td colspan="2" class="subhead"> &nbsp; Preset Point Position</td>
+</tr> 
+<tr>
+ <td colspan="2" align="center" valign="top">
+	<table border=0 cellspacing=0 cellpadding=0 width="100%">
+	<tr>
+	<td rowspan="3" align="center" valign="middle">
+		<div ID="v_play" style="display:block">
+		<table border=0 cellspacing=0 cellpadding=0><TR><TD nowrap>
+		<script language="javascript" type="text/javascript">doPlay();</script>
+		</TD></TR></table>
+		</div>
+	</td>
+	<td align="center" valign="middle">
+										 <table border="0" cellspacing="0" cellpadding="0", width="18">
+												<tr>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_01_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('UL');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_02_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('U');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_03_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('UR');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+												</tr>
+											
+												<tr>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_04_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('L');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_05_up.gif" width="26" height="26" onMouseDown="pressImg(this);goPreset('103');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_06_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('R');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+												</tr>
+											
+												<tr>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_07_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('DL');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_08_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('D');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+													<td nowrap width="33%" align="center" valign="top">
+														<img src="../buttons/b_09_up.gif" width="26" height="26" onMouseDown="pressImg(this);move('DR');" onMouseUp="pressImg(this);" onMouseOver="rolloverImg(this);" onMouseOut="overImg(this);" onload="preloadImg(this);">
+													</td>
+												</tr>							 							 
+										 </table>		
+		
+	<!--table border=0 cellspacing=0 cellpadding=0 width="90" height="89">
+	<tr>
+     <td class="pt_ctr1"><img src="../buttons/background_pt.gif" width="90" height="89" alt="Video Movement" name="pad" border="0" usemap="#controller" id="pad"></td>
+	</tr>
+	</table-->
+	</td>
+	</tr>
+	<!--tr>
+	<td nowrap align="center"><input type="button" class="stdbuttton" name="cali" value="Re-Center" onClick="re_center();"></td>
+	</tr-->
+	<tr>
+	<!--td nowrap align="center"><input type="button" class="stdbuttton" style="width:160px" name="setcalhome" value="Set User Defined Home" onClick="setCalibrationHome();"></td-->
+	</tr>
+	<tr>
+	<td nowrap align="center" valign="top">&nbsp;</td>
+	</tr>
+	<tr>
+	<td nowrap>
+	<br>
+	<table border=0 cellspacing=0 cellpadding=0>
+	<tr>
+	<td class="lc" nowrap width="100">Preset List: </td>
+	<td class="rc" nowrap>
+	<select name="pslist" size="1" onChange="displayData();" style="width:180px">
+	</select>  </td> 
+	</table>
+	</td>
+	<td nowrap align="center">
+	<br>
+	<input type="button" class="stdbuttton" name="remove" value="Remove" style="width:70px" onClick="del_pos();"></td>
+	</tr>
+	<tr>
+	<td nowrap>
+	<table border=0 cellspacing=0 cellpadding=0>
+	<tr>
+	<td class="lc" nowrap width="100">Preset Name: </td>
+	<td class="rc" nowrap><input type="text" name="pt_pname" size="18" maxlength="16" value="" style="width:180px"></td> 
+	</table>
+	</td>
+	<td nowrap align="center">
+	<input type="button" class="stdbuttton" name="apply" value=" Add " style="width:70px" onClick="add_pos();">
+	</td>
+	</tr>
+	</table>
+<br>	
+
+ </td>
+</tr>
+<tr>
+ <td nowrap colspan="2" height="40" align="right" valign="top">
+ <input type="button" class="stdbuttton" name="back" value=" Back " onClick="location.href='pan_tilt.htm'"> &nbsp; &nbsp;
+<input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)"> &nbsp; &nbsp;
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_pt_preset.htm')"> &nbsp; &nbsp; &nbsp; </td>
+</tr>
+<!-- table footer -->
+</table>
+
+</td>
+</tr>
+</table>
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+<input type="Hidden" name="h_authorization" value=""> 
+<input type="Hidden" name="preset1" value=""> 
+<input type="Hidden" name="preset2" value=""> 
+<input type="Hidden" name="preset3" value=""> 
+<input type="Hidden" name="preset4" value=""> 
+<input type="Hidden" name="preset5" value=""> 
+<input type="Hidden" name="preset6" value=""> 
+<input type="Hidden" name="preset7" value=""> 
+<input type="Hidden" name="preset8" value=""> 
+<input type="Hidden" name="preset9" value=""> 
+</form>
+
+<iframe id="hiddenframe" width="1" height="2" src=""></iframe>				
+
+<!--- controller --->
+<!--map name="controller" id="controller">
+<AREA SHAPE="rect" COORDS="56,55,89,88" title="Move camera down_right"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_04-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_04-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_04-2.gif','../buttons/b_04-3.gif');move('DR');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_04-2.gif','../buttons/b_04-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="33,55,57,88" title="Move camera down"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_05-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_05-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_05-2.gif','../buttons/b_05-3.gif');move('D');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_05-2.gif','../buttons/b_05-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="1,55,34,88" title="Move camera down_left"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_06-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_06-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_06-2.gif','../buttons/b_06-3.gif');move('DL');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_06-2.gif','../buttons/b_06-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="56,33,89,56" title="Move camera right"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_03-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_03-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_03-2.gif','../buttons/b_03-3.gif');move('R');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_03-2.gif','../buttons/b_03-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="33,33,57,56" title="Move camera home"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_o-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_o-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_o-2.gif','../buttons/b_o-3.gif');goPreset('103');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_o-2.gif','../buttons/b_o-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="1,33,34,56" title="Move camera left"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_07-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_07-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_07-2.gif','../buttons/b_07-3.gif');move('L');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_07-2.gif','../buttons/b_07-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="56,0,89,34" title="Move camera up_right"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_02-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_02-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_02-2.gif','../buttons/b_02-3.gif');move('UR');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_02-2.gif','../buttons/b_02-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="33,0,57,34" title="Move camera up"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_01-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_01-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_01-2.gif','../buttons/b_01-3.gif');move('U');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_01-2.gif','../buttons/b_01-3.gif');"
+/>
+
+<AREA SHAPE="rect" COORDS="1,0,34,34" title="Pan camera up_left"
+onmouseover="toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_08-2.gif');"
+onmouseout = "toggleButtonOver_pad('../buttons/background_pt.gif','../buttons/b_08-2.gif');"
+onmousedown="toggleButtonOver_pad('../buttons/b_08-2.gif','../buttons/b_08-3.gif');move('UL');"
+onmouseup = "toggleButtonOver_pad('../buttons/b_08-2.gif','../buttons/b_08-3.gif');"
+/>
+</MAP--> 
+
+<input type="hidden" name="pan_perstep" id="pan_perstep" value="@pan_perstep#">
+<input type="hidden" name="tilt_perstep" id="tilt_perstep" value="@tilt_perstep#">
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+
+

@@ -1,0 +1,42 @@
+#!/bin/sh
+echo "Enter upgrade mode ..."
+
+#mount ramdisk to make read/write
+cp -rf /mnt/ramdisk /tmp
+mount -t tmpfs none /mnt/ramdisk
+mv /tmp/ramdisk/* /mnt/ramdisk
+rm -rf /tmp/ramdisk
+
+insmod /usr/modules/gpio_drv.ko
+
+if [ "$has_no_usb_hub" = "yes" ];then
+echo 112 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio112/direction
+echo 1 > /sys/class/gpio/gpio112/value
+sleep 1
+fi
+
+/bin/hostname localhost
+
+#Read Configure File From FLASH
+/usr/local/bin/r_flash
+sleep 1
+/sbin/insmod /usr/modules/asix.ko
+sleep 1
+/usr/local/bin/chg_mac_address_eth
+
+/sbin/ifconfig eth0 up >/dev/null 2>/dev/null 
+/sbin/ifconfig eth0 192.168.0.99 >/dev/null 2>/dev/null 
+
+# ---- http/https server ----#
+cp /etc/lighttpd/lighttpd-secure.conf /mnt/ramdisk/lighttpd/lighttpd.conf
+sed -i "/server.bind = \"127.0.0.1\"/d" /mnt/ramdisk/lighttpd/lighttpd.conf
+/usr/local/bin/auth
+/usr/local/bin/httpd start &
+
+
+cp -f /usr/local/bin/utility_upgrade /tmp
+cp -f /usr/local/bin/do_leds /tmp
+/tmp/utility_upgrade -d &
+
+

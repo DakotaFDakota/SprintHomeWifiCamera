@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Administration</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function fw_up()
+{
+	var cf = document.forms[1];
+	if(cf.upfilename.value.length == 0)
+	{
+		alert(nofile_msg);
+		return false;
+	}
+	if (!confirm(up_msg))
+		return false;
+
+	return true;
+}
+
+
+function init()
+{
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"]
+		];
+
+	 document.getElementById("ongoing").style.display="none";
+	 document.getElementById("mubd").style.display="block";
+	read.get(array_get);
+
+	showMsg();
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init()">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+<tr><td nowrap valign="top">
+
+<form  name="upg_fw" method="post" action="bad_pixel_calibration.cgi?action=save" ENCTYPE="multipart/form-data" onSubmit="return fw_up()">
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td class="subhead" nowrap>Bad Pixel Calibration Upload </td>
+ <td class="rc" nowrap>&nbsp;  </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Upload File: </td>
+ <td class="rc" nowrap>
+ <input type="file" name="upfilename" value="" size="30" maxlength="255">
+ </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>&nbsp;  </td>
+ <td class="rc" nowrap>
+ <input type="submit" class="stdbuttton" name="upgrade" style="width:65px" value="Start"> &nbsp;
+ <input type="reset" class="stdbuttton" name="clear" value="Clear File Name">
+ </td>
+</tr>
+
+</table>
+<input type="Hidden" name="this_file"  value="upload_bad_pixel_calibration.htm">
+<input type="Hidden" name="next_file"  value="upload_bad_pixel_calibration.htm">
+<input type="Hidden" name="todo" value="upload">
+</form>
+
+</td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+	<tr>
+		<td class="leftbuttonrow" colspan="2" align="center">
+			<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_pwd.htm')"> &nbsp; 
+			<input type="button" class="stdbuttton" name="License" value=" License " onClick="openHelpWin('Licenses.txt')"> &nbsp; 
+		</td>
+	</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+	
+
+
+<!-- table footer -->
+</table>
+
+</td></tr>
+
+</table>
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

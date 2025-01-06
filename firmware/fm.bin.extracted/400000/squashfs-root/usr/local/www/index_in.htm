@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL="stylesheet" TYPE="text/css" HREF="rc8510a_ig_n.css">
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera</title>
+
+<script language="JavaScript" type="text/javascript" src="linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="message.js"></script>
+
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body style="background:#ffffff" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0" onLoad="showMsg()">
+<FORM name="index" method="post" action="adm/file.cgi" onSubmit="return false">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="header.gif" alt="" border="0">
+</div>
+<div ID="topmodel">@h_model_num#</div>
+</div>
+<input type="Hidden" name="h_http_mode" value="@h_http_mode#">
+<input type="Hidden" name="h_https_mode" value="@h_https_mode#">
+
+<div ID="mubd">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+<p>
+<BR>
+<a href="img/main.cgi?next_file=main.htm" class="tmenu">View Video</a>
+<p>
+	<script language="JavaScript">
+		var cf = document.forms[0];
+		var address = document.location + "";
+		var ipadd = self.location.host;
+		
+		if(self.location.protocol == "http:" && 0 == cf.h_http_mode.value)
+		{
+			address = 'https://' + ipadd + '/adm/system.htm';
+			
+      document.write("<a href=\"" + address + "\" class=\"tmenu\">Administration</a>");
+    }
+    else if(self.location.protocol == "https:" && 0 == cf.h_https_mode.value) 
+    {
+			address = 'http://' + ipadd + '/adm/system.htm';
+			
+      document.write("<a href=\"" + address + "\" class=\"tmenu\">Administration</a>");
+    }	
+    else
+    	document.write("<a href=\"adm/system.htm\" class=\"tmenu\">Administration</a>");
+  </script>
+</p>
+ 	</td>
+ 	
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+<tr>
+  <td colspan="2" align="center" valign="middle" width="600" height="600">
+<img src="welcome.jpg" width="600" height="379" alt="" border="0"></td>
+</tr>
+</table>
+</div>
+<input type="Hidden" name="this_file" value="index.htm">
+<input type="Hidden" name="next_file" value="index.htm">
+<input type="Hidden" name="todo" value="none">
+</form>
+
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>

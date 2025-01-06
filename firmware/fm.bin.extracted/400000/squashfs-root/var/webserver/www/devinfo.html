@@ -1,0 +1,189 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
+		<link rel="stylesheet" href="/css/style.css">
+		<!--<script type="text/javascript" src="/file/javascript.js"></script>-->
+		<title>Device Information</title>
+	</head>
+<body class="background">
+<script>
+	var myxml;
+function createXMLHttpRequest() {
+    var xmlHttp;
+    if (window.XMLHttpRequest) { //if we can get XMLHttpRequest
+        xmlHttp = new XMLHttpRequest();  // Mozilla、Firefox、Safari
+    }
+    else if (window.ActiveXObject) { //if we can get ActiveXObject
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); // Internet Explorer
+    }
+    return xmlHttp;
+}
+
+
+
+
+function select_val_idx(id,setval,defval){
+  var  e = document.getElementById(id);
+  //selval=e.options[e.selectedIndex].value;
+  //alert(e.options[e.selectedIndex].value)
+  //alert(setval)
+  for(i=0;i<defval.length;i++){
+     //alert(setval);
+     //alert(defval[i])
+     if(setval==defval[i])
+        e.selectedIndex=i;
+  }
+}
+
+
+function parsevalue(tmpstr){
+
+   var data=tmpstr.split("&");
+   //alert(data);
+key_value = data[0].split("=");
+//alert("key_value 0:" +key_value[0]);
+   document.getElementById("id_productname").value=key_value[1];
+   key_value = data[1].split("=");
+   //alert("key_value 1:" +key_value[1]);
+   document.getElementById("id_linuxkernelver").value=key_value[1];
+   key_value = data[2].split("=");
+   //alert("key_value 1:" +key_value[1]);
+   document.getElementById("id_fwver").value=key_value[1];
+   key_value = data[3].split("=");
+   //alert("key_value 1:" +key_value[1]);   
+   document.getElementById("id_macaddr").value=key_value[1];
+
+
+  
+
+}
+
+ 
+function handleGetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response:" + myxml.responseText);
+	parsevalue(myxml.responseText);
+      //document.GetVal.t1.value=myxml.responseText; 
+     }
+   }
+}
+function handleSetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response" + myxml.responseText);
+          //document.SetVal.t2.value=myxml.responseText;
+	  alert(myxml.responseText);
+	  //parsevalue(myxml.responseText);
+     }
+   }
+}
+
+
+ 
+function startGetRequest()
+{
+    
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    myxml.open("GET", "/cgi-bin/devinfo?devinfo.product.name&devinfo.linuxkernelver&devinfo.fwver&devinfo.macaddr&end",true); 
+    myxml.send("");
+
+}
+function startSetRequest()
+{
+
+   var str_value = new Array();
+   str_value[0] = document.devinfo.devinfo_appver.value;
+   str_value[1] = document.devinfo.devinfo_fwver.value;
+   str_value[2] = document.devinfo.devinfo_macaddr.value;
+  
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleSetStateChange;
+    myxml.open("POST", "/cgi-bin/devinfo",true);
+    
+    myxml.send("devinfo.appver"+str_value[0]+"&devinfo.fwver"+str_value[1]+"&devinfo.macaddr"+"&end");
+}
+ 
+
+</script>
+<form action="/action/devifo" method=POST name="devinfo">
+	
+		
+	<table border=0 width="700" cellspacing=1>
+			<tr>
+			<td>
+			<p class=title><b>Device information</p>
+			</br>
+			</br>
+			</td>
+			</tr>
+	<!--
+		<tr>
+			<td width="35%">
+				App version
+			</td>
+			<td width="65%">
+				<input type="text" name="devinfo_appver" id="id_appver" size="20" maxlength="20" value="" disabled="true">
+			</td>
+		</tr>
+	-->
+			<tr>
+			<td width="35%">
+				Product Name
+			</td>
+			<td width="65%">
+				<input type="text" name="devinfo_productname" id="id_productname" size="20" maxlength="20" value="" disabled="true">
+			</td>
+		</tr>
+
+		<tr>
+			<td width="35%">
+				Hardware version
+			</td>
+			<td width="65%">
+				<input type="text" name="devinfo_hardwrever" id="id_hardwarever" size="20" maxlength="20" value="" disabled="true">
+			</td>
+		</tr>
+
+		<tr>
+			<td width="35%"><!--linux kernel version-->
+				linux kernel version
+			</td>
+			<td width="65%">
+				<input type="text" name="devinfo_linuxkernelver" id="id_linuxkernelver" size="20" maxlength="20" value="" disabled="true">
+			</td>
+		</tr>
+		<tr>
+			<td width="35%">
+				FW version
+			</td>
+			<td width="65%">
+				<input type="text" name="devinfo_fwver" id="id_fwver" size="20" maxlength="20" value="" disabled="true">
+			</td>
+		</tr>
+		<tr>
+			<td width="35%">
+				Mac address
+			</td>
+			<td width="65%">
+				<input type="text" name="devinfo_macaddr" size="20" id="id_macaddr" maxlength="20" value="" disabled="true">
+			</td>
+		</tr>
+	</table>
+	<table>
+	<tr>
+	<td>
+	</td>
+	</tr>
+	</table>
+<script type="text/javascript">startGetRequest();</script>
+</form>
+
+</body>
+
+</html>

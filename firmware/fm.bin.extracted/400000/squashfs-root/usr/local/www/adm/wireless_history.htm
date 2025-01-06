@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Wireless Information</title>
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <!--Version 1.02 -->
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+<script type="text/javascript">
+var g_content = null;
+function read(x)
+{
+	g_content=x;
+}
+</script>
+    <script language="javascript" type="text/javascript" src="../flot/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../flot/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="./wireless.js"></script>
+    <script language="javascript" type="text/javascript" src="../flot/jquery.flot.navigate.js"></script>
+    <script language="javascript" type="text/javascript" src="../flot/excanvas.min.js"></script>
+	<script language="javascript" type="text/javascript" src="./wireless_history.cgi?Callback=read"></script>
+   <!-- <script language="javascript" type="text/javascript" src="../flot/jquery.flot.selection.js"></script>-->
+    <style type="text/css">
+    #placeholder .button {
+        position: absolute;
+        cursor: pointer;
+    }
+    #placeholder div.button {
+        font-size: smaller;
+        color: #999;
+        background-color: #eee;
+        padding: 2px;
+    }
+    #placeholder1 .button {
+        position: absolute;
+        cursor: pointer;
+    }
+    #placeholder1 div.button {
+        font-size: smaller;
+        color: #999;
+        background-color: #eee;
+        padding: 2px;
+    }
+    #placeholder2 .button {
+        position: absolute;
+        cursor: pointer;
+    }
+    #placeholder2 div.button {
+        font-size: smaller;
+        color: #999;
+        background-color: #eee;
+        padding: 2px;
+    }
+    .message {
+        padding-left: 50px;
+        font-size: smaller;
+    }
+    </style>
+ </head>
+ <body onload ="init();" style="background-color:#EBEBEB">
+    <table><td style="font: bold 18pt Arial, Helvetica, sans-serif;">Wireless Information</td>
+    	<td><input type="button" value="Reflesh" style="width:65px;font: bold 9pt Arial, Helvetica, sans-serif;" onclick="location.reload()"></td>
+    	</table>
+	<img src="plus.png" style="display:none;" id="plus"></img>
+	<img src="minus.png" style="display:none;" id="minus"></img>
+    <table id="Chief"  ><td style="font: bold 12pt Arial, Helvetica, sans-serif;" id="chief_info"></td><td valign="center" id="repeaterlabel"></td></table>
+    
+    	<!--<table style="font: bold 12pt Arial, Helvetica, sans-serif;">
+    		<td align="left">
+    			<input id="checkall" type= "checkbox" onclick="check_all()">Repeater-client 
+    		</td>
+    	</table>-->
+    	<!--<table style="padding-left:15px" >	
+    		<div style="font: bold 9pt Arial, Helvetica, sans-serif;padding-left:15px;" id="Client_list"></div>
+    	<</table>   -->
+    	
+   <br>
+	<TABLE border="0" id="Strength" style="display:none;" cellspacing="0" cellpadding="0">
+	<tr>	
+			<td style="font: bold 10pt Arial, Helvetica, sans-serif;"><span id="title" style="font: bold 15pt Arial, Helvetica, sans-serif;">Statistic Chart&nbsp;</span>
+				<select size="1" style="width:160px" id="select" onchange="changeflot(this.options[this.options.selectedIndex].value);">
+					<option value="1" selected>Signal Strength (%)</option>
+					<option value="2">Signal Strength (dBm)</option>
+					<option value="3">Noise Level</option>
+					<option value="4">Speed</option>
+				</selsect>
+				</td>
+	</tr>
+	<tr >
+		<td valign="top" >
+				<p id="Legend" style="font: 11pt Arial, Helvetica, sans-serif;margin-bottom:2px;margin-top:2px;" align="left" ></p>   
+	</td>
+		</tr>
+	<tr>
+	<td >	 <div id="placeholder" style="font:10pt Arial, Helvetica, sans-serif;width:980px;height:350px;"></div></td>
+	
+	<!--<td valign="top"><div id="overview" style="width:300px;height:150px;"></td>	-->
+	</tr>
+	<tr><td align="center" style="font: 11pt Arial, Helvetica, sans-serif;">Elapsed time (Minutes).&nbsp;Current time is&nbsp;<span id="time"></span> </td></tr>
+	
+		
+	</table>
+	
+   <table id="record_info" style="display:none;" >
+		<tr>
+			<td>
+		<input id="show"  type=button value="Show Details" style="width:120px;" onClick="show_recordlist();"></input>
+	</td>
+	</tr>
+<td><div id="record" style="font:10pt Arial, Helvetica, sans-serif;"></div></td>	
+	</table>
+    
+    
+
+
+
+ </body>
+</html>

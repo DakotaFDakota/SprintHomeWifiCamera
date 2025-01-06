@@ -1,0 +1,12 @@
+#!/bin/sh
+mkdir /mnt/usb
+
+if [ -e /dev/sda1 ]; then
+	# USB
+	mount /dev/sda1 /mnt/usb -t vfat
+elif [ -e /dev/sda ]; then
+	# SD to USB
+	mount /dev/sda /mnt/usb -t vfat
+else
+	echo "No USB device, Nothing to do."
+fi

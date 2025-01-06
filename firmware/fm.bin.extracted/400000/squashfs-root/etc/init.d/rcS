@@ -1,0 +1,34 @@
+#!/bin/sh
+echo "Enter rcS ..."
+mknod -m 666 /dev/null c 1 3
+/bin/hostname -F /etc/hostname
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+mdev -s &
+echo 3 > /proc/sys/kernel/printk
+
+/bin/mount -t proc proc /proc
+
+#=================================================
+# Export User special enviroment variables
+#=================================================
+
+export has_speaker=yes
+export echo_cancel_supp=yes
+export has_no_usb_hub=yes
+export support_mmcsd=yes
+
+upgrade=`cat /proc/cmdline | grep "upgrade"`;
+
+if [ "$upgrade" == "" ]; then
+	echo "-------------------------------------------------------"                                                                               
+	echo "normal boot up"
+	echo "-------------------------------------------------------"
+	/etc/init.d/Snormal
+else
+	echo "-------------------------------------------------------"
+	echo "utility upgrade mode"
+	echo "-------------------------------------------------------"
+	/etc/init.d/Supgrade  
+fi
+
+echo "Exit rcS ..."

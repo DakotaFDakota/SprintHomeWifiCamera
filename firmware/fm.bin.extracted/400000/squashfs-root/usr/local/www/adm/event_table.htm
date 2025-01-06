@@ -1,0 +1,861 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"> 
+<html> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css"> 
+<title>Network Camera - Event</title> 
+ 
+<style type="text/css"> 
+ 
+.table_head {
+	color: #000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+ 
+.table_title {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #111;
+}
+ 
+.subhead2 {
+	color: black;
+	background: transparent;
+	font: bold 11pt Arial, Helvetica, sans-serif;
+	text-align: center;
+}
+ 
+ 
+#eventlist
+{
+	font-family: "Courier New", Courier, monospace;
+	font-size:12px;
+}
+ 
+#statuspane
+{
+	position: relative;
+	top: 10px;
+	display: none;
+	z-index:99;
+}
+ 
+.btn
+{
+	width: 80px;
+	height: 25px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+ 
+ 
+ 
+select.snum
+{
+	font-size:11px;
+}
+ 
+a.evt:link
+{
+	color: #000;
+	text-decoration: none;
+}
+a.evt:visited {color: #000;text-decoration: none;}
+a.evt:hover {color: #036;  text-decoration: none;}
+a.evt:active {color: #C30;text-decoration: none;}
+ 
+</style> 
+ 
+ 
+ 
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../message.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../sch.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../libctrl.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script> 
+<script language="JavaScript" type="text/javascript"> 
+<!-- Start Script
+ 
+var event_max_num = 10;
+ 
+var start_time="";
+var end_time="";
+var file_ctrl="";
+ 
+ 
+var para_array=[
+		[1,	"event",			null,			null		],	
+		[2,	"mode",				"top_enable", 	null		],
+		//[2,	"in1",				"trig_in1", 	null		],
+		//[2,	"pir",				"trig_pir", 	null		],
+		[2,	"md",					"trig_md", 	null		],
+		[2,	"au",					"trig_au", 	null		],
+		//[2,	"mpan",				"m_pan", 	  null		],
+		//[2,	"GotoMdPosIdleEn",	"GotoMdPosIdleEn",	null		],
+		//[2,	"GotoMdPosIdleVal",	"GotoMdPosIdleVal",	null		],		
+		[2,	"http_trigger","trig_http", 	  null		],
+		[2,	"event_list",	"api_event", 	SPECIFIED	]
+];
+ 
+ 
+var item_array=[
+		[1,	"item",				null],		
+		[2,	"name",				null],
+		[2,	"channel",		null],
+		[2,	"mode",				null],
+		[2,	"schedule",			null],
+		[3,	"weekdays",			null],
+		[3,	"time",				null],
+		[2,	"by",				null],
+		[2,	"interval",			null],
+		//[2,	"wlled_time",			null],
+		[2,	"event_file_info",		null],
+		[2,	"action_list",		"api_action"]
+];
+ 
+ 
+function api_action(node, orientation, index)
+{
+	if (orientation == REQUEST)  //set
+	{ 
+		cf = document.getElementsByName("event_table")[0];
+		var vals = cf.options[index].value;
+		var actions = getValueInString("action_list", vals);
+		actions = actions.split(',');
+		for (var i=0; ; i++)
+		{
+			if (actions[i].length > 0)
+			{
+				var tmpNode = xmlDoc.createElement("name");
+				tmpNode.appendChild(xmlDoc.createTextNode(actions[i]));
+				var tmpNode2 = xmlDoc.createElement("action");
+				tmpNode2.appendChild(tmpNode);
+				node.appendChild(tmpNode2);
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	else if (orientation == RESPONSE)
+	{
+		cf = document.getElementsByName("event_table")[0];
+		var vals = cf.options[index];
+		var actions = "";
+		for (var i=0; i < node.childNodes.length ; i++)
+		{
+			actions += node.childNodes[i].firstChild.firstChild.nodeValue + ",";
+		}
+		setValueInString("action_list", vals, actions);
+	}
+}
+ 
+function api_event(node, orientation)
+{
+	if (orientation == REQUEST)  //set
+	{ 
+		cf = document.getElementsByName("event_table")[0];
+		for (var i=0; i<cf.options.length; i++)
+		{
+			var vals = cf.options[i].value;
+			structureXML(node, vals, item_array, i);
+		}
+	}
+	else if (orientation == RESPONSE)  //get
+	{ 
+		cf = document.getElementsByName("event_table")[0];
+		for (var i=0; i<node.childNodes.length; i++)
+		{
+			if (cf.options[i] == null)
+			{
+				try
+				{
+					cf.add(document.createElement('Option'), null);	// standards compliant				
+				}
+				catch(ex)
+				{	
+					cf.options[i] = new Option("", "");
+				}
+			}
+			vals = cf.options[i];
+			parseXML(node, vals, item_array, i);
+		}
+		
+		for (var i=0; i<cf.options.length; i++)
+		{
+			vals = cf.options[i];
+			refresh_optiontext(vals);
+		}
+	}
+}
+
+/*
+function check_pan()
+{
+	var cf = document.forms[0];
+	
+	if (!cf.top_enable.checked)
+	{  	
+		cf.m_pan[0].disabled = true;
+		cf.m_pan[1].disabled = true;
+		cf.m_pan[2].disabled = true;
+		cf.GotoMdPosIdleEn.disabled = true;
+		cf.GotoMdPosIdleVal.disabled = true;
+	}
+	else
+	{	cf.m_pan[0].disabled = false;
+		cf.m_pan[1].disabled = false;
+		cf.m_pan[2].disabled = false;
+		if (cf.m_pan[2].checked == true)   
+		{    
+			cf.GotoMdPosIdleEn.disabled = false;
+			cf.GotoMdPosIdleVal.disabled = false;
+		}
+		else
+		{  	
+			cf.GotoMdPosIdleEn.disabled = true;
+			cf.GotoMdPosIdleVal.disabled = true;
+		}
+	}
+}
+*/
+function refresh_optiontext(vals)
+{
+	var str_event_name;
+	var str_spaces1;
+	var str_enable;
+	var str_trigger;
+	var str_spacesA;
+	var str_action;
+	var event_name_front_space_len = 0;
+	var event_name_front_space = "";
+	var event_name_front_space_index = 0;
+		
+	str_event_name = getValueInString("name", vals.value);
+	if(str_event_name.length > 10)
+	{
+		str_event_name = str_event_name.slice(0,9) + "...";
+	}
+	j = (14 - str_event_name.length);
+	str_spaces1="";
+	if (j <= 0) 
+	{
+		str_spaces1 = "";
+	}
+	else
+	{
+		while((j-- > 0))
+		{
+			str_spaces1 += "&nbsp;";
+		}
+	}
+ 
+	tmp_str = getValueInString("mode", vals.value);
+	str_enable = "Enable ";
+	if(tmp_str == 2 )
+	{
+		str_enable = "Disable";
+	}
+	else
+	{
+		str_enable = "Enable ";
+	}
+	
+	str_trigger = getValueInString("by", vals.value);
+	
+	switch (str_trigger)
+	{
+		case "0": str_trigger = "Input"; break;
+		case "1": str_trigger = "Input2"; break;
+		case "2": str_trigger = "Motion"; break;
+		case "3": str_trigger = "PIR"; break;
+		case "4": str_trigger = "Audio"; break;
+		case "5": str_trigger = "HTTP"; break;
+		case "6": str_trigger = "Period"; break;
+		case "7": str_trigger = "Continuous"; break;
+		case "8": str_trigger = "Input3"; break;
+		case "9": str_trigger = "Input4"; break;
+		case "10": str_trigger = "Tamper"; break;
+		case "11": str_trigger = "People"; break;
+		case "12": str_trigger = "Motion4"; break;
+		case "13": str_trigger = "Audio2"; break;
+		case "14": str_trigger = "Audio3"; break;
+		case "15": str_trigger = "Audio4"; break;
+		default: break;
+	}
+	
+	j = (12 - str_trigger.length);
+	str_spacesA="";
+	if (j <= 0) 
+	{
+		str_spacesA = "";
+	}
+	else
+	{
+		while((j-- > 0))
+		{
+			str_spacesA += "&nbsp;";
+		}
+	}
+	
+	str_action = getValueInString("action_list", vals.value);
+	str_action = str_action.slice(0,-1);
+	
+	while(event_name_front_space_len < str_event_name.length)
+	{
+		if(str_event_name.charCodeAt(event_name_front_space_len) != 32)
+		{
+			break;
+		}
+		event_name_front_space_len++;
+	}
+	
+	while(event_name_front_space_index < event_name_front_space_len)
+	{
+		event_name_front_space += "&nbsp;";
+  		event_name_front_space_index++;
+	}
+	str_event_name = event_name_front_space + str_event_name.slice(event_name_front_space_len);
+	
+	vals.innerHTML = str_event_name
+				+	str_spaces1
+				+	str_enable + "&nbsp;&nbsp;"
+				+	str_trigger
+				+	str_spacesA
+				+	str_action	;
+}
+ 
+ 
+function show_select()
+{
+	var cf=document.getElementById("top_enable");
+	var selpane = document.getElementById("eventlist");
+	var add_btn = document.getElementById("add_btn");
+	var edit_btn = document.getElementById("edit_btn");
+	var delete_btn = document.getElementById("delete_btn");
+	if(cf.checked == 1)
+	{
+		selpane.disabled = 0;
+		add_btn.disabled = 0;
+		edit_btn.disabled = 0;
+		delete_btn.disabled = 0;
+		for(i=0; i<selpane.length; i++)
+		{
+			selpane.options[i].disabled = 0;
+		}
+	}
+	else
+	{
+		selpane.disabled = 1;
+		add_btn.disabled = 1;
+		edit_btn.disabled = 1;
+		delete_btn.disabled = 1;
+		for(i=0; i<selpane.length; i++)
+		{
+			selpane.options[i].disabled = 1;
+		}
+	}	
+	//check_pan();	
+}
+function set_trig_in1()
+{
+	var selpane = document.getElementById("eventlist");
+	
+	var vals;
+	var str_trigger;
+	var str_enable;
+	
+ 
+	document.getElementsByName("trig_in1")[0].value = "0";
+ 
+	for (var i=0; i<selpane.options.length; i++)
+	{
+		vals = selpane.options[i];
+		str_trigger = getValueInString("by", vals.value);
+		str_enable = getValueInString("mode", vals.value);
+		if((str_enable == "0") || (str_enable == "1"))
+		{
+			if(str_trigger == "0")
+			{
+				document.getElementsByName("trig_in1")[0].value = "1";
+			}
+		}
+	}
+}
+ 
+function set_trig_motion()
+{
+	var selpane = document.getElementById("eventlist");
+	
+	var vals;
+	var str_trigger;
+	var str_enable;
+	
+ 
+	document.getElementsByName("trig_md")[0].value = "0";
+ 
+	for (var i=0; i<selpane.options.length; i++)
+	{
+		vals = selpane.options[i];
+		str_trigger = getValueInString("by", vals.value);
+		str_enable = getValueInString("mode", vals.value);
+		if((str_enable == "0") || (str_enable == "1"))
+		{
+			if(str_trigger == "2")
+			{
+				document.getElementsByName("trig_md")[0].value = "1";
+			}
+		}
+	}
+}
+function set_trig_http()
+{
+	var selpane = document.getElementById("eventlist");
+	
+	var vals;
+	var str_trigger;
+	var str_enable;
+	
+ 
+	document.getElementsByName("trig_http")[0].value = "0";
+ 
+	for (var i=0; i<selpane.options.length; i++)
+	{
+		vals = selpane.options[i];
+		str_trigger = getValueInString("by", vals.value);
+		str_enable = getValueInString("mode", vals.value);
+		if((str_enable == "0") || (str_enable == "1"))
+		{
+			if(str_trigger == "5")
+			{
+				document.getElementsByName("trig_http")[0].value = "1";
+			}
+		}
+	}
+}
+function set_trig_pir()
+{
+	var selpane = document.getElementById("eventlist");
+	
+	var vals;
+	var str_trigger;
+	var str_enable;
+	
+ 
+	document.getElementsByName("trig_pir")[0].value = "0";
+ 
+	for (var i=0; i<selpane.options.length; i++)
+	{
+		vals = selpane.options[i];
+		str_trigger = getValueInString("by", vals.value);
+		str_enable = getValueInString("mode", vals.value);
+		if((str_enable == "0") || (str_enable == "1"))
+		{
+			if(str_trigger == "3")
+			{
+				document.getElementsByName("trig_pir")[0].value = "1";
+			}
+		}
+	}
+}
+ 
+function set_trig_audio()
+{
+	var selpane = document.getElementById("eventlist");
+	
+	var vals;
+	var str_trigger;
+	var str_enable;
+	
+ 
+	document.getElementsByName("trig_au")[0].value = "0";
+ 
+	for (var i=0; i<selpane.options.length; i++)
+	{
+		vals = selpane.options[i];
+		str_trigger = getValueInString("by", vals.value);
+		str_enable = getValueInString("mode", vals.value);
+		if((str_enable == "0") || (str_enable == "1"))
+		{
+			if(str_trigger == "4")
+			{
+				document.getElementsByName("trig_au")[0].value = "1";
+			}
+		}
+	}
+}
+function setV()
+{
+	//set_trig_in1();
+	set_trig_motion();
+	//set_trig_pir();
+	set_trig_audio();
+  	set_trig_http();
+	createXMLRequest("set");
+}
+ 
+ 
+ 
+function add_trig()
+{
+	var selpane = document.getElementById("eventlist");
+	var f_pane = document.getElementById("add_event");
+	var btn = document.getElementById("apply_button");
+	var tmp = document.createElement('Option');
+	
+	if(selpane.options.length == event_max_num)
+	{
+		alert("The maximum number of items is " + event_max_num + ", can't add event anymore!");
+		return false;
+	}
+	selpane.title = "add";
+	if(isChrome())
+	{
+		var obj = window;
+		obj.title = selpane.title;
+		obj.options = selpane.options;
+		window.open("config_trig.htm",selpane,"width=508px,height=520px,modal=yes,resizable=no,scrollbars=no");
+	}
+	else
+	{
+		var neop = window.showModalDialog("config_trig.htm",selpane,"dialogWidth=508px;dialogHeight=520px;");
+		if(neop != null)
+		{
+			var vals = neop.split(modal_separator);
+			tmp.innerHTML = vals[0];
+			tmp.value = vals[1];
+			try
+			{
+				selpane.add(tmp,null);	// standards compliant
+			}
+			catch(ex)
+			{	
+				selpane.options[selpane.length] = new Option(vals[2], vals[3]);
+			}
+		}
+	
+		for (var i=0; i<selpane.options.length; i++)
+		{
+			vals = selpane.options[i];
+			refresh_optiontext(vals);
+		}
+	}
+ 
+}
+ 
+ 
+function edit_trig()
+{
+	var selpane = document.getElementById("eventlist");
+	var f_pane = document.getElementById("add_event");
+	var cf=document.forms[0].eventlist;
+	var tmp = document.createElement('Option');
+	
+	
+	if (cf.selectedIndex == -1)
+	{
+		alert(msg_noevent_selected);
+		return false;
+	}
+	
+	for(i=0;i<cf.length;i++)
+	{
+		if(i != cf.selectedIndex)
+		{
+			cf.options[i].selected = 0;
+		}
+	}
+	selpane.title = "edit";
+	if(isChrome())
+	{
+		var obj = window;
+		obj.title = selpane.title;
+		obj.options = selpane.options;
+		obj.selectedIndex = cf.selectedIndex;
+		window.open("config_trig.htm",selpane,"width=508px,height=520px,modal=yes,resizable=no,scrollbars=no");
+	}
+	else
+	{
+		var neop = window.showModalDialog("config_trig.htm",selpane,"dialogWidth=508px;dialogHeight=520px");
+	
+		if(neop != null)
+		{
+			var vals = neop.split(modal_separator);
+			tmp.innerHTML = vals[0];
+			tmp.value = vals[1];
+			try
+			{
+				selpane.add(tmp,null);	// standards compliant
+				selpane.remove(selpane.selectedIndex);
+			
+			}
+			catch(ex)
+			{	
+				selpane.options[selpane.selectedIndex] = new Option(vals[2], vals[3]);
+					// IE only		
+			}
+		}
+	
+		for (var i=0; i<selpane.options.length; i++)
+		{
+			vals = selpane.options[i];
+			refresh_optiontext(vals);
+		}
+	}
+}
+function cfg_trig()
+{
+	var selpane = document.getElementById("eventlist");
+	if(selpane.options.length > 0)
+	{
+		edit_trig();
+	}
+	else
+	{
+		add_trig();
+	}
+}
+ 
+ 
+function del_item()
+{
+	var cf = document.forms[0];
+	if (chkSelected(cf.event_table, msg_noevent_selected)) {
+		if (confirm(msg_delevent)) {
+			var length = cf.event_table.options.length -1;
+			while(length >=0){
+				if(cf.event_table[length].selected == true){
+					cf.event_table.options[length] = null;
+				}
+				length--;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+ 
+function predata()
+{
+	var selpane = document.getElementById("eventlist");
+	for(i=0; i<selpane.options.length; i++)
+	{
+		document.getElementsByName("event_item"+(i+1))[0].value = selpane.options[i].value;
+	}
+	for(; i<event_max_num; i++)
+	{
+		document.getElementsByName("event_item"+(i+1))[0].value = "";
+	}
+	
+	if (document.getElementById("top_enable").checked == 1)
+	{
+		document.getElementsByName("event_enable")[0].value = "1";
+	}
+	else
+	{
+		document.getElementsByName("event_enable")[0].value = "0";
+	}
+}
+ 
+function init()
+{
+	show_select();
+	createXMLRequest("get", "show_select");
+	menuframe.highLight('eventDIV');
+ 
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"]
+		];
+	read.get(array_get);
+}
+ 
+//end script -->
+</script> 
+</head> 
+ 
+<body onLoad="init();"> 
+ 
+ 
+ 
+ 
+<form> 
+<div ID="headimage"> 
+<table border=0 cellspacing=0 cellpadding=10 class="toptab" > 
+<tr> 
+	<td nowrap height="75" align="right" valign="top"></td> 
+</tr> 
+</table> 
+ 
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0"> 
+</div> 
+<div ID="topmodel"><a name="model_num"></a></div> 
+</div> 
+ 
+<div ID="topmenu"> 
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a> 
+<strong>|</strong> 
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a> 
+<strong>|</strong> 
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a> 
+</div> 
+ 
+ 
+<div ID="mubd"> 
+<table class="maintab2" cellspacing="0" cellpadding="0"> 
+<tr> 
+<td nowrap valign="top" class="menutd"> 
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+</td> 
+ 
+<td nowrap valign="top"> 
+<table class="maintab" cellspacing="0" cellpadding="0" style="padding-top:0; padding-bottom:0; padding-right:0; padding-left:0"> 
+<tr>  <!-- layout row, adds spacing below heading --> 
+ <td width="64" class="leftspacer">&nbsp;</td> 
+ <td width="563" class="rightspacer">&nbsp;</td> 
+</tr> 
+ 
+ 
+ 
+<TR> 
+	<TD colspan="1"  width="100" class="subhead" style="padding-right:0">&nbsp;Settings</TD> 
+	<TD class="rc"><input type="checkbox" id="top_enable" name="top_enable" onClick="show_select();">Enable</input> 
+		<input name="triee" type="hidden"></input> 
+	</TD> 
+</TR> 
+ 
+<TR > 
+<TD colspan="2" style="padding-top:8px;padding-left:25px; padding-bottom:0"> 
+<table cellspacing="0" cellpadding="0"> 
+<TR> 
+<TD width="89px"  style="padding:0"></TD> 
+<TD  class="table_title" style="padding:0">&nbsp;&nbsp;Name</TD> 
+<TD width="65px" style="padding:0"></TD> 
+<TD  class="table_title" style="padding:0">Enable</TD> 
+<TD width="25px" style="padding:0"></TD> 
+<TD  class="table_title" style="padding:0">Trigger</TD> 
+<TD width="25px" style="padding:0"></TD> 
+<TD  class="table_title" style="padding:0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Actions</TD> 
+</TR> 
+</table> 
+</TD> 
+</TR> 
+ 
+ 
+ 
+ 
+<TR> 
+<TD colspan="2" style="padding-top:0;padding-left:29px; padding-bottom:0"> 
+<table width="89%"  cellspacing="0" cellpadding="0"> 
+<TR> 
+<TD width="63"></TD> 
+<TD style="padding-top:0; padding-bottom:0"> 
+   <select name="event_table" id="eventlist" multiple size="10" ondblclick="cfg_trig();" style="color:#000; width:100%;"> 
+</select> 
+</TD> 
+</TR> 
+</table> 
+</TD> 
+</TR> 
+ 
+<TR> 
+<TD class=button align=left colSpan="2" > 
+<TABLE cellSpacing=0 cellPadding=0 border=0> 
+ 
+<TR> 
+<TD width="81px"></TD> 
+<TD class=button><INPUT class=btn id="add_btn" onClick="add_trig();"  type=button value="Add"></TD> 
+<TD class=button><INPUT class=btn id="edit_btn" onClick="edit_trig();" type=button value="Edit" width="75"></TD> 
+<TD class=button><INPUT class=btn id="delete_btn" onClick="del_item();" type=button value="Delete" width="75"></TD> 
+</TR> 
+ 
+</TABLE> 
+</TD> 
+</TR> 
+ 
+<!--tr> 
+<td width="100" class="subhead" style="padding-right:0" colspan="2" nowrap>&nbsp;Motion Position</td> 
+ 
+</tr> 
+<tr> 
+<td ></td> 
+<td nowrap class="rc" style="padding-top:0; padding-bottom:0;"><input type="radio" checked="1" name="m_pan" value="2" onClick="check_pan();">&nbsp;Enable Motion Detection in all position</td> 
+</tr> 
+<tr> 
+<td ></td> 
+<td nowrap class="rc" style="padding-top:0; padding-bottom:0;"><input type="radio" name="m_pan" value="0" onClick="check_pan();">&nbsp;Disable Pan/Tilt while Motion Detection is enabled</td> 
+</tr> 
+<tr> 
+<td ></td> 
+<td nowrap class="rc" style="padding-top:0; padding-bottom:0;"><input type="radio" name="m_pan" value="1" onClick="check_pan();">&nbsp;Disable Motion Detection while position is incorrect</td> 
+</tr> 
+ 
+<tr> 
+<td ></td> 
+<td nowrap class="rc" style="padding-left:20px;padding-top:0; padding-bottom:0;"> 
+<input type="checkbox" name="GotoMdPosIdleEn" value="1"> Go to Motion Detection position if idle 
+<select name="GotoMdPosIdleVal" style="{width:50}" width="50"> 
+	<option value="60">1</option> 
+	 <option value="120">2</option> 
+	 <option value="180">3</option> 
+	 <option value="240">4</option> 
+	 <option value="300">5</option> 
+	<option value="600">10</option> 
+	<option value="900">15</option> 
+</select> Minute(s)
+</td> 
+</tr--> 
+ 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+ 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+<TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR> 
+ 
+ 
+<TR><TD colspan="2" class="rightbuttonrow" align="center">&nbsp;
+ <input type="button" class="stdbuttton" name="apply" onClick="setV();" value=" Save "> 
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)"> 
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_event_table.htm')"> 
+ 
+</TD></TR> 
+</table> 
+</TD> 
+</TR> 
+</table> 
+ 
+ 
+</div> 
+ 
+<div id="statuspane" align="center"> 
+<table style="border: #999 solid 1px; background-color: #FFC"> 
+<tr> 
+<td>&nbsp;&nbsp;&nbsp;&nbsp;<span id="msgspan"></span>&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+</tr> 
+</table> 
+</div> 
+<input type="hidden" name="trig_in1"></input> 
+<input type="hidden" name="trig_md"></input> 
+<input type="hidden" name="trig_pir"></input> 
+<input type="hidden" name="trig_au"></input> 
+<input type="hidden" name="trig_http"></input> 
+<input type="Hidden" name="this_file" value="event_table.htm"> 
+<input type="Hidden" name="next_file" value="event_table.htm"> 
+<input type="Hidden" name="todo" value="save"> 
+ 
+</form> 
+ 
+ 
+</body> 
+</html> 

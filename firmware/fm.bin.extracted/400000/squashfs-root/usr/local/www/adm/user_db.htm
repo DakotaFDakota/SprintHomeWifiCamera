@@ -1,0 +1,636 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Video &amp; Audio</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+var mode = "add";
+var maxusers;
+var orgName = "";
+var admName;
+var orgName = "";
+var orgIndex = -1;
+var user_pwd_old;
+
+function reset_pwd()
+{
+	var cf = document.forms[0];
+	var i;
+	for(i = 0; i < cf.userlist.length; i++) 
+	{
+		if (cf.userlist.options[i].value != user_pwd_old[i])
+		{
+			user_pwd_old[i] = cf.userlist.options[i].value;
+		}	
+	}
+}
+
+function saveAll()
+{
+    var cf = document.forms[0];
+	var i = 0;
+	var j = 0;
+	var str1 = "";
+	//cf.h_userlist.value = "";
+	//cf.h_operatelist.value = "";
+	cf.io_ctrl.value = "";
+	cf.pt_ctrl.value = "";
+	cf.h_mic_in_list.value = "";
+	cf.h_aud_out_list.value = "";
+	cf.pwd_chg_user.value = 0;
+
+	for(i = 0; i < cf.userlist.length; i++) 
+	{
+		var str = cf.userlist.options[i].text;
+		var index = str.indexOf(" - (Operator)");
+		var oper = 0;
+		var obj;
+		if(index != -1)
+		{
+			oper = 1;
+		}
+		
+	 	if(index == -1)
+	 	{
+			index = str.indexOf(" - (Viewer)");
+		}
+		obj = eval("cf.user"+(i+1));
+		obj.value =	str.substr(0, index);
+		obj.value += ","+cf.userlist.options[i].value;
+		cf.io_ctrl.value += oper;
+		cf.pt_ctrl.value += oper;
+		if(i<maxusers-1)
+		{
+			cf.io_ctrl.value += ',';
+			cf.pt_ctrl.value += ',';
+		}
+		//cf.h_userlist.value += str.substr(0, index);
+        //cf.h_operatelist.value += oper;		
+		//str1 = ',' + cf.userlist.options[i].value +separator ;
+		//cf.h_userlist.value += str1;
+        //cf.h_operatelist.value += separator;
+		cf.h_mic_in_list.value += "1" + separator;
+		cf.h_aud_out_list.value += "1" + separator;
+		if (cf.userlist.options[i].value != user_pwd_old[i])
+		{
+			cf.pwd_chg_user.value |= (1<<i);
+		}
+	}
+
+	for(j=i;j<maxusers;j++)
+	{
+		var obj = eval("cf.user"+(j+1));
+		obj.value = "";
+		//cf.io_ctrl.value += '0';
+		//if(i<maxusers-1)
+		//{
+		//	cf.io_ctrl.value += ',';
+		//}
+	}
+//	alert("user3="+cf.user3.value);
+//	alert("io_ctrl="+cf.io_ctrl.value);
+//	alert("pwd_chg_user="+cf.pwd_chg_user.value);
+	var save = new GroupCtrl();
+	var array_set=[
+			//["HIDDEN", "h_userlist", "h_userlist"],
+			//["HIDDEN", "h_operatelist", "h_operatelist"],
+			["USER", "pwd_chg_user", "pwd_chg_user"],	
+			["USER", "user1", "user1"],
+			["USER", "user2", "user2"],
+			["USER", "user3", "user3"],
+			["USER", "user4", "user4"],
+			["USER", "user5", "user5"],
+			["USER", "user6", "user6"],
+			["USER", "user7", "user7"],
+			["USER", "user8", "user8"],
+			["USER", "user9", "user9"],
+			["USER", "user10", "user10"],
+			["USER", "user11", "user11"],
+			["USER", "user12", "user12"],
+			["USER", "user13", "user13"],
+			["USER", "user14", "user14"],
+			["USER", "user15", "user15"],
+			["USER", "user16", "user16"],
+			["USER", "user17", "user17"],
+			["USER", "user18", "user18"],
+			["USER", "user19", "user19"],
+			["USER", "user20", "user20"],
+			["USER", "io_ctrl", "io_ctrl"],
+			["USER", "pt_ctrl", "pt_ctrl"],
+			["USER", "audio_in_ctrl", "h_mic_in_list"],		
+			["USER", "audio_out_ctrl", "h_aud_out_list"]
+		];
+	save.callback = reset_pwd;
+	save.set(array_set);	
+//	cf.submit();
+}
+
+var listA = new Array(20), listB = new Array(20), listC = new Array(20);
+
+	
+
+function getsubstr(str, terminator) // get string up to terminator
+{
+	var A = str.split(terminator);
+	return A[0];
+}
+
+function dupName(selObj, newName) // check if newName already in list
+{
+	var item;
+	var name;
+	for (var i = 0; i < selObj.options.length; i++)
+	{
+		item = selObj.options[i].text;
+		name = getsubstr(item, " ");
+		if (name == newName)
+			return true;
+	}
+	return false;
+}	
+
+
+function checkData(typestr)
+{
+    var cf = document.forms[0];
+    var msg = "";
+	var invalid_username_str = ',;';
+// std tests
+	msg+= checkBlank(cf.nameofuser, msg_username);
+	//msg+= checkNoBlanks(cf.nameofuser, msg_username);
+	//msg+= checkNoBlanks(cf.nameofuser, msg_username);
+	//msg+= checkValid(cf.nameofuser, msg_username, Valid_Stri, 32, false);
+	//msg+= checkValid(cf.userpass, msg_userpwd, Valid_Stri, 64, false);
+	msg+= checkInvalid(cf.nameofuser, msg_username, invalid_username_str);
+	msg+= checkInvalid(cf.userpass, msg_userpwd, invalid_username_str);
+	
+    if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	if (cf.userpass.value != cf.v_userpass.value)
+	{
+		alert(msg_passwd_nomatch);
+		return false;
+	}
+	if( typestr == "add" && dupName(cf.userlist, cf.nameofuser.value)||cf.nameofuser.value == admName)
+	{
+			alert(msg_nameused);
+			return false;
+	}
+	else if (typestr == "update" )
+	{
+		if ((orgName != cf.nameofuser.value && dupName(cf.userlist, cf.nameofuser.value))
+            || (cf.nameofuser.value == admName))
+		{
+			alert(msg_nameused);
+			return false;
+		}
+	}
+	return true;	
+}
+
+
+function addUser()
+{
+    var cf = document.forms[0];
+	var index = cf.userlist.selectedIndex;
+	var textStr;	
+    index = (index >= 0) ? index : 0;
+	cf.userlist.selectedIndex = index;
+	cf.userlist.focus();
+	
+	if(cf.userlist.options.length == maxusers )
+	{
+		alert(msg_dbfull);
+		return;
+	}
+	if (!checkData('add') )
+		return;
+
+	if(cf.operate[0].checked)
+	{
+	textStr = cf.nameofuser.value + " - (Viewer)";
+	addOption(cf.userlist, textStr, cf.userpass.value) ;
+	}
+	else if (cf.operate[1].checked)
+	{
+		textStr = cf.nameofuser.value + " - (Operator)";
+		//addOption(cf.userlist, textStr, cf.nameofuser.value, cf.userpass.value, cf.operate.value) ;
+		addOption(cf.userlist, textStr, cf.userpass.value) ;
+	}
+	else //default user type is viewer.
+	{
+	    cf.operate[0].checked = true;
+		textStr = cf.nameofuser.value + " - (Viewer)";
+		//addOption(cf.userlist, textStr, cf.nameofuser.value, cf.userpass.value, cf.operate.value) ;
+		addOption(cf.userlist, textStr, cf.userpass.value) ;
+	}
+	clearorcancel();
+	//saveAll();
+}
+
+function clearorcancel()
+{
+    var cf = document.forms[0];
+	mode = "add" ;  // if in edit mode, cancel it
+	cf.nameofuser.value = cf.userpass.value = cf.v_userpass.value = "";
+	//cf.userlist.disabled = cf.deleteuser.disabled = false;     // = cf.edit.disabled = cf.deleteall.disabled
+	cf.userlist.selectedIndex = -1;	
+}
+
+function addorupdate()
+{
+    var cf = document.forms[0];
+	if ( mode == "add" )
+		addUser();
+	else 
+		updateUser();
+}
+
+function displayData()
+{
+    var cf = document.forms[0];
+	var index = cf.userlist.selectedIndex;
+	var str = cf.userlist.options[index].text;
+    
+	if ( !(index > -1 && index < cf.userlist.options.length) )
+		return;
+    orgIndex = index;
+	var type = str.indexOf(" - (Operator)");
+	var oper = 0;
+	if(type != -1)
+	{
+		oper = 1;
+	}
+	
+ 	if(type == -1)
+ 	{
+		type = str.indexOf(" - (Viewer)");
+	}
+	cf.nameofuser.value = str.substr(0, type);
+	cf.userpass.value = cf.v_userpass.value = cf.userlist.options[index].value;
+    cf.operate[oper].checked = true;
+}
+function updateUser()
+{
+    var cf = document.forms[0];
+	var index = cf.userlist.selectedIndex;
+	var textStr;
+   
+    if (mode == "edit")
+    {
+        index = orgIndex;
+    }
+
+	if (!checkData('update') )
+	    return;
+    
+	if(cf.operate[0].checked)
+	{
+		textStr = cf.nameofuser.value + " - (Viewer)";
+	}
+	else if (cf.operate[1].checked)
+	{
+		textStr = cf.nameofuser.value + " - (Operator)";
+	}
+	else //default user type is viewer.
+	{
+        cf.operate[0].checked = true;
+		textStr = cf.nameofuser.value + " - (Viewer)";
+	}
+	cf.userlist.options[index].text = textStr;
+	cf.userlist.options[index].value = cf.userpass.value;
+    if (mode == "edit")
+    {
+        orgIndex = -1;
+    }
+	clearorcancel();
+}
+
+function edituser()
+{
+    var cf = document.forms[0];
+    
+	if(chkSelected(cf.userlist, msg_select_user))
+	{
+		mode = "edit";
+		displayData();
+		orgName = getsubstr(cf.userlist.options[cf.userlist.selectedIndex].text, " ");
+	}
+}
+
+function deluser() // delete selected item
+{
+    var cf = document.forms[0];
+	var index = cf.userlist.selectedIndex;
+	var num_predef = parseInt(cf.db_max.value);
+	
+	if(!chkSelected(cf.userlist, msg_select_user))
+		return;
+
+	if (!(index >= 0))
+	{
+		alert(msg_select_user);
+		return;
+	}
+	
+	if (index > num_predef )
+	{
+		alert(msg_select_user);
+		return false;
+	}
+	
+	if (confirm(msg_del_user + cf.userlist.options[index].text))
+	{
+		for (var i = index; i < cf.userlist.options.length - 1; i++)
+        	{
+        		cf.userlist.options[i].text = cf.userlist.options[i + 1].text;
+        		cf.userlist.options[i].value = cf.userlist.options[i + 1].value;
+			user_pwd_old[i] = user_pwd_old[i+1];
+        	}
+        	cf.userlist.options.length = cf.userlist.options.length - 1;
+		clearorcancel();
+	}
+	//saveAll();
+}
+
+function delall()
+{
+    var cf = document.forms[0];
+    	mode = "deleteall"; 
+	if (confirm(msg_del_allusers))
+	{
+		cf.userlist.options.length = 0;
+	}
+	mode = "add";
+}
+
+function setuser()
+{
+    var cf = document.forms[0];
+	//alert("db_max="+cf.db_max.value);
+	//alert("ulist="+cf.ulist.value);
+	//cf.userlist.innerHTML = cf.ulist.value;
+	//alert("userlist="+cf.userlist.innerHTML);
+	var user;
+	var operate = cf.io_ctrl.value.split(',');
+	var username = ""
+
+	maxusers = parseInt(cf.db_max.value,10);
+	for(i=1; i<=maxusers; i++)
+	{
+		username = eval("cf.user"+ i +".value.split(',')[0]");
+		
+		if(username == "")
+		{
+			continue;
+		}
+		
+		if(operate[i-1]==1)
+		{
+			user = username + " - (Operator)";
+		}
+		else
+		{
+			user = username + " - (Viewer)";
+		}
+		addOption(cf.userlist, user, "");
+	}
+    
+	user_pwd_old = new Array();
+	for (var i=0; i<cf.userlist.length; i++)
+	{
+		user_pwd_old[i] = randomString(6, Valid_Stri);
+		cf.userlist.options[i].value = user_pwd_old[i];
+	}
+	admName = cf.adm.value;
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+    var cf = document.forms[0];
+	menuframe.highLight('userdbDIV');
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			//["HIDDEN", "ulist", "ulist"],
+			["Manufacture", "max_user", "db_max"],
+			["USER", "user1", "user1"],
+			["USER", "user2", "user2"],
+			["USER", "user3", "user3"],
+			["USER", "user4", "user4"],
+			["USER", "user5", "user5"],
+			["USER", "user6", "user6"],
+			["USER", "user7", "user7"],
+			["USER", "user8", "user8"],
+			["USER", "user9", "user9"],
+			["USER", "user10", "user10"],
+			["USER", "user11", "user11"],
+			["USER", "user12", "user12"],
+			["USER", "user13", "user13"],
+			["USER", "user14", "user14"],
+			["USER", "user15", "user15"],
+			["USER", "user16", "user16"],
+			["USER", "user17", "user17"],
+			["USER", "user18", "user18"],
+			["USER", "user19", "user19"],
+			["USER", "user20", "user20"],
+			["USER", "io_ctrl", "io_ctrl"],	
+			["USER", "pt_ctrl", "pt_ctrl"],	
+			["USER", "admin_name", "adm"]
+		];
+	read.callback = setuser;
+	read.get(array_get);
+}
+
+// End Script -->
+</script>
+
+</head>
+
+<body onLoad="init();showMsg()">
+<FORM name="user" method="post" action="file.cgi" onSubmit="return false">
+
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap valign="top">Existing Users</td>
+ <td class="rc" nowrap valign="top">
+   <select name="userlist" size="10" style="width:290px" onChange="">
+   <!--a name="ulist"></a-->
+   </select>
+   <p>
+   	<input type="button" class="stdbuttton"  value="Edit" onclick="edituser()" style="width:70px">
+	<input type="button" class="stdbuttton"  value="Delete" onclick="deluser()" style="width:70px">
+	<input type="button" class="stdbuttton"  value="Delete All" onclick="delall()" style="width:70px">
+ </td>
+</tr>
+
+<tr>
+ <td class="subhead" nowrap valign="top">User Properties</td>
+ <td class="rc" nowrap valign="top">&nbsp;  </td>
+</tr>
+ 
+
+<tr>
+<td class="lc" nowrap>User Name:</td>
+<td class="rc" nowrap><input type="text" size="16" maxlength="32" name="nameofuser" value="" style="width:140px"></td>
+</tr>
+
+<tr>
+<td class="lc" nowrap>User Password:</td>
+<td class="rc" nowrap><input type="password" size="8" maxlength="64" name="userpass" onFocus="this.select()" value="" style="width:140px"></td>
+</tr>
+<tr>
+<td class="lc" nowrap>Confirm Password:</td>
+<td class="rc" nowrap><input type="password" size="8" maxlength="64" name="v_userpass" onFocus="this.select()"  value="" style="width:140px"></td>
+</tr>
+<tr>
+ <td class="lc" nowrap valign="top">Control Level:</td>
+ <td class="rc" nowrap>
+ <input type="radio" name="operate" checked value="0"> Viewer &nbsp; &nbsp; 
+ <input type="radio" name="operate" value="1"> Operator
+ </td>
+</tr>
+ 
+<tr>
+ <td class="lc" nowrap>&nbsp;   </td>
+ <td class="rc" nowrap>
+	 <input type="button" class="stdbuttton"  value="Add" style="width:70px" onClick="addorupdate()">
+	<input type="button" class="stdbuttton"  value="Clear" style="width:70px" onClick="clearorcancel()">
+</td>
+</tr>
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc">&nbsp; </td>
+ <td class="rc">&nbsp; </td>
+</tr> 
+
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+	<td class="leftbuttonrow" colspan="2" align="center">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="saveAll();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='user_db.htm'">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_user.htm')">
+	</td>
+</tr>
+
+<tr>  <!-- layout row, pushes data up, buttons down -->
+	<td class="lcbt" colspan="2" > </td>
+</tr> 
+
+
+<!-- table footer -->
+
+</table>
+
+</td>
+</tr> 
+
+</table>
+
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+<input type="hidden" name="user1" value=""> 
+<input type="hidden" name="user2" value=""> 
+<input type="hidden" name="user3" value=""> 
+<input type="hidden" name="user4" value=""> 
+<input type="hidden" name="user5" value=""> 
+<input type="hidden" name="user6" value=""> 
+<input type="hidden" name="user7" value=""> 
+<input type="hidden" name="user8" value=""> 
+<input type="hidden" name="user9" value=""> 
+<input type="hidden" name="user10" value=""> 
+<input type="hidden" name="user11" value=""> 
+<input type="hidden" name="user12" value=""> 
+<input type="hidden" name="user13" value=""> 
+<input type="hidden" name="user14" value=""> 
+<input type="hidden" name="user15" value=""> 
+<input type="hidden" name="user16" value=""> 
+<input type="hidden" name="user17" value=""> 
+<input type="hidden" name="user18" value=""> 
+<input type="hidden" name="user19" value=""> 
+<input type="hidden" name="user20" value=""> 
+<input type="hidden" name="io_ctrl" value=""> 
+<input type="hidden" name="pt_ctrl" value=""> 
+<input type="hidden" name="pwd_chg_user" value="0"> 
+<!--input type="Hidden" name="h_userlist" value="" title="not set by CGI"-->
+<!--input type="hidden" name="h_operatelist" value="" title="not set by CGI"-->
+
+<input type="hidden" name="db_max" value=""> <!-- max no. of users allowed in database -->
+<input type="hidden" name="adm" value="">
+<input type="hidden" name="h_mic_in_list" value="" title="not set by CGI">
+<input type="hidden" name="h_aud_out_list" value="" title="not set by CGI">
+
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

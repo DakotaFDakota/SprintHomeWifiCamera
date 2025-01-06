@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <link rel="stylesheet" href="/file/set.css">
+    <script type="text/javascript" src="/file/javascript.js"></script>
+    
+
+    <title></title>
+    <script>
+      function goupgrade()
+      {
+	
+		//alert(window.frames['fwupgrade'].document.forms['upload'].binary.value);
+		if(window.frames['fwupgrade'].document.forms['upload'].binary.value){
+		document.getElementById('Id_frame_upgrade').style.display="none";
+		document.getElementById('Id_apply').style.display="none";
+        window.frames['fwupgrade'].document.forms['upload'].submit();
+		frames[0].location='progress.html';
+		return true;
+		}
+		else{
+		alert("Please check file again...");
+		
+		return false;
+		}
+        //window.location.replace("fw_upload.html");
+      }
+    </script>
+  </head>
+  <body class="mainbg">
+    <blockquote>
+      <br>
+      <a class="titlecolor">Firmware Upgrade</a>
+      <br>
+      <br>
+<table>
+<tr>
+<td>
+<iframe src="tmp.html" name="progress" width="500" height="50"  frameborder="0">
+</iframe>
+</td>
+</tr>
+
+<tr>
+<td >
+<span id="Id_frame_upgrade" style="display:block">
+<iframe src="fwupgrade.html" name="fwupgrade" width="450" height="100"  frameborder="0">
+</iframe>
+</span>
+</td>
+</tr>
+
+</table>
+
+<table width="450" border="0" cellspacing="0" cellpadding="0">
+
+          <tr>
+            <td align="middle">
+<span id="Id_apply" style="display:block">
+              <input type=button value=apply onclick="goupgrade();" class="button">
+</span>
+              <script>//document.write('<input type=button value="'+showText(CANCEL)+'" onClick="document.upload.reset();" class="button">');</script>
+              <!--<input type="hidden" value="/tlaccept.asp" name="submit-url">-->
+            </td>
+          </tr>
+        </table>
+
+    </blockquote>
+  </body>
+</html>
+

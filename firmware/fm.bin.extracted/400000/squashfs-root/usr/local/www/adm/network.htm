@@ -1,0 +1,1142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Setup</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<!--script language="JavaScript" type="text/javascript" src="../lang_us.js"></script-->
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var WIRELESS = false;
+var max_rtp_src_port = "65494";
+
+var adm_protol_old;
+
+var old_ip_addr,old_netmask,old_gateway;
+var old_dhcp;
+
+function check_ip_first_part(ip1,min,max,notU,msg)
+{
+    var errmsg = "";
+    var value = parseInt(ip1.value);
+    if (value >max || value < min)
+    {
+        errmsg = addstr(msg_validIP_range,msg,min,max);
+    }
+    else if (value == notU)
+    {
+        errmsg = addstr(msg_validIP_notU,msg,notU,min,max);
+    }
+    return errmsg;
+}
+
+function sc_checkIp(ip1, ip2, ip3, ip4, mask1, mask2, mask3, mask4,msg)
+{
+    var ip_value =new  Array(parseInt(ip1.value),parseInt(ip2.value),parseInt(ip3.value),parseInt(ip4.value));
+    var mask_value =new  Array(parseInt(mask1.value),parseInt(mask2.value),parseInt(mask3.value),parseInt(mask4.value));
+    var i = 0;
+    var network0 = 0;
+    var network1=0;
+    var host0=0;
+    var host1 = 0;
+    var errmsg = checkIp(ip1,ip2,ip3,ip4,msg,true,1);
+
+
+    if (errmsg.length == 0)
+    {
+        errmsg = check_ip_first_part(ip1,1,223,127,msg);
+        if (errmsg.length == 0)
+        {
+            for (i=0;i<4;i++)
+            {
+            	network0+=ip_value[i]&mask_value[i];
+            	network1+=ip_value[i]|(0xFF-mask_value[i]);
+            	host0+=ip_value[i]&(0xFF-mask_value[i]);
+            	host1+=ip_value[i]|(mask_value[i]);
+            }
+            // 1020 is the whole 255*4
+            if (network0 == 0 || network1 == 1020 || host0 == 0 || host1 == 1020)
+            {
+                errmsg = addstr(msg_invalidIP_with_subnet,msg);
+            }
+        }
+    }
+	return errmsg;
+}
+
+function int2bin(val)
+{
+	var result = "";
+
+	for (var i=7; i>=0; i--) 
+    {
+		result += new String((val >> i) & 0x01);
+	}
+	return result;
+}
+function checkNetMask(mask1, mask2, mask3, mask4,msg)
+{
+	var mask;
+	var zeroflag = false;
+
+    var errmsg = checkIp(mask1,mask2,mask3,mask4,msg,true);
+
+
+    if (errmsg.length == 0)
+    {
+    	mask = int2bin(mask1.value) + int2bin(mask2.value) + int2bin(mask3.value) + int2bin(mask4.value);
+    	for (var i=0; i<mask.length; i++) 
+        {
+    		if (zeroflag) 
+            {
+    			if ('1' == mask.charAt(i)) 
+                {
+    				errmsg = addstr(msg_validMask,msg);
+                    break;
+    			}
+    		}
+    		if ('0' == mask.charAt(i)) 
+            {
+    			zeroflag = true;
+    		}
+    	}
+    }
+	return errmsg;
+}
+function check_validIP(ip1, ip2, ip3, ip4,min,max,notU,msg,null_flag)
+{
+    var errmsg = checkIp(ip1,ip2,ip3,ip4,msg,null_flag);
+
+    if (errmsg.length == 0 && (null_flag == true || ip1.length != 0))
+    {
+        errmsg = check_ip_first_part(ip1,min,max,notU,msg);
+    }
+    return errmsg;
+    
+}
+
+function set_conn_type()
+{
+	var cf = document.forms[0];
+	var value = cf.conn_type.value;
+	if(0 == value)
+	{
+		cf.ip1.disabled = cf.ip2.disabled = cf.ip3.disabled = cf.ip4.disabled =
+		cf.mask1.disabled = cf.mask2.disabled = cf.mask3.disabled = cf.mask4.disabled =
+		cf.gw1.disabled = cf.gw2.disabled = cf.gw3.disabled = cf.gw4.disabled =
+		false;
+	}
+	if(0 == value)
+	{
+		cf.dns_type[1].checked = true; 
+		cf.dns_type[0].disabled = cf.dns_type[1].disabled = true;
+	}
+	else
+	{
+		//cf.dns_type[0].checked = true;
+		cf.dns_type[0].disabled = cf.dns_type[1].disabled = false;
+	}
+
+	show_hide("ipDiv", (value == 0));
+
+	setDNS();
+}
+
+function setDNS()
+{
+    var cf = document.forms[0];
+    var dFlag = (cf.dns_type[0].checked);
+	cf.dns1_1.disabled = cf.dns1_2.disabled = cf.dns1_3.disabled = cf.dns1_4.disabled =
+	cf.dns2_1.disabled = cf.dns2_2.disabled = cf.dns2_3.disabled = cf.dns2_4.disabled =
+	dFlag;
+	show_hide("dnsDiv", !dFlag);
+}
+/*function setWINS()
+{
+    var cf = document.forms[0];
+    var dFlag = (cf.wins_type[0].checked);
+	cf.wins_1.disabled = cf.wins_2.disabled = cf.wins_3.disabled = cf.wins_4.disabled = dFlag;
+	show_hide("WINSDiv", !dFlag);
+}
+*/
+
+function setMulti()
+{
+    var cf = document.forms[0];
+    
+    if(cf.mcast_enable.checked) 
+    {
+        cf.vad1.disabled=cf.vad2.disabled=cf.vad3.disabled=cf.vad4.disabled=false;
+        cf.v_port.disabled=false;
+        cf.aad1.disabled=cf.aad2.disabled=cf.aad3.disabled=cf.aad4.disabled=false;
+        cf.a_port.disabled=false;
+        cf.rtp_time.disabled=false;
+    }
+    else 
+    {
+        cf.vad1.disabled=cf.vad2.disabled=cf.vad3.disabled=cf.vad4.disabled=true;
+        cf.v_port.disabled=true;
+        cf.aad1.disabled=cf.aad2.disabled=cf.aad3.disabled=cf.aad4.disabled=true;
+        cf.a_port.disabled=true;
+        cf.rtp_time.disabled=true;
+    }
+}
+
+function setUPNP() {
+	var cf = document.forms[0];
+	if(cf.enable_upnp.checked) {
+		cf.set_wport_upnp.disabled = false;
+	}
+	else {
+		cf.set_wport_upnp.checked = false;
+
+		cf.set_wport_upnp.disabled = true;
+	}
+}
+
+function checkData()
+{
+    var cf = document.forms[0];
+    var msg = "";
+
+	if (adm_protol_old != document.getElementById("adm_protol").value)
+	{
+		alert(msg_web_type_chg);
+	}
+	
+	if(cf.conn_type.value == 0)
+	{
+		msg+= checkNetMask(cf.mask1, cf.mask2, cf.mask3, cf.mask4,msg_ipmask);
+        msg+= sc_checkIp(cf.ip1, cf.ip2, cf.ip3, cf.ip4, 
+						cf.mask1, cf.mask2, cf.mask3, cf.mask4,msg_ipaddress);
+//        msg+= check_validIP(cf.gw1, cf.gw2, cf.gw3, cf.gw4,1,223,127,msg_gateway,false);
+	}
+
+	if(cf.dns_type[1].checked == true)
+	{
+//		msg+= check_validIP(cf.dns1_1,cf.dns1_2,cf.dns1_3,cf.dns1_4,1,223,224,msg_dns1,false);
+//		msg+= check_validIP(cf.dns2_1,cf.dns2_2,cf.dns2_3,cf.dns2_4,1,223,224,msg_dns2,false);
+	}
+/*
+	if(cf.cmtu.value != 0)
+	{
+		msg += checkInt(cf.mtu, msg_mtu, 576, 1500, cf.mtu.value == "");
+	}
+*/
+	if (cf.set_wport.checked)
+	{
+	    msg+= checkInt(cf.wport, msg_http_port, 1024, 65535, cf.wport.value == "");
+	    
+		if(cf.rtsp_port.value == cf.wport.value && cf.wport.value != "")
+		{ msg+= msg_http_port_conflict ; }
+
+	}
+	if (cf.set_ssport.checked)
+	{
+		msg+= checkInt(cf.ssport, msg_https_port, 1024, 65535, cf.ssport.value == "");
+		if(cf.rtsp_port.value == cf.ssport.value && cf.ssport.value != "")
+		{ msg+= msg_https_port_conflict ; }
+    	if (cf.set_wport.checked && cf.wport.value == cf.ssport.value && cf.ssport.value != "")
+    	{
+    		msg+= msg_second_port_conflict ;
+    	}
+	}
+    
+	if(cf.rtsp_port.value != "554"){
+		msg+= checkInt(cf.rtsp_port, msg_rtsp_port, 1024, 65535, cf.rtsp_port.value == "");
+	}
+
+	max_rtp_src_port=document.getElementsByName("max_rtp_src_port")[0].innerHTML;
+	//alert("max_rtp_src_port="+max_rtp_src_port);
+    msg += checkRTPPort(cf.rtp_src_port.value, 1024, parseInt(max_rtp_src_port));
+
+	msg+= checkInt(cf.rtp_pkt_len, msg_rtp_pkt_len, 400, 1400, cf.rtp_pkt_len.value == "");
+
+    if (cf.mcast_enable.checked)
+    {
+        msg+= check_validIP(cf.vad1,cf.vad2,cf.vad3,cf.vad4,224,239,240,msg_video_address,true);
+        if ( cf.v_port.value == "")
+        { msg+= addstr(msg_blank,msg_v_port); }
+        else
+        { msg += checkRTPPort(cf.v_port.value, 1024, 65534); }
+
+        msg+= check_validIP(cf.aad1,cf.aad2,cf.aad3,cf.aad4,224,239,240,msg_audio_address,true);
+        if ( cf.a_port.value == "")
+        { msg+= addstr(msg_blank,msg_a_port); }
+        else
+        { msg += checkRTPPort(cf.a_port.value, 1024, 65534); }
+
+        msg+= checkInt(cf.rtp_time, msg_rtp_time, 1, 255, cf.rtp_time.value == "");
+        if (cf.v_port.value == cf.a_port.value)
+        { msg+= msg_rtp_port_conflict; }	
+    }
+	
+	if (cf.qos_mode.checked)
+	{ msg+= checkInt(cf.qos_dscp, msg_q_dscp, 0, 63, cf.qos_dscp.value == ""); }
+	
+	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	convert_data_out();
+
+	cf.h_wmm.value = (cf.qos_mode.checked)?1:0;
+
+	var ip_array=new Array(4);
+	ip_array[0]=cf.ip1.value;
+	ip_array[1]=cf.ip2.value;
+	ip_array[2]=cf.ip3.value;
+	ip_array[3]=cf.ip4.value;
+	cf.ip_addr.value=ip_array.join('.');
+
+	var mask_array=new Array(4);
+	mask_array[0]=cf.mask1.value;
+	mask_array[1]=cf.mask2.value;
+	mask_array[2]=cf.mask3.value;
+	mask_array[3]=cf.mask4.value;
+	cf.netmask.value=mask_array.join('.');
+
+	if(cf.gw1.value!=""&&cf.gw2.value!=""&&cf.gw3.value!=""&&cf.gw4.value!="")
+	{
+		cf.gateway.value=cf.gw1.value+"."+cf.gw2.value+"."+cf.gw3.value+"."+cf.gw4.value;
+	}
+	else
+	{
+		cf.gateway.value="";
+	}
+//	var gw_array=new Array(4);
+//	gw_array[0]=cf.gw1.value;
+//	gw_array[1]=cf.gw2.value;
+//	gw_array[2]=cf.gw3.value;
+//	gw_array[3]=cf.gw4.value;
+//	cf.gateway.value=gw_array.join('.');
+
+	if(cf.dns1_1.value!=""&&cf.dns1_2.value!=""&&cf.dns1_3.value!=""&&cf.dns1_4.value!="")
+	{
+		cf.dns_server1.value=cf.dns1_1.value+"."+cf.dns1_2.value+"."+cf.dns1_3.value+"."+cf.dns1_4.value;
+	}
+	else
+	{
+		cf.dns_server1.value="";
+	}	
+//	var dns_array=new Array(4);
+//	dns_array[0]=cf.dns1_1.value;
+//	dns_array[1]=cf.dns1_2.value;
+//	dns_array[2]=cf.dns1_3.value;
+//	dns_array[3]=cf.dns1_4.value;
+//	cf.dns_server1.value=dns_array.join('.');
+
+	if(cf.dns2_1.value!=""&&cf.dns2_2.value!=""&&cf.dns2_3.value!=""&&cf.dns2_4.value!="")
+	{
+		cf.dns_server2.value=cf.dns2_1.value+"."+cf.dns2_2.value+"."+cf.dns2_3.value+"."+cf.dns2_4.value;
+	}
+	else
+	{
+		cf.dns_server2.value="";
+	}	
+//	var dns2_array=new Array(4);
+//	dns2_array[0]=cf.dns2_1.value;
+//	dns2_array[1]=cf.dns2_2.value;
+//	dns2_array[2]=cf.dns2_3.value;
+//	dns2_array[3]=cf.dns2_4.value;
+//	cf.dns_server2.value=dns2_array.join('.');
+
+//	if(cf.wins_1.value!="" && cf.wins_2.value!="" && cf.wins_3.value!="" && cf.wins_4.value!="")
+//	{
+//		cf.wins_ip.value=cf.wins_1.value+"."+cf.wins_2.value+"."+cf.wins_3.value+"."+cf.wins_4.value;
+//	}
+//	else
+//	{
+//		cf.wins_ip.value="";
+//	}	
+	//var wins_array=new Array(4);
+	//wins_array[0]=cf.wins_1.value;
+	//wins_array[1]=cf.wins_2.value;
+	//wins_array[2]=cf.wins_3.value;
+	//wins_array[3]=cf.wins_4.value;
+	//cf.wins_ip.value=wins_array.join('.');
+
+	var video_array=new Array(4);
+	video_array[0]=cf.vad1.value;
+	video_array[1]=cf.vad2.value;
+	video_array[2]=cf.vad3.value;
+	video_array[3]=cf.vad4.value;
+	cf.mcast_video_addr.value=video_array.join('.');
+
+	var audio_array=new Array(4);
+	audio_array[0]=cf.aad1.value;
+	audio_array[1]=cf.aad2.value;
+	audio_array[2]=cf.aad3.value;
+	audio_array[3]=cf.aad4.value;
+	cf.mcast_audio_addr.value=audio_array.join('.');
+
+	if(cf.conn_type.value==1)
+	{
+		cf.dhcp.value=1;
+	}
+	else if(cf.conn_type.value==0)
+	{
+		cf.dhcp.value=0;
+	}
+	
+	var save = new GroupCtrl();
+	var array_set=
+		[
+			//["HIDDEN", "conn_type", "conn_type"],
+			["NETWORK", "dhcp", "dhcp"],
+			["NETWORK", "dns_type", "dns_type"],
+			//["NETWORK", "wins_type", "wins_type"],
+			["NETWORK", "ip_addr", "ip_addr"],
+			["NETWORK", "netmask", "netmask"],
+			["NETWORK", "gateway", "gateway"],
+			["NETWORK", "dns_server1", "dns_server1"],
+			["NETWORK", "dns_server2", "dns_server2"],
+			//["NETWORK", "wins_ip", "wins_ip"],
+			["HTTP", "http_mode", "h_http_mode"],
+			["HTTP", "https_mode", "h_https_mode"],
+			["HTTP", "http_port2", "set_wport"],
+			["HTTP", "http_port2_num", "wport"],
+			["HTTP", "ssport_enable", "set_ssport"],
+			["HTTP", "ssport_number", "ssport"],
+			["RTSP_RTP", "rtsp_port", "rtsp_port"],
+			["RTSP_RTP", "rtp_port", "rtp_src_port"],
+			["RTSP_RTP", "rtp_size", "rtp_pkt_len"],
+			["RTSP_RTP", "mcast_enable", "mcast_enable"],
+			["RTSP_RTP", "mcast_video_port", "v_port"],
+			["RTSP_RTP", "mcast_audio_port", "a_port"],
+			["RTSP_RTP", "mcast_hops", "rtp_time"],
+			["RTSP_RTP", "mcast_video_addr", "mcast_video_addr"],
+			["RTSP_RTP", "mcast_audio_addr", "mcast_audio_addr"],
+			["UPNP", "upnp_mode", "enable_upnp"],
+			["UPNP", "upnp_traversal", "set_wport_upnp"],
+			//["BONJOUR", "bonjour_mode", "bonjour_mode"],
+			["QOS", "qos_enable", "qos_mode"],
+			["QOS", "qos_dscp", "qos_dscp"],
+			["WIRELESS", "wmm", "h_wmm"]
+		];
+	save.callback=ip_chg;
+	save.set(array_set);
+	return true;
+}
+
+function ip_chg()
+{
+	var cf = document.forms[0];
+	var w_chg=0,chg1=0,chg2=0,l_chg=0;
+
+	if(cf.lan_status.value==1)//wireless
+	{
+		if(old_ip_addr!=cf.ip_addr.value || old_netmask!=cf.netmask.value || old_gateway!=cf.gateway.value || 
+			old_dhcp!=cf.dhcp.value)
+		{
+			w_chg=1;
+		}
+	}
+	else		//lan
+	{
+
+	}
+	if(w_chg || l_chg)
+	{
+		var delayTime=10000;
+		var next_file="";
+		var message=1;//"Device's IP address may change.Please use the Windows utility to locate the camera and configure it correctly for your environment.You should now close this Browser window.";
+		self.location.href="../sys_msg.htm?"+delayTime+"&"+next_file+"&"+message;
+	}
+
+	if(old_ip_addr!=cf.ip_addr.value)
+	{
+		old_ip_addr=cf.ip_addr.value;
+	}
+	if(old_netmask!=cf.netmask.value)
+	{
+		old_netmask=cf.netmask.value;
+	}
+	if(old_gateway!=cf.gateway.value)
+	{
+		old_gateway=cf.gateway.value;
+	}
+	if(old_dhcp!=cf.dhcp.value)
+	{
+		old_dhcp=cf.dhcp.value;
+	}
+}
+
+function parse_ip()
+{
+	var cf = document.forms[0];
+	var ip_addr=cf.ip_addr.value;
+	var netmask=cf.netmask.value;
+	var gateway=cf.gateway.value;
+	var dns_server1=cf.dns_server1.value;
+	var dns_server2=cf.dns_server2.value;
+//	var wins_ip=cf.wins_ip.value;
+	var mcast_video_addr=cf.mcast_video_addr.value;
+	var mcast_audio_addr=cf.mcast_audio_addr.value;
+
+	var MODEL = document.getElementsByName("model_num")[0].innerHTML;
+	WIRELESS = (MODEL == "RC8510A") ? true : false;
+	
+	cf.ip1.value=ip_addr.split('.')[0];
+	cf.ip2.value=ip_addr.split('.')[1];
+	cf.ip3.value=ip_addr.split('.')[2];
+	cf.ip4.value=ip_addr.split('.')[3];
+
+	cf.mask1.value=netmask.split('.')[0];
+	cf.mask2.value=netmask.split('.')[1];
+	cf.mask3.value=netmask.split('.')[2];
+	cf.mask4.value=netmask.split('.')[3];
+
+	if(gateway!="")
+	{
+		cf.gw1.value=gateway.split('.')[0];	
+		cf.gw2.value=gateway.split('.')[1];	
+		cf.gw3.value=gateway.split('.')[2];	
+		cf.gw4.value=gateway.split('.')[3];	
+	}
+
+	if(dns_server1!="")
+	{
+		cf.dns1_1.value=dns_server1.split('.')[0];	
+		cf.dns1_2.value=dns_server1.split('.')[1];	
+		cf.dns1_3.value=dns_server1.split('.')[2];	
+		cf.dns1_4.value=dns_server1.split('.')[3];	
+	}
+
+	if(dns_server2!="")
+	{
+		cf.dns2_1.value=dns_server2.split('.')[0];	
+		cf.dns2_2.value=dns_server2.split('.')[1];	
+		cf.dns2_3.value=dns_server2.split('.')[2];	
+		cf.dns2_4.value=dns_server2.split('.')[3];	
+	}
+
+//	if(wins_ip!="")
+//	{
+	//	cf.wins_1.value=wins_ip.split('.')[0];	
+//		cf.wins_2.value=wins_ip.split('.')[1];	
+//		cf.wins_3.value=wins_ip.split('.')[2];	
+//		cf.wins_4.value=wins_ip.split('.')[3];	
+//	}
+
+	cf.vad1.value=mcast_video_addr.split('.')[0];	
+	cf.vad2.value=mcast_video_addr.split('.')[1];	
+	cf.vad3.value=mcast_video_addr.split('.')[2];	
+	cf.vad4.value=mcast_video_addr.split('.')[3];	
+
+	cf.aad1.value=mcast_audio_addr.split('.')[0];	
+	cf.aad2.value=mcast_audio_addr.split('.')[1];	
+	cf.aad3.value=mcast_audio_addr.split('.')[2];	
+	cf.aad4.value=mcast_audio_addr.split('.')[3];	
+}
+
+function setALL()
+{
+	var cf = document.forms[0];
+
+/*	if(cf.pppoe_enable.value==1)
+	{
+		cf.conn_type.value = 2;
+	}*/
+//	else
+//	{
+		cf.conn_type.value = cf.dhcp.value;
+//	}
+	convert_data_in();
+//	dataToVisible(document.forms[0]);
+	set_conn_type();
+//	setWINS();
+	//onChangeMTUType();
+	userport();
+	sstport();
+	setUPNP();
+	setMulti();
+	dscp();
+	set_adm_protol();
+	parse_ip();
+	old_ip_addr=cf.ip_addr.value;
+	old_netmask=cf.netmask.value;
+	old_gateway=cf.gateway.value;
+	old_dhcp=cf.dhcp.value;
+
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+	menuframe.highLight('netDIV');
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+	var read = new GroupCtrl();
+	var array_get=
+		[
+			["SYSTEM", "model_num", "model_num"],	
+			//["HIDDEN", "conn_type", "conn_type"],	
+			//["HIDDEN", "max_rtp_src_port", "max_rtp_src_port"],	
+			["NETWORK", "lan_status", "lan_status"],
+			["NETWORK", "dhcp", "dhcp"],			
+			["NETWORK", "dns_type", "dns_type"],
+	//		["NETWORK", "wins_type", "wins_type"],
+			["NETWORK", "ip_addr", "ip_addr"],
+			["NETWORK", "netmask", "netmask"],
+			["NETWORK", "gateway", "gateway"],
+			["NETWORK", "dns_server1", "dns_server1"],
+			["NETWORK", "dns_server2", "dns_server2"],
+	//		["NETWORK", "wins_ip", "wins_ip"],		
+			["HTTP", "http_mode", "h_http_mode"],
+			["HTTP", "https_mode", "h_https_mode"],
+			["HTTP", "http_port2", "set_wport"],
+			["HTTP", "http_port2_num", "wport"],
+			["HTTP", "ssport_enable", "set_ssport"],
+			["HTTP", "ssport_number", "ssport"],
+			["RTSP_RTP", "rtsp_port", "rtsp_port"],
+			["RTSP_RTP", "rtp_port", "rtp_src_port"],
+			["RTSP_RTP", "rtp_size", "rtp_pkt_len"],
+			["RTSP_RTP", "mcast_enable", "mcast_enable"],
+			["RTSP_RTP", "mcast_video_port", "v_port"],
+			["RTSP_RTP", "mcast_audio_port", "a_port"],
+			["RTSP_RTP", "mcast_hops", "rtp_time"],
+			["RTSP_RTP", "mcast_video_addr", "mcast_video_addr"],
+			["RTSP_RTP", "mcast_audio_addr", "mcast_audio_addr"],
+			["RTSP_RTP", "max_rtp_src_port", "max_rtp_src_port"],	
+			["UPNP", "upnp_mode", "enable_upnp"],
+			["UPNP", "upnp_traversal", "set_wport_upnp"],
+			//["BONJOUR", "bonjour_mode", "bonjour_mode"],
+			["QOS", "qos_enable", "qos_mode"],
+			["QOS", "qos_dscp", "qos_dscp"]
+		];
+	read.callback = setALL;
+	read.get(array_get);
+}
+
+function convert_data_in()
+{
+	var cf = document.forms[0];
+
+	if(1 == cf.h_http_mode.value && 1 == cf.h_https_mode.value)
+	{
+		//http
+		cf.adm_protol.value = 3;
+	}
+	else if(cf.h_http_mode.value != 1 && 1 == cf.h_https_mode.value)
+	{
+		//https
+		cf.adm_protol.value = 2;
+	}
+	else
+	{
+		cf.adm_protol.value = 1;
+	}
+	adm_protol_old = cf.adm_protol.value;
+}
+
+
+function convert_data_out()
+{
+	var cf = document.forms[0];
+
+	if(cf.adm_protol.value == "3")
+	{
+		//https & http 
+		cf.h_http_mode.value = 1;
+		cf.h_https_mode.value = 1;
+	}
+	else if(cf.adm_protol.value == "2")
+	{
+		//https 
+		cf.h_http_mode.value = 0;
+		cf.h_https_mode.value = 1;
+	}
+	else
+	{
+		//http 
+		cf.h_http_mode.value = 1;
+		cf.h_https_mode.value = 0;
+	}	
+}
+
+function userport()
+{
+    var cf = document.forms[0];
+	//cf.h_set_wport.value = (cf.set_wport.checked) ? "enable" : "disable";
+	var dFlag = ( cf.set_wport.checked );
+	cf.wport.disabled = !dFlag; 
+}
+
+
+function sstport()
+{
+    var cf = document.forms[0];
+//	cf.h_set_ssport.value = (cf.set_ssport.checked) ? "1" : "0";
+	var dFlag = ( cf.set_ssport.checked );
+	cf.ssport.disabled = !dFlag; 
+}
+
+
+function dscp()
+{
+    var cf = document.forms[0];
+	var dFlag = cf.qos_mode.checked;
+	cf.qos_dscp.disabled = !dFlag;
+}
+
+function wmm()
+{
+    var cf = document.forms[0];
+	var dFlag = cf.qos_mode.checked;
+	if(dFlag && WIRELESS) { alert(msg_wmm_qos); }
+	dscp();
+}
+
+var http_request;
+function showResponse()
+{
+	var resp_context;
+	if (http_request.readyState == 4 || http_request.readyState == 'complete')
+	{
+		resp_context = http_request.responseText;
+		if ("" != resp_context)
+		{
+			alert(resp_context);
+		}
+		http_request.abort();
+		http_request = null;
+		document.forms[0].ip_test.disabled = false;
+	}
+}
+
+function confirmTest()
+{
+	var src_file;
+	var cf = document.forms[0];
+	var msg = "";
+	
+	if(cf.conn_type.value == "0")
+	{
+		msg = checkIp(cf.ip1,cf.ip2,cf.ip3,cf.ip4,msg_ipaddress,true,1);
+	}
+    
+	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	if(http_request == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request = null; }
+			}
+		}
+	}
+
+	if (!http_request)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	var ip = cf.ip1.value + "." + cf.ip2.value + "." + cf.ip3.value + "." + cf.ip4.value;
+	cf.ip_test.disabled = true;
+	src_file = '../adm/test.cgi?action=ip_test&ip='+ip+
+						'&'+CGIRequestRandomKey+'='+new Date().getTime();
+	
+	http_request.onreadystatechange = function() { showResponse(); }
+	http_request.open('GET', src_file, true);
+	http_request.send(null);
+	
+	return true;
+}
+
+
+function set_adm_protol()
+{
+	var cf = document.forms[0];
+    var adm_pro=document.getElementById("adm_protol").value;
+    
+	if (adm_pro == "1")
+	{
+		document.getElementById("httpsDIV").style.display = "none";
+	}
+	else 
+	{
+		document.getElementById("httpsDIV").style.display = "block";
+	}
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg()">
+
+<FORM name="network" method="post" action="file.cgi">
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+	<td class="lc">Internet Connection Type:</td>
+	<td class="rc" nowrap valign="top">It takes effect only when network is Ethernet or Wireless.
+ </td>
+</tr>
+<tr>
+	<td class="lc" nowrap valign="top"></td>
+	<td class="rc">
+		<select name="conn_type" size="1" onChange="set_conn_type();" onFocus="if(this.disabled)this.blur();" style="width:285px">
+			<option value="1">Obtain Address Automatically (DHCP)</option>
+			<option value="0">Static IP Address</option>
+		</select>	
+	</td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap></td>
+ <td class="rc" nowrap>
+ <div ID="ipDiv">
+ <table border="0" cellspacing="0" cellpadding="2">
+  <tr>
+   <td nowrap width="140">IP address: </td>
+   <td nowrap>
+   <input type="text" class="num" name="ip1" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="ip2" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="ip3" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="ip4" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">  
+   </td>
+   <td nowrap>
+   <input type="button" name="ip_test" value="Test IP" onClick="confirmTest()">   
+   </td>
+  </tr>
+  <tr>
+   <td nowrap>Subnet mask: </td>
+   <td nowrap>
+   <input type="text" name="mask1" class="num" value=""  size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" name="mask2" class="num" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="mask3" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="mask4" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">   
+   </td>
+  </tr>
+  <tr>
+   <td nowrap>Default gateway: </td>
+   <td nowrap>
+   <input type="text" class="num" name="gw1" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="gw2" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="gw3" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="gw4" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">   
+   </td>
+  </tr>
+ </table>
+ </div>
+  </td>
+</tr>
+
+
+<tr>
+ <td class="lc" nowrap valign="top">DNS Server Address: </td>
+ <td class="rc" nowrap valign="top">
+ <input type="radio" name="dns_type" value="0" onClick="setDNS()"> Obtain DNS server address automatically<br>
+ <input type="radio" name="dns_type" value="1" onClick="setDNS()"> Use the following DNS server address 
+ </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap></td>
+ <td class="rc" nowrap>
+ <div ID="dnsDiv">
+ <table border="0" cellspacing="0" cellpadding="2">
+  <tr>
+   <td nowrap width="140">Primary DNS server: </td>
+   <td nowrap>
+   <input type="text" class="num" name="dns1_1" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="dns1_2" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="dns1_3" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="dns1_4" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">
+    (IP address)
+   </td>
+  </tr>
+  <tr>
+   <td nowrap>Secondary DNS server: </td>
+   <td nowrap>
+   <input type="text" class="num" name="dns2_1" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="dns2_2" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="dns2_3" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="dns2_4" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">
+    (IP address)
+	</td>
+  </tr>
+ </table>
+ </div> 
+ </td>
+</tr>
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<!--
+<tr>
+ <td class="lc" nowrap valign="top">WINS Address: </td>
+ <td class="rc" nowrap valign="top">It takes effect only when the "SMB/CIFS" is enabled.
+ </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap valign="top"></td>
+ <td class="rc" nowrap valign="top">
+ <input type="radio" name="wins_type" value="0" onClick="setWINS()"> Obtain WINS address automatically <br>
+ <input type="radio" name="wins_type" value="1" onClick="setWINS()"> Use the following WINS address 
+ </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap valign="top"></td>
+ <td class="rc" nowrap valign="top">
+ <div ID="WINSDiv">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" class="num" name="wins_1" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="wins_2" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="wins_3" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">.<input type="text" class="num" name="wins_4" value="" size=3 maxlength=3 onFocus="if(this.disabled)this.blur()">
+ </div> 
+ </td>
+</tr>
+-->
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+
+<tr>
+<td class="lc" nowrap>HTTP/HTTPS:</td>
+<td class="rc" nowrap valign="middle"> Administrator: &nbsp;&nbsp;
+		<select name="adm_protol" id="adm_protol" size="1" onChange="set_adm_protol();" style="width:120px">
+			<option value="1">HTTP</option>
+			<option value="2">HTTPS</option>
+			<option value="3">HTTP & HTTPS</option>
+		</select>	
+
+</td>
+
+</tr>
+
+
+<tr>
+<td class="lc" nowrap></td>
+<td class="rc"  nowrap> Viewer: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>HTTP</strong>
+</td>
+</tr>
+
+<tr>
+<td class="lc" nowrap="nowrap"></td>
+<td class="rc" nowrap="nowrap">
+<table cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap width="10px"></td>
+<td nowrap>
+<input type="checkbox" name="set_wport" value="1" onClick="userport()"> HTTP Secondary Port&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="text" class="num" name="wport" value="" size="6" maxlength="5" onFocus="if(this.disabled)this.blur()"> (1024-65535) 
+</td>
+</tr>
+<tr>
+<td nowrap width="10px"></td>
+<td nowrap>
+<div id="httpsDIV" style="display:none"> 
+<input type="checkbox" name="set_ssport" value="0" onClick="sstport()"> 
+HTTPS Secondary Port&nbsp;
+<input type="text" class="num" name="ssport" value="" size="6" maxlength="5" onFocus="if(this.disabled)this.blur()"> (1024-65535) 
+</div>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+
+
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap valign="top">RTP/RTSP:</td>
+ <td class="rc" nowrap>
+ <table border="0" cellspacing="0" cellpadding="2">
+  <tr>
+   <td nowrap width="140">RTSP Port: </td>
+   <td nowrap><input type="text" class="num" name="rtsp_port" value="" size="6" maxlength="5"> (554,1024-65535)</td>
+  </tr>
+  <tr>
+   <td nowrap width="140">RTP Data Port: </td>
+   <td nowrap><input type="text" class="num" name="rtp_src_port" value="" size="6" maxlength="5"> (1024-<a name="max_rtp_src_port"></a>, even values only)</td>
+  </tr>
+  <tr>
+   <td nowrap width="140">Max RTP Data Packet: </td>
+   <td nowrap><input type="text" class="num" name="rtp_pkt_len" value="" size="6" maxlength="5"> bytes (400-1400)</td>
+  </tr>
+ </table><br> </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap valign="top">Multicast RTP/RTSP:</td>
+ <td class="rc" nowrap valign="top">
+  <input type="checkbox" name="mcast_enable" value="1" onClick="setMulti();"> Enable Multicast
+ <table border="0" cellspacing="0" cellpadding="2">
+  <tr>
+   <td nowrap width="140">Video Address: </td>
+   <td nowrap>
+   <input type="text" class="num" name="vad1" value="" size=3 maxlength=3>.<input type="text" class="num" name="vad2" value="" size=3 maxlength=3>.<input type="text" class="num" name="vad3" value="" size=3 maxlength=3>.<input type="text" class="num" name="vad4" value="" size=3 maxlength=3>
+   &nbsp;(Streaming 1 only)    </td>
+  </tr>
+  <tr>
+   <td nowrap>Video Port: </td>
+   <td nowrap><input type="text" class="num" name="v_port" value="" size="6" maxlength="5"> (1024-65534; even values only)</td>
+  </tr>
+  <tr>
+   <td nowrap>Audio Address: </td>
+   <td nowrap>
+   <input type="text" class="num" name="aad1" value="" size=3 maxlength=3>.<input type="text" class="num" name="aad2" value="" size=3 maxlength=3>.<input type="text" class="num" name="aad3" value="" size=3 maxlength=3>.<input type="text" class="num" name="aad4" value="" size=3 maxlength=3>   </td>
+  </tr>
+  <tr>
+   <td nowrap>Audio Port: </td>
+   <td nowrap><input type="text" class="num" name="a_port" value="" size="6" maxlength="5"> (1024-65534; even values only)</td>
+  </tr>
+  <tr>
+   <td nowrap>Time to Live: </td>
+   <td nowrap><input type="text" class="num" name="rtp_time" value="" size="4" maxlength="3"> (1-255)</td>
+  </tr>
+ </table><br> </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap valign="top">UPnP: </td>
+ <td class="rc" nowrap valign="top">
+	  <input type="checkbox" name="enable_upnp" value="1" onClick="setUPNP();"> Enable Discovery
+	  <br><input type="checkbox" name="set_wport_upnp" value="1"> 
+	  Enable Traversal (Port Mapping)</td>
+</tr>
+
+<!--tr>
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap valign="top">Bonjour: </td>
+ <td class="rc" nowrap valign="top">
+<input type="checkbox" name="bonjour_mode" value="1" onClick=""> Enable Bonjour Service</td>
+</tr-->
+
+<tr>
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>QoS:</td>
+ <td class="rc" nowrap>
+ <input type="checkbox" name="qos_mode" value="0" onClick="wmm()"> Enable QoS Mode (for Video and Audio) </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>
+	<p></p>
+	<p></p>	</td>
+ <td class="rc" nowrap>
+ <table border="0" cellspacing="0" cellpadding="2" id="table2">
+  <tr> 
+  	<td nowrap width="45">DSCP: </td>
+   <td width="163" nowrap><input type="text" class="num" name="qos_dscp" value="" size="4" maxlength="2"> (0-63)</td>
+  </tr>
+ </table><br> </td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_network.htm')"> 
+ </td>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table> 
+
+</td>
+</tr> 
+</table>
+</div>   
+<!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+<input type="Hidden" name="dhcp" value="">
+
+<input type="Hidden" name="h_wmm" value="">
+<input type="Hidden" name="h_http_mode" value="">
+<input type="Hidden" name="h_https_mode" value="">
+
+<input type="Hidden" name="ip_addr" value="">
+<input type="Hidden" name="netmask" value="">
+<input type="Hidden" name="gateway" value="">
+<input type="Hidden" name="dns_server1" value="">
+<input type="Hidden" name="dns_server2" value="">
+<input type="Hidden" name="wins_ip" value="">
+<input type="Hidden" name="mcast_video_addr" value="">
+<input type="Hidden" name="mcast_audio_addr" value="">
+
+<input type="hidden" name="lan_status" value="">
+
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

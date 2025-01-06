@@ -1,0 +1,584 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Select where you want to save your recordings</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../survey.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+/* double click the folder */
+function survey_folder(workgroup, current_depth, select_index, folder_name)
+{
+    //alert("survey_folder("+workgroup+", "+current_depth+", "+select_index+", \'"+folder_name+"\')");
+
+    var flag = folder_flag_array[current_depth];
+    //alert("survey_folder: flag["+current_depth+"]="+flag+", select_index=("+folder_index_array[current_depth]+","+select_index+")");
+
+    if (0 == flag && select_index == folder_index_array[current_depth])
+    {
+        var contract_div_name = "";
+
+        if (glb_samba_depth != -1)
+        {
+            if (current_depth < glb_samba_depth)
+            {
+                document.getElementById("apply").disabled = true;
+                if (isNetscape())
+                {
+                    document.getElementById("apply").style.color = "#808080";
+                }
+            }
+        }
+
+        // add workgroup
+        glb_workgroup = workgroup;
+
+        // add survey depth
+        glb_survey_depth = current_depth;
+
+        if (current_depth <= 1)
+        {
+            contract_div_name = "server_"+workgroup+"_"+select_index+"_DIV";
+        }
+        else
+        {
+            var image_name = "folder";
+            var image_name_2 = "folder";
+
+            contract_div_name = "folder";
+            for (var i=0; i<current_depth; i++)
+            {
+                contract_div_name += "_";
+                contract_div_name += folder_index_array[i];
+
+                image_name += "_";
+                image_name_2 += "_";
+                image_name += folder_index_array[i];
+                image_name_2 += folder_index_array[i];
+            }
+            contract_div_name += "_";
+            contract_div_name += select_index;
+            contract_div_name += "_DIV";
+
+            image_name += "_";
+            image_name_2 += "_";
+            image_name += select_index;
+            image_name_2 += select_index;
+            image_name += "_IMG";
+            image_name_2 += "_IMG_2";
+
+            document.getElementById(image_name).src = "./foldertree_nolines_plus.gif";
+            document.getElementById(image_name_2).src = "./folder.gif";
+        }
+
+        //alert("Hidden "+contract_div_name);
+        folder_flag_array[current_depth] = 1;
+        document.getElementById(contract_div_name).innerHTML = "";
+        document.getElementById(contract_div_name).style.display = "none";
+    }
+    else
+    {
+        var Interval;
+        var survey_server = "";
+        var survey_path = "/";
+ 
+        if (1 == current_depth)
+        {
+            var return_val = false;
+            
+            if (isIE())
+           	{
+           			var ie_version = IEVersion();
+           			if (6 == ie_version)
+           		 	{
+                	return_val = window.showModalDialog('survey_server_auth.htm', document.forms[0], sambasurveyauthsub1);
+            		}
+            		else if (!SupportModalDialog())
+            		{
+                	openDataSubWin('survey_server_auth.htm', sambasurveyauthsub2);
+                	return_val = true;
+            		}
+            		else
+            		{
+                	return_val = window.showModalDialog('survey_server_auth.htm', document.forms[0], sambasurveyauthsub2);
+            		}
+           	}
+           	else
+           	{
+								if (!SupportModalDialog())
+            		{
+                	openDataSubWin('survey_server_auth.htm', sambasurveyauthsub2);
+                	return_val = true;
+            		}
+            		else
+            		{
+                	return_val = window.showModalDialog('survey_server_auth.htm', document.forms[0], sambasurveyauthsub2);
+            		}
+           	}
+            if (isSafari())
+            {
+                Interval = setInterval('window.focus()', 1);
+            }
+                
+            if (return_val == false)
+            {
+                return ;
+            }
+        }
+
+        if (glb_samba_depth != -1)
+        {
+            if (current_depth < glb_samba_depth)
+            {
+                document.getElementById("apply").disabled = true;
+                if (isNetscape())
+                {
+                    document.getElementById("apply").style.color = "#808080";
+                }
+            }
+        }
+        
+        folder_index_array[0] = workgroup;
+        folder_index_array[current_depth] = select_index;
+        folder_name_array[current_depth] = folder_name;
+
+        // add workgroup
+        glb_workgroup = workgroup;
+
+        // add survey depth
+        glb_survey_depth = current_depth+1;
+        
+        // Prepare survey server
+        if (1 == current_depth)
+        {
+            survey_server = folder_name;
+        }
+        else
+        {
+            survey_server = glb_samba_server;
+        }
+        glb_survey_server = survey_server;
+        
+        // Prepare survey path
+        if (current_depth > 1)
+        {
+            for (var i=2; i<current_depth; i++)
+            {
+                survey_path += folder_name_array[i];
+                survey_path += "/";
+            }
+            survey_path += folder_name;
+        }
+
+        // the maximun length of path is 128
+        if (survey_path.length > 128)
+        {
+            alert(msg_smb_path_error);
+            return false;
+        }
+
+        var smb_url = "./smb_dirctrl.cgi";
+        smb_url += "?server=" + survey_server;
+        smb_url += "&path=" + survey_path;
+        if (2 == current_depth)
+        {
+            smb_url += "&need_rights=rw";
+        }
+        
+        var cf = document.forms[0];
+        if (cf.smbc_username.value != -1)
+        {
+            smb_url += "&user=";
+            smb_url += cf.smbc_username.value;
+        }
+        if (cf.smbc_password.value != -1)
+        {
+            smb_url += "&pass=";
+            smb_url += cf.smbc_password.value;
+        }
+	 smb_url +="&timestamp="+new Date().getTime();
+
+        //alert("smb_url="+smb_url);
+        registerAJX(smb_url, 1);
+
+        if (xml_status == "unauth" || xml_status == "readonly")
+        {
+            var return_val = false;
+            
+            cf.smbc_server.value = survey_server;
+            cf.smbc_path.value = survey_path;
+            if (2 == current_depth)
+            {
+                cf.smbc_needrights.value = "rw";
+            }
+            else
+            {
+                cf.smbc_needrights.value = "r";
+            }
+            if (6 == ie_version)
+            {
+                return_val = window.showModalDialog('samba_auth.htm', document.forms[0], sambaauthsub1);
+            }
+            else if (!SupportModalDialog())
+            {
+                openDataSubWin('samba_auth.htm', sambaauthsub2);
+            }
+            else
+            {
+                return_val = window.showModalDialog('samba_auth.htm', document.forms[0], sambaauthsub2);
+            }
+
+            if (isSafari())
+            {
+                clearInterval(Interval);
+                setInterval('window.focus()', 1);
+            }
+            
+            if (return_val != false)
+            {
+                smb_url = "./smb_dirctrl.cgi";
+                smb_url += "?server=" + survey_server;
+                smb_url += "&path=" + survey_path;
+                
+                if (cf.smbc_username.value != -1)
+                {
+                    smb_url += "&user=";
+                    smb_url += cf.smbc_username.value;
+                }
+                if (cf.smbc_password.value != -1)
+                {
+                    smb_url += "&pass=";
+                    smb_url += cf.smbc_password.value;
+                }
+		 smb_url +="&timestamp="+new Date().getTime();
+                //alert("smb_url="+smb_url);
+                registerAJX(smb_url, 1);
+            }
+        }
+    }
+}
+
+/* single click the folder */
+function select_folder(workgroup, current_depth, select_index, folder_name)
+{
+    //alert("select_folder("+workgroup+", "+current_depth+", "+select_index+", \'"+folder_name+"\')");
+
+    var samba_path = "/";
+    for (var i=2; i<current_depth; i++)
+    {
+        //alert("folder_name_array["+i+"]"+"="+folder_name_array[i]);
+        samba_path += folder_name_array[i];
+        samba_path += "/";
+    }
+    samba_path += folder_name;
+    //alert("samba_path="+samba_path);
+    glb_samba_path = samba_path;
+    glb_samba_depth = current_depth;
+    
+    document.getElementById("apply").disabled = false;
+    if (isNetscape())
+    {
+        document.getElementById("apply").style.color = "#000000";
+    }
+}
+
+function AdjustDIVSizeByBrowser()
+{
+    var ie_version = IEVersion();
+    var adjust_div = document.getElementById("SmbBody_DIV");
+
+    //alert("ie_version="+ie_version);
+    if (isIE())
+    {
+        var ie_version = IEVersion();
+        if (6 == ie_version)
+        {
+            adjust_div.style.width = 500;
+            adjust_div.style.height = 195;
+        }
+        else
+        {
+            adjust_div.style.width = 460;
+            adjust_div.style.height = 240;
+        }
+    }
+    else if (isChrome())
+    {
+        adjust_div.style.width = 500;
+        adjust_div.style.height = 200;
+    }
+    else
+    {
+        adjust_div.style.width = 500;
+        adjust_div.style.height = 240;
+    }
+}
+
+function init()
+{
+    folder_index_array = new Array();
+    folder_name_array = new Array();
+    folder_flag_array = new Array();
+    folder_num_array = new Array();
+    server_num_array = new Array();
+
+    AdjustDIVSizeByBrowser();
+
+    registerAJX("./smb_survey.cgi?timeout=60&timestamp="+new Date().getTime(), 0);
+}
+
+function smb_refresh()
+{
+    var msg = "<b><font size=\"+1\">"+"Searching Samba/CIFS Server"+"</font></b></p><img src=\"wait.gif\" width=\"53\" height=\"53\" alt=\"\" border=\"0\">";
+    var buttons_msg = "<input type=\"button\" class=\"btstd80\" name=\"cancel\" value=\"Cancel\" onClick=\"smb_cancel()\">";
+
+    document.getElementById("SmbBody_DIV").align = "center";
+    document.getElementById("SmbBody_DIV").innerHTML = msg;
+    document.getElementById("Buttons_DIV").innerHTML = buttons_msg;
+
+    glb_workgroup = -1;;
+    glb_samba_server = -1;
+    glb_samba_path = -1;
+    glb_samba_depth = -1;
+    glb_survey_server = -1;
+    glb_survey_depth = -1;
+    glb_select_span_id = -1;
+    xml_status = "";
+
+    init();    
+}
+
+function smb_cancel()
+{
+    top.close();
+}
+
+function apply()
+{
+    var cf = document.forms[0];
+    //alert("samba_server="+glb_samba_server+", samba_path="+glb_samba_path+", user="+cf.smbc_username.value+", pass="+cf.smbc_password.value);
+    
+    if (glb_samba_path == "/" || -1 == glb_samba_path)
+    {
+        alert(msg_smb_select_null);
+        return false;
+    }
+
+    var smb_url = "./smb_dirctrl.cgi";
+    smb_url += "?server=" + glb_samba_server;
+    smb_url += "&path=" + glb_samba_path;
+    smb_url += "&need_rights=w";    // only need check write permission when apply
+
+    var cf = document.forms[0];       
+    if (cf.smbc_username.value != -1)
+    {
+        smb_url += "&user=";
+        smb_url += cf.smbc_username.value;
+    }
+    if (cf.smbc_password.value != -1)
+    {
+        smb_url += "&pass=";
+        smb_url += cf.smbc_password.value;
+    }
+
+    //alert("smb_url="+smb_url);
+	smb_url +="&timestamp="+new Date().getTime();
+    registerAJX(smb_url, 2);
+
+    if (xml_status == "unauth" || xml_status == "readonly")
+    {
+        var return_val = false;
+        cf.smbc_server.value = glb_samba_server;
+        cf.smbc_path.value = glb_samba_path;
+        cf.smbc_needrights.value = "w";    // only need check write permission when apply
+        
+        if (isIE())
+       	{
+       			var ie_version = IEVersion();
+       			if (6 == ie_version)
+        		{
+            		return_val = window.showModalDialog('samba_auth.htm', document.forms[0], sambaauthsub1);
+       			}
+       	 		else if (!SupportModalDialog())
+        		{
+          	 	 	openDataSubWin('samba_auth.htm', sambaauthsub2);
+        		}
+        		else
+        		{
+            		return_val = window.showModalDialog('samba_auth.htm', document.forms[0], sambaauthsub2);
+        		}
+       	}
+       	else
+       	{
+       		if (!SupportModalDialog())
+        	{
+            	openDataSubWin('samba_auth.htm', sambaauthsub2);
+        	}
+        	else
+        	{
+           	 	return_val = window.showModalDialog('samba_auth.htm', document.forms[0], sambaauthsub2);
+        	}
+       	}
+        if (return_val == false)
+        {
+            return false;
+        }
+    }
+    else if (xml_status != "ok")
+    {
+        return false;
+    }
+
+    if (SupportModalDialog())
+    {
+        var pass_cf = window.dialogArguments;
+    }
+    else
+    {
+        var pass_cf = window.opener.document.forms[0];
+    }
+    if (pass_cf != undefined)
+    {
+        if (glb_samba_server != -1)
+        {
+            if(pass_cf.smb_browse_flag.value == 1)
+            	pass_cf.smbc_rec_server.value = unescape(glb_samba_server);
+            else
+            pass_cf.smbc_server.value = unescape(glb_samba_server);
+        }
+        if (glb_samba_path != -1)
+        {
+            if(pass_cf.smb_browse_flag.value == 1)
+            	pass_cf.smbc_rec_path.value = unescape(glb_samba_path);
+            else
+            pass_cf.smbc_path.value = unescape(glb_samba_path);
+        }
+        if (cf.smbc_username.value != -1)
+        {
+            if(pass_cf.smb_browse_flag.value == 1)
+            	pass_cf.smbc_rec_name.value = cf.smbc_username.value;
+            else
+            pass_cf.smbc_name.value = cf.smbc_username.value;
+        }
+        else
+        {
+    		if(pass_cf.smb_browse_flag.value == 1)
+    			pass_cf.smbc_rec_name.value = "";
+    		else
+            pass_cf.smbc_name.value = "";   // needn't username/password, set to NULL
+        }
+        if (cf.smbc_password.value != -1)
+        {
+           	if(pass_cf.smb_browse_flag.value == 1)
+           		pass_cf.smbc_rec_pwd.value = cf.smbc_password.value;
+           	else
+            pass_cf.smbc_pwd.value = cf.smbc_password.value;
+        }
+        else
+        {
+            if(pass_cf.smb_browse_flag.value == 1)
+            	pass_cf.smbc_rec_pwd.value = "";   // needn't username/password, set to NULL
+            else
+            pass_cf.smbc_pwd.value = "";   // needn't username/password, set to NULL
+        }
+        //alert("Update Parent Page Config Value!");
+    }
+    top.close();
+    return true;
+}
+
+function clear_span(current_depth, select_index)
+{
+    var span_id;
+    var select_span;
+    //alert("clear_span("+current_depth+", "+select_index+")");
+
+    span_id = "folder";
+    for (var i=0; i<current_depth; i++)
+    {
+        span_id += "_";
+        span_id += folder_index_array[i];
+    }
+    span_id += "_";
+    span_id += select_index;
+    span_id += "_SPAN";
+    //alert("span_id="+span_id);
+
+    // clear old select span
+    if (glb_select_span_id != -1)
+    {
+        select_span = document.getElementById(glb_select_span_id);
+        if (select_span != null)
+        {
+            select_span.style.backgroundColor='#FFF';
+            select_span.style.color='#000';
+        }
+    }
+    glb_select_span_id = span_id;
+}
+
+//end script -->
+</script>
+<style type="text/css">
+<!--
+body { margin-top: 20px; }
+-->
+</style>
+</head>
+<body LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" BOTTOMMARGIN="0">
+
+	<table cellpadding="0" cellspacing="0" border="0" align="center" valign="center">
+	
+	<tr>
+	 <td bgcolor="#cccbcb" valign="top">&nbsp;</td>
+	 <th class="subwin" align="center" bgcolor="#cccbcb">Select where you want to save your recordings</th>
+	 <td bgcolor="#cccbcb" valign="top" align="right">&nbsp;</td>
+	</tr>
+	
+	<tr>
+	<td colspan="3" nowrap="nowrap" valign="center" align="center"><BR>
+		<table cellpadding="0" cellspacing="0" style="font-size:10pt" align="center">
+		<tr><td>
+			<div ID="SmbBody_DIV" align="center" style="overflow:auto; height:240px; width:460px;">
+				<b><font size="+1">Searching SMB/CIFS Server</script></font></b></p>
+			    <img src="wait.gif" width="53" height="53" alt="" border="0"></div>
+			<script language="javascript">init();</script>
+		</td></tr>
+		</table>
+	<BR></td>
+	</tr>
+	
+	<tr>
+		<td bgcolor="#cccbcb" valign="bottom">&nbsp;</td>
+		<td bgcolor="#cccbcb" align="center">
+		<div ID="Buttons_DIV">
+			<script>dw('<input type="button" class="btstd80" name="Cancel" value="Cancel" onClick="smb_abort();">')</script>
+		</div>
+		</td>
+		<td bgcolor="#cccbcb" valign="bottom" align="right">&nbsp;</td>
+	</tr>
+
+	</table>
+
+<form>
+<input type="Hidden" name="smbc_server" value="-1">
+<input type="Hidden" name="smbc_path" value="-1">
+<input type="Hidden" name="smbc_username" value="-1">
+<input type="Hidden" name="smbc_password" value="-1">
+<input type="Hidden" name="smbc_needrights" value="r">
+</form>
+</body>
+</html>

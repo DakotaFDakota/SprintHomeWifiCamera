@@ -1,0 +1,363 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<meta name="description" content="806GA M 2073">
+<title>Wireless Throughput</title>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../throughput/ig_n.css">
+
+
+
+<style type="text/css" media=screen>
+<!--
+#device_pagemain {
+	float: none;
+	position:absolute; 
+	top: 8px; 
+	left:8px ;
+}
+.leftspacer {
+	height: 8px;
+	background-color:  transparent ;
+}
+.rightspacer {
+	height: 8px;
+	background-color:   transparent ;
+}
+.bottom_right1 {
+	position: absolute;
+	text-align: right;
+	top: 520px;
+	right: 20px;
+}
+/*====== Devices page style ========================== */
+.devices_sub_long_head {
+	color: black;
+	background: transparent;
+	font: bold 11pt Arial, Helvetica, sans-serif;
+	width: 150px;
+}
+.devices_sub_short_head {
+	color: black;
+	background: transparent;
+	font: bold 11pt Arial, Helvetica, sans-serif;
+	width: 80px;
+}
+.subhead {
+	color: black;
+	background: transparent;
+	font: bold 9pt Arial, Helvetica, sans-serif;
+}
+.leftspacer {
+	height: 8px;
+	background-color:  transparent ;
+}
+.rightspacer {
+	height: 8px;
+	background-color:   transparent ;
+}
+-->
+</style>
+
+<script language="JavaScript" type="text/javascript" src="../func.js"></script>
+<script language="javascript" type="text/javascript" src="../linux.js"></script>
+
+<script language="javascript" type="text/javascript" src="../message.js"></script>
+
+
+<script language="javascript" type="text/javascript" src="../throughput/mytable.js"></script>
+<script language="javascript" type="text/javascript" src="../throughput/throughput.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/excanvas.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/jquery.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/jquery.flot.navigate.js"></script>
+
+<link href="../throughput/tableFormat.css" rel="stylesheet" type="text/css" />
+
+
+
+<STYLE TYPE="text/javascript">
+classes.num.all.fontFamily = "Courier";
+classes.num.all.fontSize = "10pt" ;
+</style>
+    <style type="text/css">
+    #placeholder .button {
+        position: absolute;
+        cursor: pointer;
+    }
+    #placeholder div.button {
+        font-size: smaller;
+        color: #111;
+        background-color: #aaa;
+        padding: 2px;
+    }
+     #placeholder2 .button {
+        position: absolute;
+        cursor: pointer;
+    }
+    #placeholder2 div.button {
+        font-size: smaller;
+        color: #111;
+        background-color: #aaa;
+        padding: 2px;
+    }
+      #placeholder3 .button {
+        position: absolute;
+        cursor: pointer;
+    }
+    #placeholder3 div.button {
+        font-size: smaller;
+        color: #111;
+        background-color: #aaa;
+        padding: 2px;
+    }
+      #placeholder4 .button {
+        position: absolute;
+        cursor: pointer;
+    }
+    #placeholder4 div.button {
+        font-size: smaller;
+        color: #111;
+        background-color: #aaa;
+        padding: 2px;
+    }
+    .message {
+        padding-left: 50px;
+        font-size: smaller;
+    }
+    </style>
+
+</head>
+
+<body onload="init();" marginwidth="0" marginheight="0" topmargin="0"  bgcolor="#EBEBEB">
+<div ID="device_pagemain">
+<table border="0" cellpadding="6" cellspacing="0" width="100"  bgcolor="white">
+
+
+    <tr> 
+      <td width="975px" valign="top" bgcolor="#ffffff"> 
+        <TABLE border="0" cellspacing="0" cellpadding="2">
+        
+<tr>
+  <td class="subhead" valign="bottom">Throughput Setting</td>
+</tr>
+<tr>
+  <td class="rc" id="buttons" valign="bottom" align="left">
+  	<input type="button" value="Add" style="width:65px;" onclick="add_item();" />
+  	<input type="button" value="Copy" style="width:65px" onclick="copy_item();"/>
+  	<input type="button" value="Edit" style="width:65px;" onclick="edit_item();" />
+  	<input type="button" value="Delete" style="width:65px;" onclick="del_item();" />
+  </td>
+</tr>
+
+<tr>
+  <td colspan="2">
+  <table  id="ThroughputTable"    border="1px" bordercolor="#cccccc"  style="border-collapse:collapse;table-layout:fixed;width:975px;font: bold 9pt Arial, Helvetica, sans-serif;" cellspacing="0" cellpadding="0">
+    <thead>
+      <tr>
+        <th align="center" rowspan="2" class="notext"style="width:20px;" ><input id="throughput_check_box_all" type="checkbox" checked="checked" onClick="throughput_click_check_all();" /></th>
+				<th style="width:30px;word-wrap:break-word;word-break:break-all;" rowspan="2" title="Test ID">ID</th>
+				<th style="width:50px;word-wrap:break-word;word-break:break-all;border-right:none" ></th>
+				<th style="width:50px;word-wrap:break-word;word-break:break-all;border-left:none;border-right:none" >Server</th>
+				<th style="width:80px;word-wrap:break-word;word-break:break-all;border-left:none;border-right:none" ></th>
+        <th style="width:50px;word-wrap:break-word;word-break:break-all;border-right:none" ></th>
+        <th style="width:50px;word-wrap:break-word;word-break:break-all;border-left:none;border-right:none" >Client</th>
+        <th style="width:80px;word-wrap:break-word;word-break:break-all;border-left:none" ></th>
+        <th style="width:60px;word-wrap:break-word;word-break:break-all;" rowspan="2" title="TX,TX,Bidirection,Trade_off">Direction</th>
+        <th style="width:60px;word-wrap:break-word;word-break:break-all;" rowspan="2" title="test time">Duration&#10(second)</th>
+        <th style="width:50px;word-wrap:break-word;word-break:break-all;" rowspan="2" title="session number"> Session </th>
+        <th style="width:60px;word-wrap:break-word;word-break:break-all;" rowspan="2" title="TCP or UDP"> Protocol </th>
+        <th style="width:40px;word-wrap:break-word;word-break:break-all; border-bottom:none"> No </th>
+        <th align="center" style="width:50px;word-wrap:break-word;word-break:break-all;border-bottom:none">Data</th>
+        <th style="width:50px;word-wrap:break-word;word-break:break-all;border-bottom:none">Payload</th>
+        <th style="width:60px;word-wrap:break-word;word-break:break-all;border-bottom:none" title="interval time to get the result">Record</th>
+      </tr>
+      <tr >
+
+	<th align="center" style="float:center;width:80px;word-wrap:break-word;word-break:break-all;" title="Internet Protocol">  IP</th>	
+	<th style="width:50px;word-wrap:break-word;word-break:break-all;">User</th>	
+	<th style="width:80px;word-wrap:break-word;word-break:break-all;">Password</th>	
+	<th align="center" style="nowrap;;width:80px;word-wrap:break-word;word-break:break-all;overflow:hidden;" title="Internet Protocol">IP</th>	
+	<th style="width:50px;word-wrap:break-word;word-break:break-all;">User</th>	
+	<th style="width:80px;word-wrap:break-word;word-break:break-all;">Password</th>	
+	 <th style="width:40px;word-wrap:break-word;word-break:break-all;border-top:none">Delay</th>
+      	 <th align="center" style="width:50px;word-wrap:break-word;word-break:break-all;border-top:none">&nbsp&nbspRate&nbsp&nbsp&#10(Kbps)</th>
+      	 <th style="width:50px;word-wrap:break-word;word-break:break-all;border-top:none">Length</th>
+      	 <th style="width:60px;word-wrap:break-word;word-break:break-all;border-top:none" title="interval time to get the result">&nbspInterval&nbsp&#10(second)</th>
+      	</tr>
+      	
+				
+
+          </thead>
+  </table>
+  </td>
+</tr>
+
+<tr>
+  
+  <td class="rc" valign="bottom" align="left"><input type="button" id="runbotton" value="Run" style="width:65px;" onclick="start_test();" /></td>
+</tr>
+
+        </table>
+        
+        
+        
+        <hr/ style="width:975px;">
+						
+<div id="testing" align="center" style="display:none;font:bold;">Test is preparing, please wait...</div>
+	<br>
+<div id="image" align="center" style="display:none;"><img src="../throughput/load.gif"/></div>
+<TABLE border="0" cellspacing="0" cellpadding="2">			
+ <tr>
+ <td nowrap colspan="2"><input type="text" class="bignum" id="progress" style="display:none;" name="progress" size="88" value=""></td>
+	</tr>
+	
+</table>
+
+
+<tr> 
+ <td class="subhead" nowrap  valign="top" colspan="2">
+  <table class="tabtable" border="0" cellspacing="0" cellpadding="0" >
+       <tr>
+            <td colspan="2">
+            <table width="845px" border="0"  cellspacing="0" cellpadding="0">
+              <tr>
+                <TD id="test_info"  style="display:none;" class="subhead" vAlign="bottom" >Throughput</TD>
+              <tr>
+            </table>
+            </td>
+	     </tr>
+       <tr>
+          <td colspan="4">
+          <table id="test_info_table"  border="1px" bordercolor="#cccccc"  style="border-collapse:collapse;table-layout:fixed;display:none;width:975px;" cellspacing="0" cellpadding="0" >
+            <thead>
+              <tr class="headTable" style="background:#ccc">
+                <th style="width:20px" rowspan="2" class="notext" ><input id="result_check_box_all" type="checkbox" checked="checked" onClick="result_click_check_all();" /></th>
+                <th style="width:30px" rowspan="2"> ID </th>
+                <th style="width:60px" rowspan="2" title="maybe OK,maybe Fail"> Status </th>
+                <th align="center" style="width:220px" colspan="3"> Server </th>
+                <th align="center" style="width:220px" colspan="3"> Client </th>
+                <th align="center" colspan="2"> Throughput(Mbps)</th>
+                <th align="center" colspan="2" title="Round-trip delay time"> RTT(ms) </th>       
+                <th align="center" style="width:80px" rowspan="2" title="which stuff has&#10wirelss information"> Wireless Info</th>
+              </tr>
+              <tr class="headTable" style="background:#ccc">
+                <th>Name</th>
+                <th title="MAC address">MAC </th>
+                <th title="the user's cpu time&#10the system's cpu time&#10the whole cpu time">CPU Consum</th>
+                <th>Name</th>
+                <th title="MAC address"><span id= style="display:none;"><span>MAC</th>
+                <th title="the user's cpu time&#13the system's cpu time&#13the whole cpu time">CPU Consum</th>
+                <th title="client sends data to server">TX</th>
+                <th title="server sends data to client">RX</th>
+                <th title="client sends data to server">TX</th>
+              	<th title="server sends data to client">RX</th>
+              </tr>
+        </thead>
+      </table>
+           </td>
+        </tr>
+  </table> 
+
+
+
+
+
+
+	
+     	<TABLE border="0" cellspacing="0" cellpadding="2">
+	<tr>
+			
+		<td id="result"  style="display:none;">
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" height="1px">
+				<p id="Legend"  align="left" style="display:none;"></p>   
+	</td>
+		</tr>
+	<tr>
+	<td>	 <div id="placeholder" style="width:845px;height:300px;display:none;"></div></td>	
+	</tr>
+	</table>
+	<p id="hoverdata" style="display:none;">
+    <span id="clickdata" style="font: bold 10pt Arial, Helvetica, sans-serif;"></span></p>	
+	    
+	<TABLE border="0" cellspacing="0" cellpadding="2">
+		<tr>
+			
+		<td id="result3" colspan="2" style="display:none;">
+			<b>Wireless Rssi</b>
+		</td>
+	</tr>
+	<br>
+	<tr >
+		<td style="width:30px;"></td>
+	<td >	 <div id="placeholder3" style="width:812px;height:300px;display:none;"></div></td>
+	<td valign="top" height="1px">
+		<p id="Legend3" style="display:none;"></p>
+    
+	</td>
+	</tr>
+		</table>
+	<br>
+	<TABLE border="0" cellspacing="0" cellpadding="2">
+		<tr>
+			
+		<td id="result4" colspan="2" style="display:none;">
+			<b>Wireless Noise_level</b>
+		</td>
+	</tr>
+	<tr>
+		<td style="width:30px;"></td>
+	<td >	 <div id="placeholder4"  style="width:812px;height:300px;display:none;"></div></td>
+	
+	</tr>
+	</table>
+	<table id="record_info" style="display:none;" >
+		<tr>
+			<td>
+		<input id="show" type=button value="Show Detail" style="width:120px;" onClick="show_records();"></input>
+	</td>
+	
+</tr>
+	<td><div id="record"></div></td>
+	</table>
+	
+	
+	
+      </td>
+     </tr>
+</table>
+
+</div>
+
+<!--iframe id="aaaa" style="position: absolute; z-index: 20px; width: 760px; height: 700px;  opacity:0; filter:alpha(opacity=0); display:none" frameborder="0"></iframe-->
+<iframe id="aaaa" style="position: absolute; z-index: 1px; top:0px; left:80px; width:348px; height: 250px;  opacity:0; filter:alpha(opacity=0); display:none" frameborder="0"></iframe>
+<div id="device_DIV" style="z-index:9px; top:0px; left:0px; width:100%; height:100%; position:absolute; display:none;">
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-width:1px; border:outset; margin-top:20px; margin-left:280px;width:100px;">
+	<tr>
+		<td style="text-align:center;">
+			<div ID="ClistHead_xx" style="width:320px; display:none;padding-top:10px;"></div>	
+			<div ID="Clist" style="width:320px;display:none;text-align:-moz-center;"></div>
+			<br>
+			<center>
+				<input type="button" class="stdbuttton" id="csave" value="Save" onClick="save()" style="width:65px">
+				<input type="button" class="stdbuttton" id="cclose" value="Close" onClick="abort_scan()" style="width:65px">
+			</center>
+			<br>&nbsp;
+		</td>
+	</tr>
+</table>
+</div>
+
+
+</body>
+</html>
+
+
+

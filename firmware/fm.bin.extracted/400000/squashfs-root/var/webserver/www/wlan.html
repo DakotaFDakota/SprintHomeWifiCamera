@@ -1,0 +1,341 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
+		<link rel="stylesheet" href="/css/style.css">
+		
+		<title>Streamer</title>
+	</head>
+	<body class="background">
+	<script type="text/javascript">
+		var myxml;
+function createXMLHttpRequest() {
+    var xmlHttp;
+    if (window.XMLHttpRequest) { //if we can get XMLHttpRequest
+        xmlHttp = new XMLHttpRequest();  // Mozilla、Firefox、Safari
+    }
+    else if (window.ActiveXObject) { //if we can get ActiveXObject
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); // Internet Explorer
+    }
+    return xmlHttp;
+}
+
+
+function keysetting()
+{
+ if(document.getElementById("id_wlan_chiper_suit").value=="NONE"){
+  document.getElementById("id_wpa_pass_phrase").disabled=true;
+ }
+ else if(document.getElementById("id_wlan_chiper_suit").value=="WPA2"){
+  document.getElementById("id_wpa_pass_phrase").disabled=false;
+ }
+}
+
+
+
+function select_val_idx(id,setval,defval){
+  var  e = document.getElementById(id);
+  //selval=e.options[e.selectedIndex].value;
+  //alert(e.options[e.selectedIndex].value)
+  //alert(setval)
+  for(i=0;i<defval.length;i++){
+     //alert(setval);
+     //alert(defval[i])
+     if(setval==defval[i])
+        e.selectedIndex=i;
+  }
+}
+
+
+function parsevalue(tmpstr){
+
+   var data=tmpstr.split("&");
+
+   //alert(data);
+
+   key_value = data[0].split("=");
+
+   document.getElementById("id_ssid").value=key_value[1];
+   key_value = data[1].split("=");
+   document.getElementById("id_wlan_channel").value=key_value[1];
+   key_value = data[2].split("=");
+   
+   document.getElementById("id_wlan_chiper_suit").value=key_value[1];
+   key_value = data[3].split("=");
+   
+   document.getElementById("id_wpa_pass_phrase").value=key_value[1];
+
+   key_value = data[4].split("=");
+   document.getElementById("id_ip_address").value=key_value[1];
+   key_value = data[5].split("="); 
+   document.getElementById("id_subnet_mask").value=key_value[1];
+   key_value = data[6].split("=");
+   document.getElementById("id_dhcp_start_ip").value=key_value[1];
+   key_value = data[7].split("="); 
+   document.getElementById("id_dhcp_end_ip").value=key_value[1];
+   key_value = data[8].split("=");
+   document.getElementById("id_dhcp_lease_time").value=key_value[1];
+
+keysetting();
+
+
+/*
+   key_value = data[4].split("=");
+   document.getElementById("id_group").value=key_value[1];
+
+   key_value = data[5].split("=");
+   document.getElementById("id_psk").value=key_value[1];
+*/
+
+}
+
+ 
+function handleGetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response:" + myxml.responseText);
+	parsevalue(myxml.responseText);
+      //document.GetVal.t1.value=myxml.responseText; 
+     }
+   }
+}
+function handleSetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response" + myxml.responseText);
+          //document.SetVal.t2.value=myxml.responseText;
+	  alert(myxml.responseText);
+	  //parsevalue(myxml.responseText);
+     }
+   }
+}
+
+
+ 
+function startGetRequest()
+{
+    
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    myxml.open("GET", "/cgi-bin/wireless_client?wireless.ssid&wireless.ap.channel&wireless.ap.cert&wireless.ap.wpa.psk&wireless.ap.ipaddr&wireless.ap.subnetmask&wireless.ap.dhcp.start&wireless.ap.dhcp.end&wireless.ap.dhcp.lease&end",true); 
+    myxml.send("");
+
+}
+
+function startSetRequest()
+{
+   var e = document.getElementById("ddlViewBy");
+   var strUser = e.options[e.selectedIndex].text;
+
+   var str_value = new Array();
+
+   //if(){
+   //document.streamer.streamer_video_resolution_sel.options[e.selectedIndex].value;
+
+   //}
+
+   str_value[0] = document.streamer.streamer_video_resolution_sel.value;
+   alert(str_value[0]);
+   str_value[1] = document.streamer.streamer_video_pixel_fmt_sel.selectedIndex;
+   str_value[2] = document.streamer.streamer_video_framerate.value;
+   str_value[3] = document.streamer.streamer_video_bitrate.value;
+   str_value[4] = document.streamer.streamer_video_source_sel.selectedIndex;
+   str_value[5] = document.streamer.streamer_audio_samplerate_sel.selectedIndex;
+ 
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleSetStateChange;
+    myxml.open("POST", "/cgi-bin/runcgi",true);
+    myxml.send("wireless.ssid"+str_value[0]+"&wireless.ap.channel"+str_value[1]+"&wireless.ap.cert"+str_value[2]+"&wireless.ap.wpa.psk."+str_value[3]+"&end");
+}
+ 
+
+	</script>
+
+	<form action="/cgi-bin/wireless_client" method=POST name="wireless">
+		<table border=0 width="700" cellspacing=1>
+			<tr>
+			<td>
+			<p class=title><b>Wireless</p>
+			</br>
+			</br>
+			</td>
+			</tr>
+			
+			<tr>
+
+			<td  width="35%">
+				SSID
+			</td>
+
+	   
+           		<td  width="65%">
+				<input type="text" name="wlan_connect_ssid" id="id_ssid" size="32" maxlength="32" value="">	 
+			</td>
+		</tr>
+		<tr>
+			<td  width="35%">
+				Channel(1~13)
+			</td>
+			<td>
+			<select name="wlan_channel" id="id_wlan_channel">
+			<script>
+			for(i=1;i<=13;i++)
+			   document.write('<option value='+i+'>'+i+'</option>');	
+			</script>
+			</select>
+			</td>		
+		</tr>
+		<tr>
+			<td  width="35%">
+				WPA Chiper suit
+			</td>
+			<td>
+			<select name="wlan_chiper_suit" id="id_wlan_chiper_suit" onChange="keysetting();">
+			 <option value="NONE">NONE</option>			
+			 <option value="WPA2">WPA2</option>
+			</select>
+			</td>
+
+			
+		</tr>
+		<tr>
+			<td  width="35%">
+				WPA Pass-phrase
+			</td>
+			<td  width="65%">
+				<input type="text" name="wpa_pass_phrase" id="id_wpa_pass_phrase" size="63" maxlength="63" value="">				
+			</td>
+			
+		</tr>
+
+
+		<tr>
+			<td  width="35%">
+				IP address
+			</td>
+			<td  width="65%">
+				<input type="text" name="ip_address" id="id_ip_address" size="20" maxlength="20" value="">				
+			</td>
+			
+		</tr>
+
+		<tr>
+			<td  width="35%">
+				Subnet mask
+			</td>
+			<td  width="65%">
+				<input type="text" name="subnet_mask" id="id_subnet_mask" size="20" maxlength="20" value="">				
+			</td>
+			
+		</tr>
+
+		<tr>
+			<td  width="35%">
+				DHCP server
+			</td>
+			<td>
+			</td>
+		</tr>	
+		<tr>
+			<td  width="35%">
+				DHCP client start IP
+			</td>
+			<td  width="65%">
+				<input type="text" name="dhcp_start_ip" id="id_dhcp_start_ip" size="20" maxlength="20" value="">				
+			</td>
+			
+		</tr>
+		<tr>
+			<td  width="35%">
+				DHCP client end IP
+			</td>
+			<td  width="65%">
+				<input type="text" name="dhcp_end_ip" id="id_dhcp_end_ip" size="20" maxlength="20" value="">				
+			</td>
+			
+		</tr>
+		<tr>
+			<td  width="35%">
+				DHCP lease time(1~864000s)
+			</td>
+			<td  width="65%">
+				<input type="text" name="dhcp_lease_time" id="id_dhcp_lease_time" size="20" maxlength="20" value="">				
+			</td>
+			
+		</tr>
+
+
+
+<!--
+			<tr>
+			<td  width="35%">
+				Proto
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_proto" id="id_proto" size="20" maxlength="20" value="">
+				
+			</td>
+			
+		</tr>
+
+		<tr>
+			<td  width="35%">
+				Key_mgmt
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_key_mgmt" id="id_key_mgmt" size="20" maxlength="20" value="">
+				
+			</td>
+		</tr>
+
+		
+			<tr>
+			<td  width="35%">
+				Pairwise
+			</td>
+			<td width="65%">
+				<input type="text" name="wlan_connect_pairwise" id="id_pairwise" size="20" maxlength="20" value="">
+			</td>
+		</tr>
+		
+		<tr>
+			<td  width="35%">
+				Group
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_group" id="id_group" size="20" maxlength="20" value="">
+				
+			</td>
+			</td>
+		</tr>
+<tr>
+			<td  width="35%">
+				Psk
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_psk" id="id_psk" size="20" maxlength="20" value=""> 
+	                       
+				</select>
+			</td>
+			</td>
+		</tr>
+-->
+	</table>
+		
+	<table>
+<script type="text/javascript">startGetRequest();</script>
+<script type="text/javascript">keysetting();</script>
+	<tr>
+	<td>
+	<input type="submit" value="apply" name="wlan_apply" class="button" >
+	</td>
+	</tr>
+	</table>
+</form>
+
+</body>
+
+</html>

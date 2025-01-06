@@ -1,0 +1,371 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - CMS</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function setCMS()
+{
+	var cf = document.forms[0];
+
+	if (cf.cms_enable.checked == false)
+	{ 
+		cf.cms_address.disabled = cf.cms_username.disabled = cf.cms_userpass.disabled = cf.cms_port.disabled = cf.cms_interval.disabled = 1;
+	}
+	else
+	{
+		cf.cms_address.disabled = cf.cms_username.disabled = cf.cms_userpass.disabled = cf.cms_port.disabled = cf.cms_interval.disabled = 0;
+	}
+}
+/*
+function setL2TP()
+{
+	var cf = document.forms[0];
+    
+	if (cf.l2tp_enable.checked == false)
+	{ 
+		cf.l2tp_server.disabled = cf.l2tp_username.disabled = cf.l2tp_password.disabled = cf.l2tp_mtu.disabled = 1;
+	}
+	else
+	{
+		cf.l2tp_server.disabled = cf.l2tp_username.disabled = cf.l2tp_password.disabled = cf.l2tp_mtu.disabled = 0;
+	}
+}
+*/
+
+var cmspw_old = "";
+var l2tppw_old = "";
+
+function set_pwd()
+{
+ 	var cf = document.forms[0];
+
+	if(cf.cms_userpass.value=="")
+	{
+		cmspw_old = randomString(6, Valid_Stri);
+		cf.cms_userpass.value = cmspw_old;
+	}
+  /*
+	if(cf.l2tp_password.value=="")
+	{
+		l2tppw_old = randomString(6, Valid_Stri);
+		cf.l2tp_password.value = l2tppw_old;
+	}
+  */
+}
+
+function set_all()
+{
+	set_pwd();
+	setCMS();
+	//setL2TP();
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+	//menuframe.highLight('cmsDIV');
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			["CMS", "enable", "cms_enable"],
+			["CMS", "address", "cms_address"],
+			//["CMS", "uri", "cms_uri"],
+			["CMS", "username", "cms_username"],
+			["CMS", "password", "cms_userpass"],
+			["CMS", "port", "cms_port"],
+			["CMS", "interval", "cms_interval"],
+			//["CMS", "enable2", "h_cms_enable2"],
+			//["CMS", "address2", "cms_address2"],
+			//["CMS", "uri2", "cms_uri2"],
+			//["CMS", "username2", "cms_username2"],
+			//["CMS", "password2", "cms_userpass2"],
+			//["CMS", "port2", "cms_port2"],
+			//["CMS", "interval2", "cms_interval2"],
+		];
+	read.callback = set_all;
+	read.get(array_get);
+	
+ 	//var cf = document.forms[0];
+	//dataToVisible(cf);
+}
+
+function reset_pwd()
+{
+	var cf = document.forms[0];
+	if(cf.cms_userpass.value != cmspw_old)
+	{
+		cmspw_old = cf.cms_userpass.value;
+	}
+  /*
+	if(cf.l2tp_password.value != l2tppw_old)
+	{
+		l2tppw_old = cf.l2tp_password.value;
+	}
+  */
+}
+
+function checkData()
+{
+ 	var cf = document.forms[0];
+	var msg = "";
+    
+ 	// CMS
+	if (cf.cms_enable.checked)
+	{
+		if(cf.cms_address.value == "")
+		{ 
+			msg+= msg_cms_address_empty; 
+		}
+		
+		msg+= checkInt(cf.cms_port, msg_cms_port, 1, 65535, true);	
+	}
+	// L2TP
+  /*
+	if (cf.l2tp_enable.checked)
+	{
+		if(cf.l2tp_server.value == "")
+		{ 
+			msg+= msg_l2tp_server_empty; 
+		}
+		
+		msg+= checkInt(cf.l2tp_mtu, msg_l2tp_mtu, 600, 1452, true);	
+	}
+  */
+ 	if (cf.cms_userpass.value != cmspw_old)
+ 	{
+ 	 	msg += checkValid(cf.cms_userpass, msg_cms_pw_invalid, Valid_Stri, 64, false);
+ 	}
+  /*
+ 	if (cf.l2tp_password.value != l2tppw_old)
+ 	{
+ 	 	msg += checkValid(cf.l2tp_password, msg_l2tp_pw_invalid, Valid_Stri, 64, false);
+ 	}
+  */
+ 	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	//dataToHidden(cf);
+	cf.pwd_chg_cms_password.value = (cf.cms_userpass.value != cmspw_old)?1:0;
+ 	//cf.pwd_chg_l2tp.value = (cf.l2tp_password.value != l2tppw_old)?1:0;
+	
+	cf.h_cms_enable2.value = (cf.cms_enable.checked == true)?1:0;
+	cf.cms_address2.value = cf.cms_address.value;
+	cf.cms_username2.value = cf.cms_username.value;
+	cf.cms_userpass2.value = cf.cms_userpass.value;
+	cf.cms_port2.value = cf.cms_port.value;
+	cf.cms_interval2.value = cf.cms_interval.value;
+  	cf.pwd_chg_cms_password2.value = cf.pwd_chg_cms_password.value
+	
+	var save = new GroupCtrl();
+	var array_set=[
+			["CMS", "enable", "cms_enable"],
+			["CMS", "address", "cms_address"],
+			//["CMS", "uri", "cms_uri"],
+			["CMS", "username", "cms_username"],
+			["CMS", "port", "cms_port"],
+			["CMS", "interval", "cms_interval"],
+			["CMS", "enable2", "h_cms_enable2"],
+			["CMS", "address2", "cms_address2"],
+			//["CMS", "uri2", "cms_uri2"],
+			["CMS", "username2", "cms_username2"],
+			["CMS", "port2", "cms_port2"],
+			["CMS", "interval2", "cms_interval2"],
+		];
+	if (cf.pwd_chg_cms_password.value==1)
+	{
+		array_set.push(["CMS", "password", "cms_userpass"]);
+	}
+	if (cf.pwd_chg_cms_password2.value==1)
+	{	
+		array_set.push(["CMS", "password2", "cms_userpass2"]);
+	}
+  /*
+	if (cf.pwd_chg_l2tp.value==1)
+	{
+		array_set.push(["L2TP", "l2tp_password", "l2tp_password"]);
+	}
+  */
+	save.callback = reset_pwd;
+	save.set(array_set);
+/*
+	if(cf.pwd_chg_l2tp.value==1)
+	{
+		array_set.pop();
+	}
+*/
+	if(cf.pwd_chg_cms_password2.value==1)
+	{
+		array_set.pop();
+	}
+	if(cf.pwd_chg_cms_password.value==1)
+	{
+		array_set.pop();
+	}
+	
+	return true;
+}
+
+// End Script -->
+</script>
+</head>
+
+<body onLoad="init();showMsg()">
+<FORM name="cms" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<TR><TD nowrap height="75" align="right" valign="top"></TD>
+</TR>
+</TABLE>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>CMS</td>
+ <td class="rc" nowrap><input type="checkbox" name="cms_enable" value="1" onClick="setCMS()"> Enable</td>
+</tr>
+
+<tr>
+ <td class="lc" style="padding-left: 60px" nowrap>Address:</td>
+ <td class="rc" nowrap><input type="text" name="cms_address" size="25" maxlength="256" value="" style="width:300px"></td>
+</tr>
+
+<tr>
+<td class="lc" style="padding-left: 60px" nowrap>User Name:</td>
+<td class="rc" nowrap><input type="text" size="16" maxlength="64" name="cms_username" value="" style="width:140px"></td>
+</tr>
+
+<tr>
+<td class="lc" style="padding-left: 60px" nowrap>User Password:</td>
+<td class="rc" nowrap><input type="password" size="8" maxlength="64" name="cms_userpass" value="" style="width:140px"></td>
+</tr>
+
+<tr>
+ <td class="lc" style="padding-left: 60px" nowrap>Port Number:</td>
+ <td class="rc" nowrap><input type="text" name="cms_port" size="5" maxlength="5" value="" style="width:80px"></td>
+</tr>
+
+<tr>
+ <td class="lc" style="padding-left: 60px" nowrap>Interval:</td>
+ <td class="rc" nowrap><input type="text" name="cms_interval" size="5" maxlength="5" value="" style="width:80px"></td>
+</tr>
+
+<tr>
+ <td class="lc">&nbsp;</td>
+ <td class="rc">&nbsp;</td>
+</tr>
+<!--
+<tr>
+ <td class="subhead" nowrap>L2TP</td>
+ <td class="rc" nowrap><input type="checkbox" name="l2tp_enable" value="1" onClick="setL2TP()"> Enable</td>
+</tr>
+
+<tr>
+ <td class="lc" style="padding-left: 60px" colspan=2 nowrap><strong>L2TP Connection Settings</strong></td>
+</tr>
+
+<tr>
+ <td class="lc" style="padding-left: 60px" nowrap>L2TP Server:</td>
+ <td class="rc" nowrap><input type="text" name="l2tp_server" size="25" maxlength="256" value="" style="width:300px"></td>
+</tr>
+
+<tr>
+<td class="lc" style="padding-left: 60px" nowrap>Login Name:</td>
+<td class="rc" nowrap><input type="text" size="16" maxlength="64" name="l2tp_username" value="" style="width:140px"></td>
+</tr>
+
+<tr>
+<td class="lc" style="padding-left: 60px" nowrap>Password:</td>
+<td class="rc" nowrap><input type="password" size="8" maxlength="64" name="l2tp_password" value="" style="width:140px"></td>
+</tr>
+
+<tr>
+ <td class="lc" style="padding-left: 60px" nowrap>MTU Size:</td>
+ <td class="rc" nowrap><input type="text" name="l2tp_mtu" size="5" maxlength="5" value="" style="width:80px"> (Bytes,600~1452)</td>
+</tr>
+-->
+<tr>  <!-- layout row, pushes data up, buttons down -->
+ <td class="lc" height="80%"> </td>
+ <td class="rc" height="80%"> </td>
+</tr>
+
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='cms.htm'">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_cms.htm')"> </td>
+</tr>
+
+<!-- table footer -->
+</table>
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+<input type="Hidden" name="h_cms_enable2" value="">
+<input type="Hidden" name="cms_address2" value="">
+<input type="Hidden" name="cms_username2" value="">
+<input type="Hidden" name="cms_userpass2" value="">
+<input type="Hidden" name="cms_port2" value="">
+<input type="Hidden" name="cms_interval2" value="">
+
+<input type="Hidden" name="pwd_chg_cms_password" value="0">
+<input type="Hidden" name="pwd_chg_cms_password2" value="0">
+<input type="Hidden" name="pwd_chg_l2tp" value="0">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

@@ -1,0 +1,150 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
+		<link rel="stylesheet" href="/css/style.css">
+		<!--<script type="text/javascript" src="/file/javascript.js"></script>-->
+		<title>night vision</title>
+	</head>
+<body class="background">
+<script type="text/javascript">
+
+var myxml;
+function createXMLHttpRequest() {
+    var xmlHttp;
+    if (window.XMLHttpRequest) { //if we can get XMLHttpRequest
+        xmlHttp = new XMLHttpRequest();  // Mozilla、Firefox、Safari
+    }
+    else if (window.ActiveXObject) { //if we can get ActiveXObject
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); // Internet Explorer
+    }
+    return xmlHttp;
+}
+
+
+
+
+function select_val_idx(id,setval,defval){
+  var  e = document.getElementById(id);
+  //selval=e.options[e.selectedIndex].value;
+  //alert(e.options[e.selectedIndex].value)
+  //alert(setval)
+  for(i=0;i<defval.length;i++){
+     //alert("a:"+setval);
+     //alert("b:"+defval[i])
+     if(setval==defval[i])
+        e.selectedIndex=i;
+  }
+}
+
+
+function parsevalue(tmpstr){
+
+   var data=tmpstr.split("&");
+   var off_on = ["0","1"];
+  // alert("tmpstr:"+tmpstr);
+   key_value = data[0].split("=");
+   select_val_idx("id_night_vision_enable",key_value[1],off_on);
+   
+  
+ 
+
+}
+
+ 
+function handleGetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response:" + myxml.responseText);
+	parsevalue(myxml.responseText);
+      //document.GetVal.t1.value=myxml.responseText; 
+     }
+   }
+}
+function handleSetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response" + myxml.responseText);
+          //document.SetVal.t2.value=myxml.responseText;
+	  alert(myxml.responseText);
+	  //parsevalue(myxml.responseText);
+     }
+   }
+}
+
+
+ 
+function startGetRequest()
+{
+    
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    myxml.open("GET", "/cgi-bin/night_vision?night.vision.eanble&end",true); 
+    myxml.send("");
+
+}
+function startSetRequest()
+{
+  var strUser = e.options[e.selectedIndex].text;
+
+   var str_value = new Array();
+
+   //if(){
+   //document.streamer.streamer_video_resolution_sel.options[e.selectedIndex].value;
+
+   //}
+
+   str_value[0] = document.streamer.streamer_video_resolution_sel.value;
+   //alert(str_value[0]);
+   str_value[1] = document.streamer.streamer_video_pixel_fmt_sel.selectedIndex;
+   
+   myxml=createXMLHttpRequest();
+   if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleSetStateChange;
+    myxml.open("POST", "/cgi-bin/voice",true);
+    myxml.send("night.vision.eanble"+str_value[0]+"&end");
+}
+ 
+
+</script>
+<form action="/cgi-bin/night_vision" method=POST name="night_vision">
+	
+		
+	<table border=0 width="700" cellspacing=1>
+		<tr>
+			<td>
+			<p class=title><b>Night vision</p>
+			</br>
+			</br>
+			</td>
+			</tr>
+			<td width="35%">
+				Night Vision
+				
+			</td>
+			<td width="65%">
+				<select name="night_vision_enable" id="id_night_vision_enable">
+				<option value=0 >OFF</option>
+				<option value=1 >ON</option>
+			</td>
+		</tr>
+		
+		
+	</table>
+	<table>
+<script type="text/javascript">startGetRequest();</script>
+	<tr>
+	<td>
+	<input type="submit" value="apply" name="night_vision_apply" class="button">
+	</td>
+	</tr>
+	</table>
+<script>
+</script>
+</form>
+
+</body>
+
+</html>

@@ -1,0 +1,1140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Setup</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../retrive.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var StartChannel =  new Array( 1, 1, 1, 1, 1,10,10,5, 1,11, 1, 1);
+var FinishChannel = new Array(13,13,13,11,13,11,13,7,13,11,13,11);
+var currentCh = null;
+//var wireless_status_done=0;
+
+var wepPassphrase_old;
+var WEPKey1_old;
+var WEPKey2_old;
+var WEPKey3_old;
+var WEPKey4_old;
+var psk_old;
+var old_essid,old_h_w_re,old_h_w_ch,old_h_wire_sec,old_psk,old_h_w_auth,old_h_w_wep;
+var old_wepPassphrase,old_WEPKey1,old_WEPKey2,old_WEPKey3,old_WEPKey4,old_h_defkey;
+
+function set_all()
+{
+	var cf = document.forms[0];
+
+	dataToVisible(cf);
+	
+	if (cf.w_wep.value == "1")
+    {
+    	WEPKey1_old = randomString(10, hex_str);
+		WEPKey2_old = randomString(10, hex_str);
+        WEPKey3_old = randomString(10, hex_str);
+        WEPKey4_old = randomString(10, hex_str);
+    }
+    else if(cf.w_wep.value == "2")
+    {
+        WEPKey1_old = randomString(26, hex_str);
+        WEPKey2_old = randomString(26, hex_str);
+        WEPKey3_old = randomString(26, hex_str);
+        WEPKey4_old = randomString(26, hex_str);
+    }
+    else if(cf.w_wep.value == "3")
+    {
+		WEPKey1_old = randomString(5, hex_str);
+        WEPKey2_old = randomString(5, hex_str);
+        WEPKey3_old = randomString(5, hex_str);
+        WEPKey4_old = randomString(5, hex_str);
+    }
+    else
+    {
+		WEPKey1_old = randomString(13, hex_str);
+        WEPKey2_old = randomString(13, hex_str);
+        WEPKey3_old = randomString(13, hex_str);
+       	WEPKey4_old = randomString(13, hex_str);
+    }
+    if (cf.WEPKey1.value == "")
+    {
+        cf.WEPKey1.value = WEPKey1_old;
+    }
+    if (cf.WEPKey2.value == "")
+    {
+        cf.WEPKey2.value = WEPKey2_old;
+    }
+    if (cf.WEPKey3.value == "")
+    {
+        cf.WEPKey3.value = WEPKey3_old;
+    }
+    if (cf.WEPKey4.value == "")
+    {
+        cf.WEPKey4.value = WEPKey4_old;
+    }
+    wepPassphrase_old = randomString(6, Valid_Strd);
+    if (cf.wepPassphrase.value == "")
+    {
+        cf.wepPassphrase.value = wepPassphrase_old;
+    }
+    psk_old = randomString(9, Valid_Strd);
+    if (cf.psk.value == "")
+    {
+        cf.psk.value = psk_old;
+    }
+
+	old_essid=cf.essid.value;
+	old_h_w_re=cf.h_w_re.value;
+	old_h_w_ch=cf.h_w_ch.value;
+	old_h_wire_sec=cf.h_wire_sec.value;
+	old_psk=cf.psk.value;
+	old_h_w_auth=cf.h_w_auth.value;
+	old_h_w_wep=cf.h_w_wep.value;
+	old_wepPassphrase=cf.wepPassphrase.value;
+	old_WEPKey1=cf.WEPKey1.value;
+	old_WEPKey2=cf.WEPKey2.value;
+	old_WEPKey3=cf.WEPKey3.value;
+	old_WEPKey4=cf.WEPKey4.value;
+	old_h_defkey=cf.h_defkey.value;
+	
+	setChannel();
+	setwsec();
+	setKeySize();
+	cgi_cnt--;
+	if(cgi_cnt == 0)
+	{
+		document.getElementById("ongoing").style.display="none";
+		document.getElementById("mubd").style.display="block";	
+	}
+}
+/*
+var http_request2;
+function showResponse2()
+{
+ 	var cf = document.forms[0];
+	var resp_context;
+	if (http_request2.readyState == 4 || http_request2.readyState == 'complete')
+	{
+		resp_context = http_request2.responseText;
+		if (resp_context != "")
+		{
+			var all_value = resp_context.split("\r\n");
+			var i;
+			//var wps_pin_code;
+			//var index = resp_context.indexOf("wps_pin_code=");
+			for(i=0;i<all_value.length;i++)
+			{
+				if(all_value[i].split("=")[0] == "wps_pin_code")
+				{
+					//alert("wsc_pin="+all_value[i].split("=")[1]);
+					document.getElementsByName("wsc_pin")[0].innerHTML = all_value[i].split("=")[1];
+					break;
+				}
+			}
+		}
+		http_request2.abort();
+		http_request2 = null;
+	}
+	wireless_status_done=1;
+}
+function do_wireless_status_cgi()
+{
+  var cf = document.forms[0];
+  var src_file;
+
+	if(http_request2 == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request2 = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request2 = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request2 = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request2 = null; }
+			}
+		}
+	}
+
+	if (!http_request2)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+
+	src_file =  '../adm/wireless_status.cgi';
+
+	http_request2.onreadystatechange = function() { showResponse2(); };
+	http_request2.open('GET', src_file, true);
+	http_request2.send(null);
+}
+*/
+
+var http_request1;
+function showResponse1()
+{
+	var resp_context;
+	if (http_request1.readyState == 4 || http_request1.readyState == 'complete')
+	{
+		resp_context = http_request1.responseText;
+		if ("" != resp_context)
+		{
+			alert(resp_context);
+		}
+		http_request1.abort();
+		http_request1 = null;
+		document.forms[0].wireless_test.disabled = false;
+	}
+}
+
+function confirmTest()
+{
+	var src_file;
+	var cf = document.forms[0];
+	var msg = "";
+	
+	if(http_request1 == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request1 = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request1 = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request1 = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request1 = null; }
+			}
+		}
+	}
+
+	if (!http_request1)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	cf.wireless_test.disabled = true;
+	src_file = '../adm/test_wlan.cgi';
+	
+	http_request1.onreadystatechange = function() { showResponse1(); }
+	http_request1.open('GET', src_file, true);
+	http_request1.send(null);
+	
+	if(secMethod == "2" || secMethod == "3" || secMethod == "6")
+	{
+		if(cf.pwd_chg_wpa_ascii.value==1)
+		{
+			array_set.pop();
+		}
+	}
+	else if(secMethod == "1")
+	{
+		if(cf.pwd_chg_wep_key4.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_key3.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_key2.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_key1.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_ascii.value==1)
+		{					
+			array_set.pop();
+		}
+	}
+
+	return true;
+}
+
+var cgi_cnt=0;
+/*
+var content="";
+function wirelessstatuscgi_response()
+{
+	var cf = document.forms[0];
+	//alert("content="+content);
+	if (content != "")
+	{
+		var all_value = content.split("\r\n");
+		var i;
+
+		for(i=0;i<all_value.length;i++)
+		{
+			if(all_value[i].split("=")[0] == "wps_pin_code")
+			{
+				document.getElementsByName("wsc_pin")[0].innerHTML = all_value[i].split("=")[1];
+				break;
+			}
+		}
+	}
+	cgi_cnt--;
+	if(cgi_cnt == 0)
+	{
+		document.getElementById("ongoing").style.display="none";
+		document.getElementById("mubd").style.display="block";	
+	}
+}
+*/
+function init()
+{
+	//wireless_status_done=0;
+	cgi_cnt=0;
+	menuframe.highLight('wireDIV');
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+	//do_wireless_status_cgi();
+	//var src_file = '../adm/wireless_status.cgi';
+	//cgi_cnt++;
+	//call_http_cgi(src_file,wirelessstatuscgi_response);
+	cgi_cnt++;
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],	
+			["WIRELESS", "pin_code", "wsc_pin"],
+			["NETWORK", "lan_status", "lan_status"],
+			["WIRELESS", "wlan_type", "h_w_type"],
+			["WIRELESS", "wlan_essid", "essid"],
+			["WIRELESS", "wlan_domain", "h_w_re"],
+			["WIRELESS", "wlan_channel", "h_w_ch"],
+			["WIRELESS", "wlan_security", "h_wire_sec"],
+			["WIRELESS", "wpa_ascii", "psk"],
+			["WIRELESS", "wep_authtype", "h_w_auth"],
+			["WIRELESS", "wep_mode", "h_w_wep"],
+			["WIRELESS", "wep_ascii", "wepPassphrase"],
+			["WIRELESS", "wep_kep1", "WEPKey1"],
+			["WIRELESS", "wep_kep2", "WEPKey2"],
+			["WIRELESS", "wep_kep3", "WEPKey3"],
+			["WIRELESS", "wep_kep4", "WEPKey4"],
+			["WIRELESS", "wep_index", "h_defkey"]
+		];
+	read.callback = set_all;
+	read.get(array_get);
+}
+
+
+function Ch()
+{
+	setChannel();
+}
+
+function setChannel()
+{
+	var cf = document.forms[0];
+	var reIndex = cf.w_re.value - 1;		// value is 1,2,3...
+	currentCh = cf.w_ch.value = cf.h_w_ch.value;
+	
+	if (currentCh >FinishChannel[reIndex] || currentCh < StartChannel[reIndex])
+	{
+		currentCh = cf.w_ch.value = StartChannel[reIndex];
+	}
+	cf.w_ch.options.length = 1;
+	cf.w_ch.options[0].value = currentCh;
+	cf.w_ch.options[0].text = msg_infraChannel;
+	cf.w_ch.selectedIndex = 0;
+}	 
+
+
+function setwsec()
+{
+	var cf = document.forms[0];
+	
+	cf.wire_sec.options.length = 3;
+	cf.wire_sec.options[0].value = "0";
+	cf.wire_sec.options[0].text = msg_no_wsec;
+	cf.wire_sec.options[1].value = "1";
+	cf.wire_sec.options[1].text = msg_wep;
+	cf.wire_sec.options[2].value = "2";
+	cf.wire_sec.options[2].value = "2";
+	cf.wire_sec.options[2].text = msg_wpa;
+	/*cf.wire_sec.options.length = 5;
+	cf.wire_sec.options[0].value = "0";
+	cf.wire_sec.options[0].text = msg_no_wsec;
+	cf.wire_sec.options[1].value = "1";
+	cf.wire_sec.options[1].text = msg_wep;
+	cf.wire_sec.options[2].value = "2";
+	cf.wire_sec.options[2].text = msg_wpa;
+	cf.wire_sec.options[3].value = "3";
+	cf.wire_sec.options[3].text = msg_wpa_tkip;
+	cf.wire_sec.options[4].value = "6";
+	cf.wire_sec.options[4].text = msg_wpa2_aes;*/
+	setDivs();
+}
+
+
+function setDivs()
+{
+ 	var cf = document.forms[0];
+	var method = cf.wire_sec.value ;
+
+	setDisplay("testWirelssButton",true);
+	setDisplay("wepDIV01", method == "1");
+	setDisplay("wepDIV02", method == "1");
+	setDisplay("wepDIV03", method == "1");
+	setDisplay("wepDIV04", method == "1");
+	setDisplay("wepDIV05", method == "1");
+	setDisplay("wepDIV06", method == "1");
+	setDisplay("wepDIV07", method == "1");
+	setDisplay("wepDIV08", method == "1");
+
+	setDisplay("wpapskDIV01", method == "2");
+	setDisplay("wpapskDIV02", method == "2");
+	setDisplay("wpapskDIV03", method == "2");
+	setDisplay("wpapskDIV03", method == "2");
+	if(method == "3")
+	{
+		//richard add WPA-TKIP only
+		setDisplay("wpapskDIV01", method == "3");
+		setDisplay("wpapskDIV02", method == "3");
+		setDisplay("wpapskDIV03", method == "3");
+	}
+	if(method == "6")
+	{
+		//richard add WPA2-AES only
+		setDisplay("wpapskDIV01", method == "6");
+		setDisplay("wpapskDIV02", method == "6");
+		setDisplay("wpapskDIV03", method == "6");
+	}
+}
+			
+var http_request;
+function showResponse()
+{
+ 	var cf = document.forms[0];
+	var resp_context;
+	if (http_request.readyState == 4 || http_request.readyState == 'complete')
+	{
+		resp_context = http_request.responseText;
+		if (resp_context != "")
+		{
+			var all_value = resp_context.split("\r\n");
+
+			if(all_value.length == 5)
+			{
+				cf.WEPKey1.value = all_value[0].split("=")[1];
+				cf.WEPKey2.value = all_value[1].split("=")[1];
+				cf.WEPKey3.value = all_value[2].split("=")[1];
+				cf.WEPKey4.value = all_value[3].split("=")[1];
+			}
+			else if(all_value.length == 2)
+			{
+				cf.WEPKey1.value = "";
+				cf.WEPKey2.value = "";
+				cf.WEPKey3.value = "";
+				cf.WEPKey4.value = "";
+				for(i=1;i<5;i++)
+				{
+					if(eval("(cf.defkey[" + (i-1) + "].checked)"))
+					{
+						var obj = eval("cf.WEPKey"+i);
+						obj.value=all_value[0].split("=")[1];
+						break;
+					}
+				}
+			}
+			else
+			{
+				alert(resp_context);
+			}
+		}
+		http_request.abort();
+		http_request = null;
+		cf.generate.disabled = false;
+	}
+}	
+		
+var minPhraseSize = 1;
+
+function generateKey()
+{
+  var cf = document.forms[0];
+  var src_file;
+  
+  if(cf.wepPassphrase.value.length < minPhraseSize)
+  {
+     alert(msg_smallpassphase);
+     return;
+  }
+  dataToHidden(cf);
+  
+//  cf.todo.value = "generate";
+//  cf.submit();
+
+	if(http_request == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request = null; }
+			}
+		}
+	}
+
+	if (!http_request)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	cf.generate.disabled = true;
+  cf.pwd_chg_wep_ascii.value = (cf.wepPassphrase.value != wepPassphrase_old)?1:0;   
+
+	src_file =  '../adm/generate_key.cgi?wep_mode='+cf.h_w_wep.value+
+							'&pwd_chg_wep_ascii='+cf.pwd_chg_wep_ascii.value+
+							'&wep_ascii='+cf.wepPassphrase.value;
+							//'&h_defkey='+cf.h_defkey.value;
+
+	http_request.onreadystatechange = function() { showResponse(); };
+	http_request.open('GET', src_file, true);
+	http_request.send(null);
+} 
+
+function clearKeys()
+{
+  var cf = document.forms[0];
+  cf.WEPKey1.value = cf.WEPKey2.value = cf.WEPKey3.value = cf.WEPKey4.value = "";
+}
+ 
+var keysize = 10;
+var hexkey = true; 
+                                                                                
+function setKeySize()
+{
+  var cf = document.forms[0];
+    
+  var keytype = cf.w_wep.value;
+ 
+  hexkey = ( keytype == "1" || keytype == "2");
+
+  if(keytype == "1")
+		keysize = 10;
+  	else if(keytype == "2")
+		keysize = 26;
+	else if(keytype == "3")
+		keysize = 5;
+	else if(keytype == "4")
+		keysize = 13;
+		
+  cf.WEPKey1.size = cf.WEPKey2.size = cf.WEPKey3.size = cf.WEPKey4.size = keysize + 8;
+  cf.WEPKey1.maxLength = cf.WEPKey2.maxLength = cf.WEPKey3.maxLength = cf.WEPKey4.maxLength = keysize;
+  
+  if (keytype > 2)
+  {
+  	cf.wepPassphrase.disabled = true;
+  	cf.generate.disabled = true;
+  }
+  else
+  {
+  	cf.wepPassphrase.disabled = false;
+  	cf.generate.disabled = false;  	
+  }
+}
+
+function isHex(str) {
+    var i;
+    for(i = 0; i<str.length; i++) {
+                var c = str.substring(i, i+1);
+
+        if(("0" <= c && c <= "9") || ("a" <= c && c <= "f") || ("A" <= c && c <= "F")) {
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+function keyGen()
+{
+	var min_size = 1;  // passphrase
+    var cf = document.forms[0];
+
+	if(cf.passphrase.value.length < min_size)
+	{	
+		alert( msg_wep_pass);
+		return false;
+	}
+	return true;
+}
+
+function ip_chg()
+{	
+	var cf = document.forms[0];	
+	
+	if(cf.lan_status.value==1)//wireless
+	{
+		if(old_essid!=cf.essid.value || old_h_w_re!=cf.h_w_re.value || 
+			old_h_w_ch!=cf.h_w_ch.value || old_h_wire_sec!=cf.h_wire_sec.value || old_psk!=cf.psk.value ||
+			old_h_w_auth!=cf.h_w_auth.value || old_h_w_wep!=cf.h_w_wep.value || old_wepPassphrase!=cf.wepPassphrase.value ||
+			old_WEPKey1!=cf.WEPKey1.value || old_WEPKey2!=cf.WEPKey2.value || old_WEPKey3!=cf.WEPKey3.value ||
+			old_WEPKey4!=cf.WEPKey4.value || old_h_defkey!=cf.h_defkey.value)
+		{
+			var delayTime=10000;
+			var next_file="";
+			var message=1;//"Device's IP address may change.Please use the Windows utility to locate the camera and configure it correctly for your environment.You should now close this Browser window.";
+			self.location.href="../sys_msg.htm?"+delayTime+"&"+next_file+"&"+message;	
+		}
+	}
+
+	if(cf.wire_sec.value == "1")
+	{
+		if(cf.wepPassphrase.value != wepPassphrase_old)
+		{					
+			old_wepPassphrase = wepPassphrase_old = cf.wepPassphrase.value;
+		}
+		if(cf.WEPKey1.value != WEPKey1_old)
+		{
+			old_WEPKey1 = WEPKey1_old = cf.WEPKey1.value;
+		}
+		if(cf.WEPKey2.value != WEPKey2_old)
+		{
+			old_WEPKey2 = WEPKey2_old = cf.WEPKey2.value;
+		}
+		if(cf.WEPKey3.value != WEPKey3_old)
+		{
+			old_WEPKey3 = WEPKey3_old = cf.WEPKey3.value;
+		}
+		if(cf.WEPKey4.value != WEPKey4_old)
+		{
+			old_WEPKey4 = WEPKey4_old = cf.WEPKey4.value;
+		}	
+	}
+	else if(cf.wire_sec.value == "2")
+	{
+		if(cf.psk.value != psk_old)
+		{
+			old_psk = psk_old = cf.psk.value;
+		}		
+	}
+	if(old_essid!=cf.essid.value)
+	{
+		old_essid=cf.essid.value;
+	}
+	if(old_h_w_re!=cf.h_w_re.value)
+	{
+		old_h_w_re=cf.h_w_re.value
+	}
+	if(old_h_w_ch!=cf.h_w_ch.value)
+	{
+		old_h_w_ch=cf.h_w_ch.value;
+	}
+	if(old_h_wire_sec!=cf.h_wire_sec.value)
+	{
+		old_h_wire_sec=cf.h_wire_sec.value;	
+	}
+	if(old_h_w_auth!=cf.h_w_auth.value)
+	{
+		old_h_w_auth=cf.h_w_auth.value;
+	}
+	if(old_h_w_wep!=cf.h_w_wep.value)
+	{
+		old_h_w_wep=cf.h_w_wep.value;
+	}
+	if(old_h_defkey!=cf.h_defkey.value)
+	{
+		old_h_defkey=cf.h_defkey.value;
+	}
+}
+
+
+//var secMethods = ["0","1","2", "3"];
+
+function checkData()
+{
+ 	var cf = document.forms[0];
+    var msg = "";  
+    var blankFlag = false; 
+    var sizeOK = false;
+    var i; 
+	var secMethod = cf.wire_sec.value;
+	
+// wireless
+	if(secMethod == "1")
+    {
+		for (i = 1; i < 5; i++ )
+		{
+			msg = "";
+			blankFlag = ! (eval("(cf.defkey[" + (i-1) + "].checked)"));  // default key
+			if( (blankFlag) && (eval("(cf.WEPKey" + i + ".value.length == 0)"))  )
+				continue;  // blank ok
+			sizeOK =  (eval("(cf.WEPKey" + i + ".value.length == keysize)"));
+			if (!sizeOK)
+			{
+				msg = (hexkey) ? addstr(msg_hexkeysize, keysize) : addstr(msg_asciikeysize, keysize);
+				alert(msg);
+				return false;
+			}
+			if (hexkey)
+			{
+				if((eval("isHex(cf.WEPKey" + i + ".value)")) || ((eval("(cf.WEPKey" + i + ".value)")) == (eval("WEPKey" + i + "_old"))))
+					;
+				else 
+				{ 
+					alert(msg_hexkey);
+					return false;
+				}
+			}
+		}
+		cf.pwd_chg_wep_ascii.value = (cf.wepPassphrase.value != wepPassphrase_old)?1:0;
+       	cf.pwd_chg_wep_key1.value = (cf.WEPKey1.value != WEPKey1_old)?1:0;
+        	cf.pwd_chg_wep_key2.value = (cf.WEPKey2.value != WEPKey2_old)?1:0;
+        	cf.pwd_chg_wep_key3.value = (cf.WEPKey3.value != WEPKey3_old)?1:0;
+        	cf.pwd_chg_wep_key4.value = (cf.WEPKey4.value != WEPKey4_old)?1:0;
+	}
+	else if (secMethod == "2" )
+	{
+		if(cf.psk.value.length < 8 || cf.psk.value.length > 64)
+		{
+			msg+= msg_psk_keysize;
+		}
+		else if(64 == cf.psk.value.length)
+		{
+			if( false == isHex(cf.psk.value))
+			{
+				msg+= msg_psk_keysize;
+			}
+		}
+		cf.pwd_chg_wpa_ascii.value = (cf.psk.value != psk_old)?1:0;
+	}
+	else if (secMethod == "3")
+	{
+		//richard add WPA-TKIP only
+		if(cf.psk.value.length < 8 || cf.psk.value.length > 64)
+		{
+			msg+= msg_psk_keysize;
+		}
+		else if(64 == cf.psk.value.length)
+		{
+			if( false == isHex(cf.psk.value))
+			{
+				msg+= msg_psk_keysize;
+			}
+		}
+		cf.pwd_chg_wpa_ascii.value = (cf.psk.value != psk_old)?1:0;
+	}
+	else if (secMethod == "6")
+	{	
+		//richard add WPA2-AES only
+		if(cf.psk.value.length < 8 || cf.psk.value.length > 64)
+		{
+			msg+= msg_psk_keysize;
+		}
+		else if(64 == cf.psk.value.length)
+		{
+			if( false == isHex(cf.psk.value))
+			{
+				msg+= msg_psk_keysize;
+			}
+		}
+		cf.pwd_chg_wpa_ascii.value = (cf.psk.value != psk_old)?1:0;
+	}
+	msg+= checkBlank(cf.essid, msg_ssid);
+	
+	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+    dataToHidden(cf);
+//    cf.todo.value = "save";
+	cf.h_w_type.value = 1;
+	var save = new GroupCtrl();
+	var array_set=[
+			["WIRELESS", "wlan_type", "h_w_type"],
+			["WIRELESS", "wlan_essid", "essid"],
+			["WIRELESS", "wlan_domain", "h_w_re"],
+			["WIRELESS", "wlan_channel", "h_w_ch"],
+			["WIRELESS", "wlan_security", "h_wire_sec"],		
+			["WIRELESS", "wep_authtype", "h_w_auth"],
+			["WIRELESS", "wep_mode", "h_w_wep"],
+			["WIRELESS", "wep_index", "h_defkey"]
+		];
+	if(secMethod == "1")
+	{
+		if(cf.pwd_chg_wep_ascii.value==1)
+		{					
+			array_set.push(["WIRELESS", "wep_ascii", "wepPassphrase"]);
+		}
+		if(cf.pwd_chg_wep_key1.value==1)
+		{
+			array_set.push(["WIRELESS", "wep_kep1", "WEPKey1"]);
+		}
+		if(cf.pwd_chg_wep_key2.value==1)
+		{
+			array_set.push(["WIRELESS", "wep_kep2", "WEPKey2"]);
+		}
+		if(cf.pwd_chg_wep_key3.value==1)
+		{
+			array_set.push(["WIRELESS", "wep_kep3", "WEPKey3"]);
+		}
+		if(cf.pwd_chg_wep_key4.value==1)
+		{
+			array_set.push(["WIRELESS", "wep_kep4", "WEPKey4"]);
+		}
+	}
+	else if (secMethod == "2" || secMethod == "3" || secMethod == "6")
+	{
+		if(cf.pwd_chg_wpa_ascii.value==1)
+		{
+			array_set.push(["WIRELESS", "wpa_ascii", "psk"]);
+		}
+	}
+	save.callback=ip_chg;
+	save.set(array_set);
+	
+	if(secMethod == "2" || secMethod == "3" || secMethod == "6")
+	{
+		if(cf.pwd_chg_wpa_ascii.value==1)
+		{
+			array_set.pop();
+		}
+	}
+	else if(secMethod == "1")
+	{
+		if(cf.pwd_chg_wep_key4.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_key3.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_key2.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_key1.value==1)
+		{
+			array_set.pop();
+		}
+		if(cf.pwd_chg_wep_ascii.value==1)
+		{					
+			array_set.pop();
+		}
+	}
+
+	return true;	
+}
+
+function keyCheck(fobj)
+{
+  var cf = document.forms[0];
+  var keysize = (cf.w_wep.value == "2") ? 26 : 10; // hex chars
+  if (fobj.value.length >= keysize )
+        keyTooBig = true;
+  else
+    keyTooBig = false;
+  mustbeHEX = true;
+}
+
+// End Script -->
+</script>
+
+</head>
+
+
+<body onLoad="init();showMsg()">
+<FORM name="wireless" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>Wireless Network</td>
+ <td class="rc" nowrap>&nbsp;  </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Site Survey: </td>
+ <td class="rc" nowrap><input type="button" class="stdbuttton" name="site" value="Site Survey" style="width:125px" onClick="setTimeout('registerAJX()', 1500);"></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>WSC PIN Code: </td>
+ <td class="rc" nowrap><b><a name="wsc_pin"></a></b></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>SSID: </td>
+ <td class="rc" nowrap><input type="text" name="essid" value="" size="20" maxlength="32" style="width:125px"> </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Domain: </td>
+ <td class="rc" nowrap><select name="w_re" size="1" onChange="Ch()" style="width:125px">
+<option value="1">Africa</option>
+<option value="2">Asia</option>
+<option value="3">Australia</option>
+<option value="4">Canada</option>
+<option value="5">Europe</option>
+<option value="6">Spain</option>
+<option value="7">France</option>
+<option value="8">Israel</option>
+<option value="9">Japan</option>
+<option value="10">Mexico</option>
+<option value="11">South America</option>
+<option value="12">USA</option>
+</select></td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Channel No: </td>
+ <td class="rc" nowrap><select name="w_ch" size="1" onFocus="if(this.disabled)this.blur()" style="width:65px">
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+</select></td>
+</tr>
+
+<!-- tr>
+ <td class="lc" nowrap>WMM: </td>
+ <td class="rc" nowrap><input type="checkbox" name="wmm" value="0" onFocus="if(this.disabled)this.blur;">&nbsp; Enable WMM (802.11e QoS) </td>
+</tr -->
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap>Security</td>
+ <td class="rc" nowrap>&nbsp;  </td>
+</tr>
+
+<!-- WEP -->
+<tr>
+<td class="lc">Security System:</td>
+<td class="rc">
+<select name="wire_sec" size="1" onChange="setDivs()">
+	<option value="0">Disabled</option>
+	<option value="1">WEP</option>
+	<option value="2">WPA/WPA2 Personal</option>
+</select></td>
+</tr>
+
+<!-- Pre-Shared Key -->
+
+<tr>
+ <td class="lc"><div ID="wpapskDIV01">Shared Key:</div></td>
+ <td class="rc"><div ID="wpapskDIV02">
+<input type="password" name="psk" size="32" onFocus="this.select()" maxlength="64" value="">
+ </div></td> 
+</tr>
+<tr>
+	<td class="lc"></td>
+	<td class="rc"><div ID="wpapskDIV03">(8 to 63 characters or 64 hex characters)</div></td>
+</tr>
+<!-- END Pre-Shared Key -->
+
+<tr>
+ <td class="lc"><div ID="wepDIV01">Authentication Type: </div></td>
+ <td class="rc"><div ID="wepDIV02"><select name="w_auth" size="1" style="width:150px">
+<option value="1">Open System</option>
+<option value="2">Shared Key</option>
+</select></div></td>
+</tr>
+
+<tr>
+ <td class="lc"><div ID="wepDIV03">WEP Encryption:</div></td>
+ <td class="rc"><div ID="wepDIV04">
+<select name="w_wep" size="1" style="width:16em;" onChange="setKeySize();clearKeys()">
+<option value="1">64 Bit Keys (10 Hex chars)</option>
+<option value="2">128 Bit Keys (26 Hex chars)</option>
+<option value="3">64 Bit Keys (5 ASCII chars)</option>
+<option value="4">128 Bit Keys (13 ASCII chars)</option>
+</select>
+</div></td>
+</tr>
+
+<tr>
+ <td class="lc"><div ID="wepDIV05">Passphrase:</div></td>
+ <td class="rc">
+ <div ID="wepDIV07">
+  <input type="password" name="wepPassphrase" size="18" maxlength="32" value="" onFocus="keyTooBig=false;this.select()" style="width:16em;">
+  <input type="button" class="stdbuttton" name="generate" value="Generate Keys" onClick="generateKey()">
+ </div>
+ </td>
+</tr>
+
+<tr>
+ <td class="lc" valign="top"><div ID="wepDIV08">WEP Keys:</div></td>
+ <td class="rc" valign="top">
+ <div ID="wepDIV06">
+ <table border="0" cellspacing="1" class="closetab">
+ <tr>
+   <td nowrap><input type="radio" name="defkey" value="1"> Key 1: &nbsp; </td>
+   <td nowrap><input type="password" name="WEPKey1" size="29" maxlength="26" value="" onFocus="this.select()" title="Keys must be in Hex (0~9 and A~F)" onKeyDown="keyCheck(this)"></td>
+  </tr>
+  <tr>
+	 <td nowrap><input type="radio" name="defkey" value="2"> Key 2: &nbsp; </td>
+	 <td nowrap><input type="password" name="WEPKey2" size="29" maxlength="26" value="" onFocus="this.select()"  title="Keys must be in Hex (0~9 and A~F)" onKeyDown="keyCheck(this)"></td>
+	</tr>
+	<tr>
+	 <td nowrap><input type="radio" name="defkey" value="3"> Key 3: &nbsp; </td>
+	 <td nowrap><input type="password" name="WEPKey3" size="29" maxlength="26" value="" onFocus="this.select()"  title="Keys must be in Hex (0~9 and A~F)" onKeyDown="keyCheck(this)"></td>
+	</tr>
+	<tr>
+	 <td nowrap><input type="radio" name="defkey" value="4"> Key 4: &nbsp; </td>
+	 <td nowrap><input type="password" name="WEPKey4" size="29" maxlength="26" value="" onFocus="this.select()"  title="Keys must be in Hex (0~9 and A~F)" onKeyDown="keyCheck(this)"></td>
+	</tr>
+	<tr>
+	 <td nowrap>&nbsp; </td>
+	 <td nowrap><input type="button" class="stdbuttton" name="clearwep" value="Clear Keys" onClick="clearKeys()"> </td>
+	</tr>
+  </table>
+  </div>
+  </td>
+</tr>  	
+
+<!-- END WEP -->
+<tr>
+<td class="lc">&nbsp;</td>
+ <td class="rc" nowrap><div ID="testWirelssButton">
+ <input type="button" class="stdbuttton" name="wireless_test" value="Test Wireless" onClick="confirmTest()"></div></td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="button" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='wireless.htm'">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_wire.htm')">
+ </td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table>
+</div> 
+ 
+<!-- pagemain -->
+<iframe id="aaaa" style="position: absolute; z-index: 20px; width: 760px; height: 696px; top: expression(this.nextSibling.offsetTop); left: expression(this.nextSibling.offsetLeft); opacity:0; filter:alpha(opacity=0); display:none" frameborder="0"></iframe>
+
+<div id="wl_site_DIV" style="z-index:9px; top:0px; left:0px; width:100%; height:100%; position:absolute; display:none;">
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-width:1px; border:outset; margin-top:36px; margin-left:165px;"><tr>
+<td>
+<div ID="ClistHead" style="width:630px; display:none"></div>	
+<div ID="Clist" style="width:630px; height:380px; overflow:auto; display:none;"></div>
+<br><br>
+<center>
+<input type="button" class="stdbuttton" name="rrefresh" value="Re-Scan" onClick="re_scan()">
+ &nbsp; &nbsp; 
+<input type="button" class="stdbuttton" name="close" value="Close" onClick="abort_scan()">
+</center>
+<br>&nbsp;
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+
+</div> 
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+<input type="Hidden" name="pwd_chg_wep_key1" value="0">
+<input type="Hidden" name="pwd_chg_wep_key2" value="0">
+<input type="Hidden" name="pwd_chg_wep_key3" value="0">
+<input type="Hidden" name="pwd_chg_wep_key4" value="0">
+<input type="Hidden" name="pwd_chg_wep_ascii" value="0">
+<input type="Hidden" name="pwd_chg_wpa_ascii" value="0">
+
+<input type="hidden" name="h_w_type" value="">
+<input type="hidden" name="h_w_re" value="">
+<input type="hidden" name="h_w_ch" value="">
+<input type="hidden" name="h_wire_sec" value="">
+<input type="hidden" name="h_w_auth" value="">
+<!-- input type="Hidden" name="h_wmm" value="@h_wmm#" -->
+
+<input type="hidden" name="h_w_wep" value="">
+<input type="hidden" name="h_defkey" value="">
+
+<input type="hidden" name="lan_status" value="">
+
+<input type="Hidden" name="this_file" value="wireless.htm">
+<input type="Hidden" name="next_file" value="wireless.htm">
+<input type="Hidden" name="todo" value="save">
+</form>
+	
+<script> var msgVar="@message#"; </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+#!/bin/sh
+#######################
+#Record MP4 cpu_b aac #
+######################
+#echo 2 > /proc/sys/vm/dirty_ratio
+#echo 100 > /proc/sys/vm/dirty_writeback_centisecs
+#Setting Cache
+echo 1048576 > /proc/sys/vm/dirty_bytes
+echo 131072 > /proc/sys/vm/dirty_background_bytes
+echo 0 > /proc/sys/vm/dirty_ratio
+echo 0 > /proc/sys/vm/dirty_background_ratio
+echo 0 > /proc/sys/vm/dirty_expire_centisecs
+echo 0 > /proc/sys/vm/dirty_writeback_centisecs
+if [ $# -lt 3 ]
+then
+	echo "Usage: $0 {start|stop} {video size} {video bitrate} {audio sample rate} {Recordtime} {filename_name}"
+	exit 1
+fi
+echo 3 > /proc/sys/vm/drop_caches
+asstime=0
+vsstime=0
+case "$1" in
+	start)
+		ffmpeg -ss "$asstime" -f alsa -ar $4 -ac 2 -i hw:0,0 -ss "$vsstime" -r 30 -s $2 -input_format h264 -osd 0 -flicker 60 -vbrate $3 -gop 30 -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v $3 -c:a aac -b:a 48k -ar $4 -ac 2 -strict -2 -async 1 -vsync 1 -aac_2nd_cpu 1 -t $5 /mnt/sdcard/$6 -y < /dev/null &
+		echo "ffmpeg -ss $asstime -f alsa -ar $4 -ac 2 -i hw:0,0 -ss $vsstime -r 30 -s $2 -input_format h264 -osd 0 -flicker 60 -vbrate $3 -gop 30 -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v $3 -c:a aac -b:a 48k -ar $4 -ac 2 -strict -2 -async 1 -vsync 1 -aac_2nd_cpu 1 -t $5 /mnt/sdcard/$6"
+		;;
+	stop)
+		killall ffmpeg
+		;;
+	*)
+		echo "Usage: $0 {start|stop} {video size} {video bitrate} {audio sample rate} {Recordtime} {filename_name}"
+
+		;;
+	esac
+

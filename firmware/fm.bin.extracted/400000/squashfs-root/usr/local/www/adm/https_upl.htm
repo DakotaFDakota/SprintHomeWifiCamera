@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Administration</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+//
+var msgVar="@message#"; 
+
+function ca_up()
+{
+	var cf = document.forms[0];
+	if(cf.upfilename.value.length == 0)
+	{
+		alert(nofile_msg);
+		return;
+	}
+/*	
+	if(fill == "")
+	{
+		if(cf.upfilename.value.length == 0)
+		{
+			alert(nofile_msg);
+			return;
+		}
+		if(!confirm(ca_msg))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if(cf.upfilename.value.length == 0)
+		{
+			alert(nofile_msg);
+			return;
+		}
+		if(!confirm(fill_msg))
+		{
+			return false;
+		}
+	}
+*/
+}
+
+function init()
+{
+	showMsg();
+	if (msgVar.length > 1 && msgVar != "@" + "m" + "essage#")
+	{
+		window.opener.location.reload();
+		window.close();
+	}
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body style="margin-left: 0px" onLoad="init();">
+
+
+<div ID="mubd" style="left:4px; top:4px; width:500px">
+
+
+<form id="upg_httpsca" name="upg_httpsca" method="post" action="upg_https_ca.cgi" ENCTYPE="multipart/form-data">
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td class="subhead" colspan="2" nowrap>&nbsp;&nbsp;HTTPS CA Upload </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>&nbsp;&nbsp;&nbsp;HTTPS CA File: </td>
+ <td class="rc" nowrap>
+ <input type="file" name="upfilename" value="" size="30" maxlength="255">
+ </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>&nbsp; </td>
+ <td class="rc" nowrap>
+ <input type="submit" class="stdbuttton" name="Upload" value="Upload" style="width:65px" onClick="return ca_up()"> &nbsp;
+ <input type="button" class="stdbuttton" name="clear" value="Cancel" onClick="window.close();">
+ </td>
+</tr>
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+</table>
+<!--
+<input type="hidden" name="this_file"  value="password.htm">
+<input type="hidden" name="next_file"  value="password.htm">
+<input type="hidden" name="todo" value="upload">
+-->
+</form>
+</div>  <!-- pagemain -->
+
+</body>
+</html>
+

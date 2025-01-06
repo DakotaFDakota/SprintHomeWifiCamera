@@ -1,0 +1,49 @@
+#!/bin/sh
+
+if [ $# -lt 2 ]; then
+	echo "ERROR parameter"
+	exit 1
+fi
+
+case "$1" in
+preview)
+	case "$2" in
+	start)
+		echo "Start preview"
+		killall capture
+		capture -s IMX208 -t YUY2 -r 720 480 -f 30 -n 0 -o fb0 &
+		;;
+	stop)
+		echo "Stop preview"
+		killall capture
+		;;
+	esac
+	;;
+capture)
+	case "$2" in
+	start)
+		echo "Start capture"
+		capture -s IMX208 -t MJPG -r 1920 1080 -n 1 -o /mnt/sdcard/$3
+		;;
+	stop)
+		echo "Stop catpure"
+		;;
+	esac
+	;;
+recorder)
+	case "$2" in
+	start)
+		echo "Start recorder"
+		#killall recorder
+		recorder -t H264 -r 1280 720 -f 60 -b 768 -gop 120 -rc lbr -c 0 -d 3600 -o /mnt/sdcard/$3 &
+		;;
+	stop)
+		echo "Stop recorder"
+		killall recorder
+		;;
+	esac
+	;;
+*)
+	echo "ERROR parameter"
+	;;
+esac

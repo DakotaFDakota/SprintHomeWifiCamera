@@ -1,0 +1,835 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var smtp_pw_old = "";
+var smtp2_pw_old = "";
+
+function checkData()
+{
+    var cf = document.forms[0];
+    var msg = "";
+
+	//if(cf.h_email_1.value == 1   || cf.h_email_pir.value ==1   || cf.h_email_md.value ==1)
+	{
+		if(cf.smtp_add.value == "")
+		{ 
+			msg+= msg_smtp_server_empty; 
+		}
+		else 
+		{ 
+			msg+= checkDomainName(cf.smtp_add,msg_smtp_server,Valid_domain);
+		}
+		if (cf.smtp_auth.value=="1")
+		{
+			msg+= checkBlank(cf.smtp_login, msg_blank_smtp_name);
+			msg+= checkBlank(cf.smtp_pw, msg_blank_smtp_pw);
+		}
+		if (cf.smtp_auth.value=="2")
+		{ 
+			if (cf.pop_name.value == "")
+			{
+				msg+= msg_pop_server_empty; 
+			}
+			else
+			{
+				msg+= checkDomainName(cf.pop_name,msg_blank_pop_name,Valid_domain);
+			}
+		}
+		if(cf.smtp2.checked == true)
+		{
+			if(cf.smtp2_add.value == "")
+			{ 
+				msg+= msg_smtp2_server_empty; 
+			}
+			else 
+			{ 
+				msg+= checkDomainName(cf.smtp2_add,msg_smtp_server,Valid_domain);
+			}
+		if (cf.smtp2_auth.value=="1")
+		{
+			msg+= checkBlank(cf.smtp2_login, msg_blank_smtp_name);
+			msg+= checkBlank(cf.smtp2_pw, msg_blank_smtp_pw);
+		}
+		if (cf.smtp2_auth.value=="2")
+		{
+			if(cf.pop2_name.value == "")
+			{
+				msg+= msg_pop2_server_empty; 
+			}
+			else
+			{
+				msg+= checkDomainName(cf.pop2_name,msg_blank_pop_name,Valid_domain);
+			}
+		}
+	}
+	if(cf.am1.checked)
+		msg+= checkMailAddress(cf.amail1, msg_emaildest1);
+			
+	if(cf.am2.checked)
+		msg+= checkMailAddress(cf.amail2, msg_emaildest2);
+			
+	if(cf.am3.checked)
+		msg+= checkMailAddress(cf.amail3, msg_emaildest3);
+		
+		msg+= checkBlank(cf.asub, msg_email_subject);
+		msg+= checkMailAddress(cf.asender, msg_emailsrc);
+	if(! cf.asender2.disabled)
+		msg+= checkMailAddress(cf.asender2, msg_emailsrc);
+
+	}
+    /*
+	else
+	{	
+		if(cf.smtp_add.value.length >0)
+			msg+= checkDomainName(cf.smtp_add,msg_smtp_server,Valid_domain);
+			
+		if (cf.smtp_auth.value=="2")
+		{ 
+			if(cf.pop_name.value.length >0)
+			msg+= checkDomainName(cf.pop_name,msg_blank_pop_name,Valid_domain);
+		}
+		
+		if(cf.smtp2.checked == true)
+		{
+			if(cf.smtp2_add.value.length >0)
+				msg+= checkDomainName(cf.smtp2_add,msg_smtp_server,Valid_domain);
+	
+			if (cf.smtp2_auth.value=="2")
+			{
+				if(cf.pop2_name.value.length >0)
+					msg+= checkDomainName(cf.pop2_name,msg_blank_pop_name,Valid_domain);
+			}
+		}
+
+	if(cf.am1.checked)
+		if(cf.amail1.value.length >0)
+			msg+= checkMailAddress(cf.amail1, msg_emaildest1);
+			
+	if(cf.am2.checked)
+		if(cf.amail2.value.length >0)
+			msg+= checkMailAddress(cf.amail2, msg_emaildest2);
+			
+	if(cf.am3.checked)
+		if(cf.amail3.value.length >0)
+			msg+= checkMailAddress(cf.amail3, msg_emaildest3);
+	
+	//msg+= checkBlank(cf.asub, msg_email_subject);
+	if(cf.asender.value.length >0)
+		msg+= checkMailAddress(cf.asender, msg_emailsrc);
+	if(! cf.asender2.disabled)
+		if(cf.asender2.value.length >0)
+			msg+= checkMailAddress(cf.asender2, msg_emailsrc);
+
+	}
+	*/
+	//if (cf.en_url.checked)
+	//msg+= checkBlank(cf.v_url, msg_v_url);
+
+    if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	cf.pwd_chg_email.value = ( cf.smtp_pw.value != smtp_pw_old )?1:0;
+	cf.pwd_chg_email2.value = ( cf.smtp2_pw.value != smtp2_pw_old )?1:0;
+	var m=1;
+	if(cf.am1.checked)
+	{
+		cf.send_email.value |=m;		
+	}
+	else
+	{
+		cf.send_email.value &=(~m);
+	}
+	if(cf.am2.checked)
+	{
+		cf.send_email.value |=(m<<1);		
+	}
+	else
+	{
+		cf.send_email.value &=(~(m<<1));
+	}
+	if(cf.am3.checked)
+	{
+		cf.send_email.value |=(m<<2);		
+	}
+	else
+	{
+		cf.send_email.value &=(~(m<<2));
+	}
+
+	if(cf.att1.checked)
+	{
+		cf.email_att.value |=m;		
+	}
+	else
+	{
+		cf.email_att.value &=(~m);
+	}
+	if(cf.att2.checked)
+	{
+		cf.email_att.value |=(m<<1);		
+	}
+	else
+	{
+		cf.email_att.value &=(~(m<<1));
+	}
+	if(cf.att3.checked)
+	{
+		cf.email_att.value |=(m<<2);		
+	}
+	else
+	{
+		cf.email_att.value &=(~(m<<2));
+	}
+	
+	var save = new GroupCtrl();
+	var array_set=[
+			["EMAIL", "smtp_server", "smtp_add"],
+			["EMAIL", "smtp_port", "smtp_port"],
+			["EMAIL", "smtp_auth", "smtp_auth"],
+			["EMAIL", "smtp_account", "smtp_login"],
+			["EMAIL", "pop_server", "pop_name"],
+			["EMAIL", "from_addr", "asender"],
+			["EMAIL", "smtp2_enable", "smtp2"],		
+			["EMAIL", "smtp2_server", "smtp2_add"],
+			["EMAIL", "smtp2_port", "smtp2_port"],
+			["EMAIL", "smtp2_auth", "smtp2_auth"],
+			["EMAIL", "smtp2_account", "smtp2_login"],
+			["EMAIL", "pop2_server", "pop2_name"],
+			["EMAIL", "from_addr2", "asender2"],
+			["EMAIL", "to_addr1", "amail1"],
+			["EMAIL", "to_addr2", "amail2"],
+			["EMAIL", "to_addr3", "amail3"],	
+			["EMAIL", "subject", "asub"],
+			["EMAIL", "email_att", "email_att"],
+			["EMAIL", "send_email", "send_email"]
+		];
+	if(cf.pwd_chg_email.value==1)
+	{
+		array_set.push(["EMAIL", "smtp_password", "smtp_pw"]);
+	}
+	if(cf.pwd_chg_email2.value==1)
+	{
+		array_set.push(["EMAIL", "smtp2_password", "smtp2_pw"]);
+	}
+	save.callback = reset_pwd;
+	save.set(array_set);
+	if(cf.pwd_chg_email2.value==1)
+	{
+		array_set.pop();
+	}
+	if(cf.pwd_chg_email.value==1)
+	{
+		array_set.pop();
+	}
+
+//	dataToHidden(cf);
+	return true;	
+}
+
+function reset_pwd()
+{
+	var cf = document.forms[0];
+	if(cf.smtp_pw.value != smtp_pw_old)
+	{
+		smtp_pw_old = cf.smtp_pw.value;
+	}
+	if(cf.smtp2_pw.value != smtp2_pw_old)
+	{
+		smtp2_pw_old = cf.smtp2_pw.value;
+	}
+}
+
+function set_pwd()
+{
+	var cf = document.forms[0];
+	smtp_pw_old = randomString(6, Valid_Strd);
+	if (cf.smtp_pw.value == "")
+	{
+		cf.smtp_pw.value = smtp_pw_old;
+	}
+	smtp2_pw_old = randomString(6, Valid_Strd);
+	if (cf.smtp2_pw.value == "")
+	{
+		cf.smtp2_pw.value = smtp2_pw_old;
+	}
+}
+
+function setAll()
+{
+   	setAuth();
+   	setSMTP2();
+    	setAuth2()
+	set_pwd();
+	//setAttach();
+	total2separate();
+	update_email_setup();
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+//	dataToVisible(document.forms[0]);
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+	menuframe.highLight('alertDIV');
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			["EMAIL", "smtp_server", "smtp_add"],
+			["EMAIL", "smtp_port", "smtp_port"],
+			["EMAIL", "smtp_auth", "smtp_auth"],
+			["EMAIL", "smtp_account", "smtp_login"],
+			["EMAIL", "smtp_password", "smtp_pw"],
+			["EMAIL", "pop_server", "pop_name"],
+			["EMAIL", "from_addr", "asender"],
+			["EMAIL", "smtp2_enable", "smtp2"],		
+			["EMAIL", "smtp2_server", "smtp2_add"],
+			["EMAIL", "smtp2_port", "smtp2_port"],
+			["EMAIL", "smtp2_auth", "smtp2_auth"],
+			["EMAIL", "smtp2_account", "smtp2_login"],
+			["EMAIL", "smtp2_password", "smtp2_pw"],
+			["EMAIL", "pop2_server", "pop2_name"],
+			["EMAIL", "from_addr2", "asender2"],
+			["EMAIL", "to_addr1", "amail1"],
+			["EMAIL", "to_addr2", "amail2"],
+			["EMAIL", "to_addr3", "amail3"],	
+			["EMAIL", "subject", "asub"],
+			["EMAIL", "email_att", "email_att"],
+			["EMAIL", "send_email", "send_email"]
+		];
+	read.callback = setAll;
+	read.get(array_get);
+}
+
+function total2separate()
+	{
+	var cf = document.forms[0];
+	var m=1;
+	
+	cf.am1.checked = cf.send_email.value & m;
+	cf.am2.checked = (cf.send_email.value & (m<<1))>>1;	
+	cf.am3.checked = (cf.send_email.value & (m<<2))>>2;
+
+	cf.att1.checked = cf.email_att.value & m;
+	cf.att2.checked = (cf.email_att.value & (m<<1))>>1;	
+	cf.att3.checked = (cf.email_att.value & (m<<2))>>2;
+
+}
+
+function setSMTP2()
+{
+    var cf = document.forms[0];
+	var smtpp = cf.smtp2.checked;
+	var auth = cf.smtp2_auth.value;
+	cf.smtp2_auth.disabled = cf.smtp2_add.disabled =cf.asender2.disabled =cf.smtp2_port.disabled = cf.smtp_test2.disabled = !smtpp;
+    if (smtpp)
+    {
+        cf.smtp2_login.disabled = cf.smtp2_pw.disabled  = ( auth == "0");
+        cf.pop2_name.disabled = ( auth != "2" ) ;
+    }
+    else
+    {
+        cf.smtp2_login.disabled = cf.smtp2_pw.disabled  = !smtpp;
+        cf.pop2_name.disabled = !smtpp ;
+    }
+}
+
+function setAuth()
+{
+    var cf = document.forms[0];
+	var auth = cf.smtp_auth.value;
+	var smtpFlag = ( auth != "0");
+	var popFlag = ( auth == "2" ) ;
+	//cf.smtp_login.disabled = cf.smtp_pw.disabled  = ( auth == "0");
+	//cf.pop_name.disabled = ( auth != "2" ) ;
+	setDisplay("smtp_loginDIV1", smtpFlag);
+	setDisplay("smtp_loginDIV2", smtpFlag);	
+	setDisplay("smtp_pwDIV1", smtpFlag);
+	setDisplay("smtp_pwDIV2", smtpFlag);		
+	setDisplay("pop_nameDIV1", popFlag);
+	setDisplay("pop_nameDIV2", popFlag);		
+}
+
+function setAuth2()
+{
+    var cf = document.forms[0];
+	var auth = cf.smtp2_auth.value;
+	var smtpFlag = ( auth != "0");
+	var popFlag = ( auth == "2" ) ;
+	//cf.smtp2_login.disabled = cf.smtp2_pw.disabled  = ( auth == "0");
+	//cf.pop2_name.disabled = ( auth != "2" ) ;
+	setDisplay("smtp2_loginDIV1", smtpFlag);
+	setDisplay("smtp2_loginDIV2", smtpFlag);	
+	setDisplay("smtp2_pwDIV1", smtpFlag);
+	setDisplay("smtp2_pwDIV2", smtpFlag);		
+	setDisplay("pop2_nameDIV1", popFlag);
+	setDisplay("pop2_nameDIV2", popFlag);		
+	setSMTP2();
+}
+
+/*
+function setAttach()
+{
+    var cf = document.forms[0];
+	var attach = cf.en_url.checked;
+	cf.v_url.disabled = !attach;
+}
+*/
+
+var http_request;
+function showResponse(index)
+{
+	var resp_context;
+	if (http_request.readyState == 4 || http_request.readyState == 'complete')
+	{
+		resp_context = http_request.responseText;
+		if ("" != resp_context)
+		{
+			alert(resp_context);
+		}
+		http_request.abort();
+		http_request = null;
+		if (1 == index)
+		{
+			document.forms[0].smtp_test.disabled = false;
+		}
+		else if(2 == index)
+		{
+			document.forms[0].smtp_test2.disabled = false;
+		}
+	}
+}
+
+function confirmTest(index)
+{
+	var src_file;
+	var cf = document.forms[0];
+	var msg = "";
+	var tmp1 = "";
+	var tmp2 = "";
+	var tmp3 = "";
+	var tmp4 = "";
+
+	if (1 == index)
+	{
+		msg = checkBlank(cf.smtp_add,msg_smtp_server);
+		msg += checkDomainName(cf.smtp_add,msg_smtp_server,Valid_domain);
+		if (cf.smtp_auth.value=="1")
+		{
+			msg+= checkBlank(cf.smtp_login, msg_blank_smtp_name);
+			//if (cf.smtp_pw.length > 0 && cf.smtp_pw.value != smtp_pw_old)
+			{
+				msg+= checkBlank(cf.smtp_pw, msg_blank_smtp_pw);
+			}
+		}
+		if (cf.smtp_auth.value=="2")
+		{ 
+			if (cf.pop_name.value == "")
+			{
+				msg+= msg_pop_server_empty; 
+			}
+			else
+			{
+				msg+= checkDomainName(cf.pop_name,msg_blank_pop_name,Valid_domain);
+			}
+		}
+		msg+= checkMailAddress(cf.asender, msg_emailsrc);
+	}
+	else if (2 == index)
+	{
+		msg = checkBlank(cf.smtp2_add,msg_smtp_server);
+		msg+= checkDomainName(cf.smtp2_add,msg_smtp_server,Valid_domain);
+		if (cf.smtp2_auth.value=="1")
+		{
+			msg+= checkBlank(cf.smtp2_login, msg_blank_smtp_name);
+			//if (cf.smtp2_pw.length > 0 && cf.smtp2_pw.value != smtp2_pw_old)
+			{
+				msg+= checkBlank(cf.smtp2_pw, msg_blank_smtp_pw);
+			}
+		}
+		if (cf.smtp2_auth.value=="2")
+		{ 
+			if (cf.pop2_name.value == "")
+			{
+				msg+= msg_pop_server_empty; 
+			}
+			else
+			{
+				msg+= checkDomainName(cf.pop2_name,msg_blank_pop_name,Valid_domain);
+			}
+		}
+		msg+= checkMailAddress(cf.asender2, msg_emailsrc);
+	}
+	
+	if (!cf.am1.checked&&!cf.am2.checked&&!cf.am3.checked)
+	{
+		msg += "Please select one receipt e-mail address";
+	}
+
+	if (cf.am1.checked)
+		msg+= checkMailAddress(cf.amail1, msg_emaildest1);
+	if (cf.am2.checked)
+		msg+= checkMailAddress(cf.amail2, msg_emaildest2);
+	if (cf.am3.checked)
+		msg+= checkMailAddress(cf.amail3, msg_emaildest3);
+	
+	if (msg.length > 1)	
+	{
+		alert(msg);
+		return false;
+	}
+	if(http_request == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request = null; }
+			}
+		}
+	}
+
+	if (!http_request)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	
+	if (1 == index)
+	{
+		cf.smtp_test.disabled = true;
+		cf.pwd_chg_email.value = ( cf.smtp_pw.value != smtp_pw_old )?1:0;
+		src_file =  '../adm/test.cgi?action=smtp_test&from_addr='+cf.asender.value+
+								'&smtp_server='+cf.smtp_add.value+
+								'&smtp_account='+cf.smtp_login.value+
+								'&smtp_password='+cf.smtp_pw.value+
+								'&smtp_auth='+cf.smtp_auth.value+
+								'&smtp_port='+cf.smtp_port.value+
+								'&pop_server='+cf.pop_name.value+
+								'&subject='+cf.asub.value+
+								'&smtp_serv_flag=1'+
+								'&pwd_chg_email='+cf.pwd_chg_email.value+
+								'&index=1';
+								if(cf.am1.checked == true && cf.amail1.value!="")
+								{
+									src_file += '&to_addr1='+cf.amail1.value;
+								}
+								if(cf.am2.checked == true && cf.amail2.value!="")
+								{
+									src_file += '&to_addr2='+cf.amail2.value;
+								}
+								if(cf.am3.checked == true && cf.amail3.value!="")
+								{
+									src_file += '&to_addr3='+cf.amail3.value;
+								}
+	}
+	else if (2 == index)
+	{
+		cf.smtp_test2.disabled = true;
+		tmp4 = cf.smtp2.checked?"1":"0";
+		cf.pwd_chg_email2.value = ( cf.smtp2_pw.value != smtp2_pw_old )?1:0;
+		src_file =  '../adm/test.cgi?action=smtp_test&from_addr='+cf.asender2.value+
+								'&smtp_server='+cf.smtp2_add.value+
+								'&smtp_account='+cf.smtp2_login.value+
+								'&smtp_password='+cf.smtp2_pw.value+
+								'&smtp_auth='+cf.smtp2_auth.value+
+								'&smtp_port='+cf.smtp2_port.value+
+								'&pop_server='+cf.pop2_name.value+
+								'&subject='+cf.asub.value+
+								'&smtp_serv_flag='+tmp4+
+								'&pwd_chg_email='+cf.pwd_chg_email2.value+
+								'&index=2';
+								if(cf.am1.checked == true && cf.amail1.value!="")
+								{
+									src_file += '&to_addr1='+cf.amail1.value;
+								}
+								if(cf.am2.checked == true && cf.amail2.value!="")
+								{
+									src_file += '&to_addr2='+cf.amail2.value;
+								}
+								if(cf.am3.checked == true && cf.amail3.value!="")
+								{
+									src_file += '&to_addr3='+cf.amail3.value;
+								}							
+	}
+	http_request.onreadystatechange = function() { showResponse(index); };
+	//initTestPage(); 
+	http_request.open('GET', src_file, true);
+	http_request.send(null);
+	
+	return true;
+}
+
+function update_email_setup()
+{
+	var cf = document.forms[0];
+	
+
+	if (cf.am1.checked ==true)
+	{
+		cf.amail1.disabled = cf.att1.disabled = 0;
+	}
+	else
+	{
+		cf.amail1.disabled = cf.att1.disabled = 1;		
+	}
+	if (cf.am2.checked ==true)
+	{
+		cf.amail2.disabled = cf.att2.disabled = 0;
+	}
+	else
+	{
+		cf.amail2.disabled = cf.att2.disabled = 1;		
+	}
+	if (cf.am3.checked ==true)
+	{
+		cf.amail3.disabled = cf.att3.disabled = 0;
+	}
+	else
+	{
+		cf.amail3.disabled = cf.att3.disabled = 1;		
+	}
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg()">
+<FORM name="alerts" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+   <tr>
+     <!-- layout row, do not delete -->
+     <td class="leftspacer"></td>
+     <td colspan="3" class="rightspacer"></td>
+   </tr>
+   <tr>
+     <td class="subhead" nowrap>Primary SMTP Server</td>
+     <td colspan="3" nowrap class="rc">&nbsp;</td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap>SMTP Server Address:</td>
+     <td colspan="3" nowrap class="rc"><input type="text" name="smtp_add" size="34" maxlength="64" value="" style="{width:280}" width=280>
+       &nbsp;&nbsp;Port:
+       <input type="text" name="smtp_port" size="5" maxlength="5" value="" style="{width: 40}"></td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap>Authentication:</td>
+     <td colspan="3" nowrap class="rc"><select name="smtp_auth" size="1" onChange="setAuth()" style="{width:180}" width=180>
+         <option value="0">None</option>
+         <option value="1">SMTP authentication</option>
+         <option value="2">POP before SMTP</option>
+       </select>
+     </td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap><div id="smtp_loginDIV1">SMTP Login name:</div></td>
+     <td colspan="3" nowrap class="rc"><div id="smtp_loginDIV2">
+       <input type="text" name="smtp_login" size="25" maxlength="32" value="" style="{width:180}" width=180>
+     </div></td>
+   </tr>
+   <tr>
+     <!-- layout row, do not delete -->
+     <td class="lc" nowrap><div id="smtp_pwDIV1">SMTP Password:</div></td>
+     <td colspan="3" nowrap class="rc"><div id="smtp_pwDIV2">
+       <input type="password" name="smtp_pw" size="16" maxlength="16" value="" onFocus="this.select()" style="{width:180}" width=180>
+     </div></td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap><div id="pop_nameDIV1">POP server name:</div></td>
+     <td colspan="3" nowrap class="rc"><div id="pop_nameDIV2">
+       <input type="text" name="pop_name" size="25" maxlength="64" value="" style="{width:180}" width=180>
+     </div></td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap>Show "From" as:</td>
+     <td colspan="3" nowrap class="rc"><input type="text" name="asender" size="32" maxlength="48" value="" style="{width:280}" width=280>
+       (E-Mail Address)</td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap></td>
+     <td colspan="3" nowrap class="rc">
+     	<input type="button"  name="smtp_test" value="Test the Server" onClick="confirmTest(1)">
+     </td>
+   </tr>
+   <tr>
+     <td class="subhead" nowrap valign="top">Secondary SMTP Server</td>
+     <td colspan="3" nowrap class="rc">&nbsp;</td>
+   </tr>
+   <tr>
+     <td nowrap colspan="4"><input type="checkbox" name="smtp2"  value="1" onClick="setSMTP2();">
+       Secondary SMTP (enable this if the camera can not connect to the primary SMTP) </td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap>SMTP Server Address:</td>
+     <td colspan="3" nowrap class="rc"><input type="text" name="smtp2_add" size="34" maxlength="64" value="" style="{width:280}" width=280>
+       &nbsp;&nbsp;Port:
+       <input type="text" name="smtp2_port" size="5" maxlength="5" value="" style="{width: 40}"></td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap>Authentication:</td>
+     <td colspan="3" nowrap class="rc"><select name="smtp2_auth" size="1" onChange="setAuth2()" style="{width:180}" width=180>
+         <option value="0">None</option>
+         <option value="1">SMTP authentication</option>
+         <option value="2">POP before SMTP</option>
+       </select>
+     </td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap><div id="smtp2_loginDIV1">SMTP Login name:</div></td>
+     <td colspan="3" nowrap class="rc"><div id="smtp2_loginDIV2">
+       <input type="text" name="smtp2_login" size="25" maxlength="32" value="" style="{width:180}" width=180>
+     </div></td>
+   </tr>
+   <tr>
+     <!-- layout row, do not delete -->
+     <td class="lc" nowrap><div id="smtp2_pwDIV1">SMTP Password:</div></td>
+     <td colspan="3" nowrap class="rc"><div id="smtp2_pwDIV2">
+       <input type="password" name="smtp2_pw" size="16" maxlength="16" value="" onFocus="this.select()" style="{width:180}" width=180>
+     </div></td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap><div id="pop2_nameDIV1">POP server name:</div></td>
+     <td colspan="3" nowrap class="rc"><div id="pop2_nameDIV2">
+       <input type="text" name="pop2_name" size="25" maxlength="64" value="" style="{width:180}" width=180>
+     </div></td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap>Show "From" as:</td>
+     <td colspan="3" nowrap class="rc"><input type="text" name="asender2" size="32" maxlength="48" value="" style="{width:280}" width=280>
+       (E-Mail Address)</td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap></td>
+     <td colspan="3" nowrap class="rc"><input type="button"  name="smtp_test2" value="Test the Server" onClick="confirmTest(2)"></td>
+   </tr>
+   <tr>
+     <td class="subhead" nowrap>E-Mail Setup</td>
+     <td colspan="3" nowrap class="rc">&nbsp;</td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap><input type="checkbox" name="am1" value="0" onclick="update_email_setup()">
+       E-Mail Address #1:</td>
+     <td nowrap class="rc"><input type="text" name="amail1" size="32" maxlength="48" value=""></td>
+     <td nowrap class="rc">
+       <input type="checkbox" name="att1" value="0">
+       With Attachment</td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap><input type="checkbox" name="am2" value="0" onclick="update_email_setup()">
+       E-Mail Address #2:</td>
+     <td nowrap class="rc"><input type="text" name="amail2" size=32 maxlength=48 value=""></td>
+     <td nowrap class="rc"><input type="checkbox" name="att2" value="0"> 
+     With Attachment</td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap><input type="checkbox" name="am3" value="0" onclick="update_email_setup()">
+       E-Mail Address #3:</td>
+     <td nowrap class="rc"><input type="text" name="amail3" size=32 maxlength=48 value=""></td>
+     <td nowrap class="rc"><input type="checkbox" name="att3" value="0"> With Attachment</td>
+   </tr>
+   <tr>
+     <td class="lc" nowrap>Subject:</td>
+     <td colspan="3" nowrap class="rc"><input type="text" name="asub" size="48" maxlength="48" value="" style="{width:280}" width=280></td>
+   </tr>
+   <!--<tr>
+  <td class="lc" nowrap valign="top"><input type="checkbox" name="en_url" value="en_url" onClick="setAttach()"> Attach Video URL</td> 
+  <td class="rc"><input type="text" name="v_url" size="20" maxlength="48" style="{width:220}" value="@v_url#"> (to E-Mail Body)</td>
+</tr> -->
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+   <tr>
+     <td class="leftbuttonrow">&nbsp;</td>
+     <td colspan="3" class="rightbuttonrow"><input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+         <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='alerts.htm'">
+         <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_alert.htm')">
+     </td>
+   </tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+	  <!-- table footer -->
+ </table>
+ 
+ </td>
+ </tr>
+ </table>
+ </div>  <!-- pagemain file.cgi?next_file=-->
+ <div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+<input type="Hidden" name="pwd_chg_email" value="0">
+<input type="Hidden" name="pwd_chg_email2" value="0">
+<input type="Hidden" name="email_att" value="0">
+<input type="Hidden" name="send_email" value="0">
+
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

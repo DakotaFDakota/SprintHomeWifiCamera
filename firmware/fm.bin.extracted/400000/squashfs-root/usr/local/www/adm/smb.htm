@@ -1,0 +1,504 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function SambaBrowse(index)
+{
+    if (SupportModalDialog())
+    {
+    	if(index == 1)
+    	{
+    		document.forms[0].smb_browse_flag.value = 1;
+    	}
+    	else
+    	{
+    		document.forms[0].smb_browse_flag.value = 0;
+    	}
+    	window.showModalDialog('samba_browse.htm', document.forms[0], sambasurveysub);
+    }
+    else
+    {
+     	openDataSubWin('samba_browse.htm', sambasurveysub);
+    }
+}
+var smbc_pwd_old = "";
+var smbc_pwd_old_rec = "";
+function init()
+{
+//	dataToVisible(cf);
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			//["HIDDEN", "h_smb_1", "h_smb_1"],
+			//["HIDDEN", "h_smb_md", "h_smb_md"],
+			//["HIDDEN", "h_smb_rec", "h_smb_rec"],
+			["SMBC", "smbc_server", "smbc_server"],
+			["SMBC", "smbc_path", "smbc_path"],
+			["SMBC", "smbc_account", "smbc_name"],
+			["SMBC", "smbc_passwd", "smbc_pwd"],
+			["SMBC", "smbc_rec_duration", "smbc_rec_duration"],
+			["SMBC", "smbc_rec_server", "smbc_rec_server"],
+			["SMBC", "smbc_rec_path", "smbc_rec_path"],
+			["SMBC", "smbc_rec_account", "smbc_rec_name"],
+			["SMBC", "smbc_rec_passwd", "smbc_rec_pwd"]
+		];
+	read.callback = set_pwd;
+	read.get(array_get);
+	menuframe.highLight('smbDIV');
+}
+
+function set_pwd()
+{
+ 	var cf = document.forms[0];
+
+	if(cf.smbc_pwd.value=="")
+	{
+	smbc_pwd_old = randomString(6, Valid_Strd);
+	cf.smbc_pwd.value = smbc_pwd_old;
+	}
+	if(cf.smbc_rec_pwd.value=="")
+	{
+	smbc_pwd_old_rec = randomString(6, Valid_Strd);
+	cf.smbc_rec_pwd.value = smbc_pwd_old_rec;
+	}
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function checkData()
+{
+ 	var cf = document.forms[0];
+	var msg = "";
+	var invalid_path_str = '?*"<>';
+	var Valid_Strs = Valid_Stri + ":";
+	if(cf.h_smb_1.value == 1   || cf.h_smb_pir.value ==1   || cf.h_smb_md.value ==1)
+	{
+		if(cf.smbc_server.value == "")
+		{ msg+= msg_smb_server_empty; }
+		else 
+		{ msg+= checkValid(cf.smbc_server, msg_smb_server_illegal_str, Valid_Strs, 64, false); }
+
+		if(cf.smbc_path.value == "")
+		{ 
+			msg+= msg_smb_path_empty; 
+		}
+
+	
+		//msg+= checkBlank(cf.smbc_name, msg_smb_name);
+		//msg+= checkBlank(cf.smbc_pwd, msg_smb_pwd);
+	}
+	else
+	{
+		if(cf.smbc_server.value.length >0)
+			msg+= checkValid(cf.smbc_server, msg_smb_server_illegal_str, Valid_Strs, 64, false);
+		
+	}
+	
+	if(cf.h_smb_rec.value == 1)
+	{
+		if(cf.smbc_rec_server.value == "")
+		{ msg+= msg_smb_server_empty; }
+		else 
+		{ msg+= checkValid(cf.smbc_rec_server, msg_smb_server_illegal_str, Valid_Stri, 64, false); }
+
+		if(cf.smbc_rec_path.value == "")
+		{ 
+			msg+= msg_smb_path_empty; 
+		}
+	}
+	else
+	{
+		if(cf.smbc_rec_server.value.length >0)
+			msg+= checkValid(cf.smbc_rec_server, msg_smb_server_illegal_str, Valid_Stri, 64, false);
+		
+	}
+	
+    if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+//	dataToHidden(cf);
+	cf.pwd_chg_smbc.value = ( cf.smbc_pwd.value != smbc_pwd_old )?1:0;
+	cf.pwd_chg_smbc_rec.value = ( cf.smbc_rec_pwd.value != smbc_pwd_old_rec )?1:0;
+	var save = new GroupCtrl();
+	var array_set=[
+			["SMBC", "smbc_server", "smbc_server"],
+			["SMBC", "smbc_path", "smbc_path"],
+			["SMBC", "smbc_account", "smbc_name"],
+			["SMBC", "smbc_rec_duration", "smbc_rec_duration"],
+			["SMBC", "smbc_rec_server", "smbc_rec_server"],
+			["SMBC", "smbc_rec_path", "smbc_rec_path"],
+			["SMBC", "smbc_rec_account", "smbc_rec_name"]
+		];
+	if(cf.pwd_chg_smbc.value==1)
+	{
+		array_set.push(["SMBC", "smbc_passwd", "smbc_pwd"]);
+	}
+	if(cf.pwd_chg_smbc_rec.value==1)
+	{
+		array_set.push(["SMBC", "smbc_rec_passwd", "smbc_rec_pwd"]);
+	}
+	save.callback = reset_pwd;
+	save.set(array_set);
+	if(cf.pwd_chg_smbc_rec.value==1)
+	{
+		array_set.pop();
+	}
+	if(cf.pwd_chg_smbc.value==1)
+	{
+		array_set.pop();
+	}
+	return true;	
+}
+
+function reset_pwd()
+{
+ 	var cf = document.forms[0];
+	if(cf.smbc_pwd.value != smbc_pwd_old)
+	{
+		smbc_pwd_old = cf.smbc_pwd.value;
+	}
+	if(cf.smbc_rec_pwd.value != smbc_pwd_old_rec)
+	{
+		smbc_pwd_old_rec = cf.smbc_rec_pwd.value;
+	}
+}
+
+var http_request;
+function showResponse(index)
+{
+	var resp_context;
+	var tag_var;
+	var TagList = "List";
+	var TagTagStatus = "Status";
+	var status_node;
+	if (http_request.readyState == 4 || http_request.readyState == 'complete')
+	{
+		siteFile = http_request.responseXML;	
+		tag_var = siteFile.getElementsByTagName(TagList);
+		status_node = tag_var[0];
+		resp_context = status_node.getElementsByTagName(TagTagStatus)[0].firstChild.nodeValue;
+		if ("" != resp_context)
+		{
+			if ("ok" == resp_context)
+			{
+				alert(msg_smb_test_succ);
+			}
+			else if ("server unknow" == resp_context)
+			{
+				alert(msg_smb_test_server_unknow);
+			}
+			else if ("invalid" == resp_context)
+			{
+				alert(msg_smb_test_no_path);
+			}
+			else if ("unauth" == resp_context)
+			{
+				alert(msg_smb_test_no_permission);
+			}
+			else if ("readonly" == resp_context)
+			{
+				alert(msg_smb_test_readonly);
+			}
+			else if ("writeonly" == resp_context)
+			{
+				alert(msg_smb_test_writeonly);
+			}
+			else
+			{
+				alert(msg_smb_test_fail);
+			}
+		}
+		http_request.abort();
+		http_request = null;
+		if(index == 1)
+		{
+			document.forms[0].smb_test_rec.disabled = false;
+		}
+		else
+		{
+		document.forms[0].smb_test.disabled = false;
+	}
+	}
+}
+function confirmTest(index)
+{
+	var src_file;
+	var msg = "";
+	var invalid_path_str = '?*"<>';
+	var Valid_Strs = Valid_Stri + ":";
+	var cf = document.forms[0];
+
+	if(index == 1)
+	{
+		if(cf.smbc_rec_server.value == "")
+			msg+= msg_smb_server_empty;
+		else
+			msg+= checkValid(cf.smbc_rec_server, msg_smb_server_illegal_str, Valid_Strs, 64, false);
+		if(cf.smbc_rec_path.value == "")
+			msg+= msg_smb_path_empty;
+		else
+			msg+= checkInvalid(cf.smbc_rec_path, msg_smb_path_illegal_str, invalid_path_str);
+	}
+	else
+	{
+	if(cf.smbc_server.value == "")
+		msg+= msg_smb_server_empty;
+	else 
+		msg+= checkValid(cf.smbc_server, msg_smb_server_illegal_str, Valid_Strs, 64, false);
+
+	if(cf.smbc_path.value == "")
+		msg+= msg_smb_path_empty;
+	else
+		msg+= checkInvalid(cf.smbc_path, msg_smb_path_illegal_str, invalid_path_str);
+	}
+	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	if(http_request == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request = null; }
+			}
+		}
+	}
+
+	if (!http_request)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	if(index == 1)
+	{
+		cf.smb_test_rec.disabled = true;
+		cf.pwd_chg_smbc_rec.value = ( cf.smbc_rec_pwd.value != smbc_pwd_old_rec )?1:0;
+		src_file = 	'../adm/smb_dirctrl.cgi?server='+cf.smbc_rec_server.value+
+							'&path='+cf.smbc_rec_path.value+
+							'&user='+cf.smbc_rec_name.value+
+							'&pass='+cf.smbc_rec_pwd.value+
+							'&pwd_chg_smbc='+cf.pwd_chg_smbc_rec.value+
+							'&need_rights=wr'+
+							'&'+CGIRequestRandomKey+'='+new Date().getTime();
+	}
+	else
+	{
+	cf.smb_test.disabled = true;
+	cf.pwd_chg_smbc.value = ( cf.smbc_pwd.value != smbc_pwd_old )?1:0;
+	src_file = 	'../adm/smb_dirctrl.cgi?server='+cf.smbc_server.value+
+							'&path='+cf.smbc_path.value+
+							'&user='+cf.smbc_name.value+
+							'&pass='+cf.smbc_pwd.value+
+							'&pwd_chg_smbc='+cf.pwd_chg_smbc.value+
+							'&need_rights=wr'+
+							'&'+CGIRequestRandomKey+'='+new Date().getTime();
+	}
+	http_request.onreadystatechange = function() { showResponse(index); };
+	//initTestPage(); 
+	http_request.open('GET', src_file, true);
+	http_request.send(null);
+	
+	return true;
+}
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg()">
+<FORM name="smb" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td colspan="2" class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td nowrap class="subhead" colspan="3">SMB/CIFS Client</td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">Browse SMB/CIFS Server:</td>
+ <td colspan="2" nowrap class="rc"><input type="button" name="samba_browse" value="Browse" onClick="SambaBrowse(0)"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">Server Name:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="smbc_server" size="25" maxlength="64" value="" style="width:160px"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">File Path:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="smbc_path" size="25" maxlength="128" value="" style="width:260px"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">User Name:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="smbc_name" value="" size="24" maxlength="64" style="width:160px"></td>
+</tr>
+ 
+<tr>
+ <td nowrap class="lc">Password:</td>
+ <td colspan="2" nowrap class="rc"><input type="password" name="smbc_pwd" value="" onFocus="this.select()" size="24" maxlength="64" style="width:160px"></td>
+</tr>
+
+<!--
+<tr>
+ <td height="30" nowrap class="lc">Prefix:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="smbc_prefix" value="@smbc_prefix#" size="24" maxlength="64" style="width:160px"></td>
+</tr>
+-->
+
+<tr>
+ <td nowrap class="lc">&nbsp;</td>
+ <td colspan="2" nowrap class="rc"><input type="button" name="smb_test" value="Test the Server" onClick="confirmTest(0)"></td>
+</tr>
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td colspan="2" class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead" nowrap >Continuous Recording</td>
+ <td class="rc" nowrap colspan="3" >Maximum duration of continuous recording file:
+<input type="text" class="num" name="smbc_rec_duration" value="" size="4" maxlength="2">&nbsp; Minutes(1-60)
+ </td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">Browse SMB/CIFS Server:</td>
+ <td colspan="2" nowrap class="rc"><input type="button" name="samba_browse_rec" value="Browse" onClick="SambaBrowse(1)"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">Server Name:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="smbc_rec_server" size="25" maxlength="64" value="" style="width:160px"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">File Path:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="smbc_rec_path" size="25" maxlength="128" value="" style="width:260px"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">User Name:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="smbc_rec_name" value="" size="24" maxlength="64" style="width:160px"></td>
+</tr>
+ 
+<tr>
+ <td nowrap class="lc">Password:</td>
+ <td colspan="2" nowrap class="rc"><input type="password" name="smbc_rec_pwd" value="" onFocus="this.select()" size="24" maxlength="64" style="width:160px"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">&nbsp;</td>
+ <td colspan="2" nowrap class="rc"><input type="button" name="smb_test_rec" value="Test the Server" onClick="confirmTest(1)"></td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td colspan="2" class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='smb.htm'">
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_smb.htm')"> </td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+<input type="Hidden" name="smb_browse_flag" value="0">
+<input type="Hidden" name="pwd_chg_smbc" value="0">
+<input type="Hidden" name="pwd_chg_smbc_rec" value="0">
+<input type="Hidden" name="h_smb_1" value="">
+<input type="Hidden" name="h_smb_pir" value="">
+<input type="Hidden" name="h_smb_md" value="">
+<input type="Hidden" name="h_smb_rec" value="">
+
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

@@ -1,0 +1,593 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script 
+
+var aftp_pw_old = "";
+var aftp_pw2_old = "";
+
+function setftp2()
+{
+    var cf = document.forms[0];
+
+	if (!cf.ftp2.checked) // disable
+	{	
+		cf.aftp_address2.disabled = 1;
+		cf.aftp_login2.disabled = 1;
+		cf.aftp_pw2.disabled = 1;
+		cf.ftp_mode2.disabled = 1;		
+		cf.aftp_port2.disabled = 1;
+		cf.aftp_img2.disabled = 1;
+		cf.ftp_test2.disabled = 1;
+	}
+	else
+	{
+		cf.aftp_address2.disabled = 0;
+		cf.aftp_login2.disabled = 0;
+		cf.aftp_pw2.disabled = 0;
+		cf.ftp_mode2.disabled = 0;
+		cf.aftp_port2.disabled = 0;
+		cf.aftp_img2.disabled = 0;
+		cf.ftp_test2.disabled = 0;
+	}
+}
+
+function set_pwd()
+{
+ 	var cf = document.forms[0];
+
+	if(cf.aftp_pw.value=="")
+	{
+		aftp_pw_old = randomString(6, Valid_Strd);
+		cf.aftp_pw.value = aftp_pw_old;
+	}
+	if(cf.aftp_pw2.value=="")
+	{
+		aftp_pw2_old = randomString(6, Valid_Strd);
+		cf.aftp_pw2.value = aftp_pw2_old;
+	}
+}
+
+function set_all()
+{
+	setftp2();
+	set_pwd();
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function check_ftp_port(port,require)
+{
+    var pmsg="";
+
+	pmsg = checkInt(port,msg_ftp_port,1024,65535,require);
+    if (pmsg.length != 0)
+    {
+    	pmsg = checkInt(port,msg_ftp_port,21,21,require);
+        if (pmsg.length != 0)
+        {
+            return msg_ftp_port_valid_range;
+        }
+    }
+    return pmsg;
+}
+
+function init()
+{
+	menuframe.highLight('ftpDIV');
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			//["HIDDEN", "h_ftp_1", "h_ftp_1"],
+			//["HIDDEN", "h_ftp_md", "h_ftp_md"],
+			["FTP", "ftp1_server", "aftp_address"],
+			["FTP", "ftp1_account", "aftp_login"],
+			["FTP", "ftp1_passwd", "aftp_pw"],
+			["FTP", "ftp1_path", "aftp_img1"],
+			["FTP", "ftp1_passive", "ftp_mode"],
+			["FTP", "ftp1_port", "aftp_port"],
+			["FTP", "ftp2", "ftp2"],
+			["FTP", "ftp2_server", "aftp_address2"],
+			["FTP", "ftp2_account", "aftp_login2"],
+			["FTP", "ftp2_passwd", "aftp_pw2"],
+			["FTP", "ftp2_path", "aftp_img2"],
+			["FTP", "ftp2_passive", "ftp_mode2"],
+			["FTP", "ftp2_port", "aftp_port2"]
+		];
+	read.callback = set_all;
+	read.get(array_get);
+}
+
+function checkData()
+{
+	var cf = document.forms[0];
+	var msg = "";
+	var Valid_String = Valid_Stri  + "/\#~\"`!@$%^&*()_+={}[]|;:'<>,? " + " ";
+	var Valid_Strpw = Valid_Str + "/!@$^~-.=[]{}";
+	
+	if(cf.h_ftp_1.value == 1   || cf.h_ftp_pir.value ==1   || cf.h_ftp_md.value ==1)
+	{		
+		if(cf.aftp_address.value == "")
+		{ 
+			msg+= msg_ftp_server_empty; 
+		}
+		else 
+		{ 
+			msg+= checkDomainName(cf.aftp_address,msg_aftp_name,Valid_domain);
+		}
+	
+		//msg+= checkValid(cf.aftp_address, msg_aftp_name, Valid_Strd, 64, false);
+		msg+= checkBlank(cf.aftp_login,msg_aftp_login);
+		//msg+= checkValid(cf.aftp_login, msg_aftp_login, Valid_Stri, 32, false);
+		//msg+= checkBlank(cf.aftp_pw,msg_aftp_pw);
+		/*
+		if (cf.aftp_pw.value != aftp_pw_old)
+	        {
+	    		msg+= checkValid(cf.aftp_pw, msg_aftp_pw, Valid_Strpw, 16, false);
+	        }*/
+		msg+= check_ftp_port(cf.aftp_port,true);
+		//msg+= checkBlank(cf.aftp_img1,msg_ftp_path);
+		msg+= checkValid(cf.aftp_img1,msg_ftp_path,Valid_String,64,false);
+	}
+	else
+	{
+		if(cf.aftp_address.value.length >0)
+		{
+			msg+= checkDomainName(cf.aftp_address,msg_aftp_name,Valid_domain);
+		}
+		/*
+		if(cf.aftp_login.value.length >0)
+		{
+			msg+= checkValid(cf.aftp_login, msg_aftp_login, Valid_Stri, 32, false);
+		}
+		if((cf.aftp_pw.value.length >0)&&(cf.aftp_pw.value != aftp_pw_old))
+		{
+			msg+= checkValid(cf.aftp_pw, msg_aftp_pw, Valid_Strpw, 16, false);
+		}*/
+		if(cf.aftp_port.value.length >0)
+		{
+			msg+= check_ftp_port(cf.aftp_port,true);
+		}
+		if(cf.aftp_img1.value.length >0)
+		{
+			msg+= checkValid(cf.aftp_img1,msg_ftp_path,Valid_String,64,false);
+		}
+	}
+
+	if (cf.ftp2.checked) // enable
+	{
+		if(cf.h_ftp_1.value == 1   || cf.h_ftp_pir.value ==1   || cf.h_ftp_md.value ==1)
+		{		
+			if(cf.aftp_address2.value == "")
+			{ 
+				msg+= msg_ftp2_server_empty; 
+			}
+			else 
+			{ 
+				msg+= checkDomainName(cf.aftp_address2,msg_aftp_name,Valid_domain);
+			}
+	
+			//msg+= checkValid(cf.aftp_address2, msg_aftp_name, Valid_Strd, 64, false);
+			msg+= checkBlank(cf.aftp_login2,msg_aftp_login);
+			//msg+= checkValid(cf.aftp_login2, msg_aftp_login, Valid_Stri, 32, false);
+			//msg+= checkBlank(cf.aftp_pw2,msg_aftp_pw);
+			/*
+			if (cf.aftp_pw2.value != aftp_pw2_old)
+			{
+				msg+= checkValid(cf.aftp_pw2, msg_aftp_pw, Valid_Strpw, 16, false);
+			}*/
+			msg+= check_ftp_port(cf.aftp_port2,true);
+			//msg+= checkBlank(cf.aftp_img2,msg_ftp_path);		
+			msg+= checkValid(cf.aftp_img2,msg_ftp_path,Valid_String,64,false);
+		}
+		else
+		{
+			if(cf.aftp_address2.value.length >0)
+			{
+				msg+= checkDomainName(cf.aftp_address2,msg_aftp_name,Valid_domain);
+			}
+			/*
+			if(cf.aftp_login2.value.length >0)
+			{
+				msg+= checkValid(cf.aftp_login2, msg_aftp_login, Valid_Stri, 32, false);
+			}
+			if((cf.aftp_pw2.value.length >0)&&(cf.aftp_pw2.value != aftp_pw2_old))
+			{
+				msg+= checkValid(cf.aftp_pw2, msg_aftp_pw, Valid_Strpw, 16, false);
+			}*/
+			if(cf.aftp_port2.value.length >0)
+			{
+				msg+= check_ftp_port(cf.aftp_port2,true);
+			}
+			if(cf.aftp_img2.value.length >0)
+			{
+				msg+= checkValid(cf.aftp_img2,msg_ftp_path,Valid_String,64,false);
+			}
+		}
+	}
+
+    if (msg.length >= 1)
+	{
+		alert(msg);
+		return false;
+	}
+
+	cf.pwd_chg_ftp.value = ( cf.aftp_pw.value != aftp_pw_old )?1:0;
+	cf.pwd_chg_ftp2.value = ( cf.aftp_pw2.value != aftp_pw2_old )?1:0;
+
+	var save = new GroupCtrl();
+	var array_set=[
+			["FTP", "ftp1_server", "aftp_address"],
+			["FTP", "ftp1_account", "aftp_login"],
+			["FTP", "ftp1_path", "aftp_img1"],
+			["FTP", "ftp1_passive", "ftp_mode"],
+			["FTP", "ftp1_port", "aftp_port"],
+			["FTP", "ftp2", "ftp2"],
+			["FTP", "ftp2_server", "aftp_address2"],
+			["FTP", "ftp2_account", "aftp_login2"],
+			["FTP", "ftp2_path", "aftp_img2"],
+			["FTP", "ftp2_passive", "ftp_mode2"],
+			["FTP", "ftp2_port", "aftp_port2"]
+		];
+	if(cf.pwd_chg_ftp.value==1)
+	{
+		array_set.push(["FTP", "ftp1_passwd", "aftp_pw"]);
+	}
+	if(cf.pwd_chg_ftp2.value==1)
+	{	
+		array_set.push(["FTP", "ftp2_passwd", "aftp_pw2"]);
+	}
+	save.callback = reset_pwd;
+	save.set(array_set);
+	if(cf.pwd_chg_ftp2.value==1)
+	{
+		array_set.pop();
+	}
+	if(cf.pwd_chg_ftp.value==1)
+	{
+		array_set.pop();
+	}
+
+	return true;	
+}
+
+function reset_pwd()
+{
+	var cf = document.forms[0];
+	if(cf.aftp_pw.value != aftp_pw_old)
+	{
+		aftp_pw_old = cf.aftp_pw.value;
+	}
+	if(cf.aftp_pw2.value != aftp_pw2_old)
+	{
+		aftp_pw2_old = cf.aftp_pw2.value;
+	}
+}
+
+function checkFTPInterval(hr,mn) {
+ 	var cf = document.forms[0];
+	if(hr == 24 && mn == 30)
+		return (msg_in_inter);
+	else if(hr == 0 && mn == 0)
+		return (msg_in_inter);
+
+	return "";
+}
+
+
+function chkPort() {
+    var cf = document.forms[0];
+	if(cf.aftp_address.value!="" && cf.aftp_port.value == "") {
+		cf.aftp_port.value = "21";
+	}
+
+	if(cf.aftp_address2.value!="" && cf.aftp_port2.value == "") {
+		cf.aftp_port2.value = "21";
+	}
+}
+var http_request;
+function showResponse(index)
+{
+	var resp_context;
+	if (http_request.readyState == 4 || http_request.readyState == 'complete')
+	{
+		resp_context = http_request.responseText;
+		if ("" != resp_context)
+		{
+			alert(resp_context);
+		}
+		http_request.abort();
+		http_request = null;
+		if (1 == index)
+		{
+			document.forms[0].ftp_test.disabled = false;
+		}
+		else if (2 == index)
+		{
+			document.forms[0].ftp_test2.disabled = false;
+		}
+	}
+}
+function confirmTest(index)
+{
+	var src_file;
+	var cf = document.forms[0];
+	var msg = "";
+	var Valid_String = Valid_Stri  + "/\#~\"`!@$%^&*()_+={}[]|;:'<>,? " + " ";
+	var Valid_Strpw = Valid_Str + "/!@$^~-.=[]{}";
+	
+	if (1 == index)
+	{
+		msg+= checkBlank(cf.aftp_address,msg_aftp_name);
+		msg+= checkDomainName(cf.aftp_address,msg_aftp_name,Valid_domain);
+		msg+= checkBlank(cf.aftp_login,msg_aftp_login);
+		/*
+		msg+= checkValid(cf.aftp_login, msg_aftp_login, Valid_Stri, 32, false);
+		if((cf.aftp_pw.value.length >0)&&(cf.aftp_pw.value != aftp_pw_old))
+		{
+			msg+= checkValid(cf.aftp_pw, msg_aftp_pw, Valid_Strpw, 16, false);
+		}*/
+		msg+= check_ftp_port(cf.aftp_port,true);
+		msg+= checkValid(cf.aftp_img1,msg_ftp_path,Valid_String,64,false);
+	}
+	else if (2 == index)
+	{
+		msg+= checkBlank(cf.aftp_address2,msg_aftp_name);
+		msg+= checkDomainName(cf.aftp_address2,msg_aftp_name,Valid_domain);
+		msg+= checkBlank(cf.aftp_login2,msg_aftp_login);
+		/*
+		msg+= checkValid(cf.aftp_login2, msg_aftp_login, Valid_Stri, 32, false);
+		if((cf.aftp_pw2.value.length >0)&&(cf.aftp_pw2.value != aftp_pw2_old))
+		{
+			msg+= checkValid(cf.aftp_pw2, msg_aftp_pw, Valid_Strpw, 16, false);
+		}*/
+		msg+= check_ftp_port(cf.aftp_port2,true);
+		msg+= checkValid(cf.aftp_img2,msg_ftp_path,Valid_String,64,false);
+	}
+	if (msg.length >= 1)
+	{
+		alert(msg);
+		return false;
+	}
+	if(http_request == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request = null; }
+			}
+		}
+	}
+
+	if (!http_request)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	if (1 == index)
+	{
+		cf.ftp_test.disabled = true;
+		cf.pwd_chg_ftp.value = ( cf.aftp_pw.value != aftp_pw_old )?1:0;
+		cf.h_ftp_mode.value = (cf.ftp_mode.checked)?1:0;
+		src_file =  '../adm/test.cgi?action=ftp_test&ftp_server='+cf.aftp_address.value+
+								'&ftp_account='+cf.aftp_login.value+
+								'&ftp_passwd='+cf.aftp_pw.value+
+								'&ftp_path='+cf.aftp_img1.value+
+								'&ftp_port='+cf.aftp_port.value+
+								'&ftp_passive='+cf.h_ftp_mode.value+
+								'&pwd_chg_ftp='+cf.pwd_chg_ftp.value+
+								'&index=1'+
+								'&'+CGIRequestRandomKey+'='+new Date().getTime();
+	}
+	else if (2 == index)
+	{
+		cf.ftp_test2.disabled = true;
+		cf.pwd_chg_ftp2.value = ( cf.aftp_pw2.value != aftp_pw2_old )?1:0;
+		cf.h_ftp_mode2.value = (cf.ftp_mode.checked)?1:0;
+		src_file =  '../adm/test.cgi?action=ftp_test&ftp_server='+cf.aftp_address2.value+
+								'&ftp_account='+cf.aftp_login2.value+
+								'&ftp_passwd='+cf.aftp_pw2.value+
+								'&ftp_path='+cf.aftp_img2.value+
+								'&ftp_port='+cf.aftp_port2.value+
+								'&ftp_passive='+cf.h_ftp_mode2.value+
+								'&pwd_chg_ftp='+cf.pwd_chg_ftp2.value+
+								'&index=2'+
+								'&'+CGIRequestRandomKey+'='+new Date().getTime();
+	}
+	http_request.onreadystatechange = function() { showResponse(index); };
+	//initTestPage(); 
+	http_request.open('GET', src_file, true);
+	http_request.send(null);
+	
+	return true;
+}
+
+// End Script -->
+</script>
+
+
+</head>
+<body onLoad="init();showMsg();">
+<FORM name="ftp" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="file.cgi?next_file=logout.htm&adm_todo=logout" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td colspan="2" class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td nowrap class="subhead">Primary FTP</td>
+ <td colspan="2" nowrap class="rc">&nbsp;  </td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">FTP Server:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="aftp_address" size="40" maxlength="64" value="" style="{width: 200}"> 
+	   &nbsp;&nbsp;Port: <input type="text" name="aftp_port" size="5" maxlength="5" value="" style="{width: 40}"></td>
+</tr>
+
+<tr>
+ <td nowrap class="lc">Login Name:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="aftp_login" size="25" maxlength="32" value="" style="{width: 200}"></td>
+</tr>
+ 
+<tr>
+ <td nowrap class="lc">Password:</td>
+ <td colspan="2" nowrap class="rc"><input type="password" name="aftp_pw" size="25" maxlength="16" value="" onFocus="this.select()" style="{width: 200}"></td>
+</tr>
+
+<tr>
+  <td nowrap class="lc"><input type="checkbox" name="ftp_mode"> Enable Passive Mode</td> 
+  <td colspan="2" nowrap class="rc">&nbsp;</td>
+</tr>
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc">File Path Name:</td>
+ <td colspan="2" class="rc"><input type="text" name="aftp_img1" size="25" maxlength="64" value="" style="{width: 200}"></td>
+</tr> 
+
+<tr>
+ <td class="lc">&nbsp;</td>
+ <td colspan="2" class="rc"><input type="button"  name="ftp_test" value="Test the Server" onClick="confirmTest(1)"></td>
+</tr>
+
+<tr>
+ <td nowrap class="subhead"> Secondary FTP</td>
+ <td colspan="2" nowrap class="rc">&nbsp;</td>
+</tr>
+
+<tr>
+  <td colspan="3" nowrap>
+  <input type="checkbox" name="ftp2"  value="1" onClick="setftp2();"> Secondary FTP (enable this if the camera can not connect to the primary FTP)
+  </td> 
+</tr>
+
+<tr>
+ <td nowrap class="lc">FTP Server:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="aftp_address2" size="40" maxlength="64" value="" style="{width: 200}">
+	 &nbsp;&nbsp;Port: <input type="text" name="aftp_port2" size="5" maxlength="5" value="" style="{width: 40}"></td>
+</tr> 
+
+<tr>
+ <td nowrap class="lc">Login Name:</td>
+ <td colspan="2" nowrap class="rc"><input type="text" name="aftp_login2" size="25" maxlength="32" value="" style="{width: 200}"></td>
+</tr>  
+
+<tr>
+ <td nowrap class="lc">Password:</td>
+ <td colspan="2" nowrap class="rc"><input type="password" name="aftp_pw2" size="25" maxlength="16" value="" onFocus="this.select()" style="{width: 200}"></td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td nowrap class="lc"><input type="checkbox" name="ftp_mode2"> Enable Passive Mode</td>
+ <td colspan="2" nowrap class="rc">&nbsp;</td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc">File Path Name:</td>
+ <td colspan="2" class="rc"><input type="text" name="aftp_img2" size="25" maxlength="64" value="" style="{width: 200}"></td>
+</tr>
+
+<tr>
+ <td class="lc">&nbsp;</td>
+ <td colspan="2" class="rc"><input type="button"  name="ftp_test2" value="Test the Server" onClick="confirmTest(2)"></td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td colspan="2" class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="location.href='ftp.htm'">
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_ftp.htm')"> </td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table>
+</td>
+</tr>
+
+</table>
+
+
+</div>  <!-- pagemain -->
+
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+<input type="Hidden" name="h_ftp_mode" value="0">
+<input type="Hidden" name="h_ftp_mode2" value="0">
+<input type="Hidden" name="pwd_chg_ftp" value="0">
+<input type="Hidden" name="pwd_chg_ftp2" value="0">
+<input type="Hidden" name="h_ftp_1" value="">
+<input type="Hidden" name="h_ftp_pir" value="">
+<input type="Hidden" name="h_ftp_md" value="">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

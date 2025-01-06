@@ -1,0 +1,137 @@
+#!/bin/sh
+####################################
+#RTSP Streaming Server for dualCPU #
+####################################
+
+###################################
+#Parameters Prepared              #
+###################################
+DualAudio=0
+
+case "$2" in
+1080p)
+	Resolution="1920x1080"
+        ;;
+720p)
+	Resolution="1280x720"
+	;;
+VGA)
+	Resolution="640x480"
+	;;
+*)
+	Resolution="1920x1080"
+	;;
+esac
+
+VideoFPS=$3
+VideoBitRate=$4
+AudioType=$5
+
+if [ "$6" == "info" ]
+then
+Info_Enable=$6
+else
+Info_Enable=""
+fi
+
+if [ "$7" == "2cpu" ]
+then
+DualCPU_Enable=$7
+else
+DualCPU_Enable=""
+fi
+
+if [ "$8" == "na" ]
+then
+SampleRate=16 #KHz
+else
+SampleRate=$8
+fi
+
+if [ "$9" == "na" ]
+then
+AudioBitRate=64 #Kbps
+else
+AudioBitRate=$9
+fi
+
+#################################
+#Initial                        #
+#################################
+
+cd /var/log/
+echo 5 > /proc/sys/vm/dirty_ratio
+case "$8" in
+16)
+	ass_time="0"
+        ;;
+32)
+	ass_time="0"
+	;;
+48)
+	ass_time="0"
+	;;
+*)
+
+	;;
+esac
+case "$1" in
+start)
+	if [ "$Info_Enable" == "info" ]
+	then
+		setffsrv_conf.sh $VideoFPS $VideoBitRate $AudioType $Info_Enable
+	else
+		setffsrv_conf.sh $VideoFPS $VideoBitRate $AudioType "no_info" "$ass_time" 
+	fi
+	sync	
+	echo "Start RTSP streaming server ..."
+	ffserver -f /tmp/ffsrv.conf &
+	sleep 1
+	if [ "$Info_Enable" == "info" ]
+	then
+        	if [ "$AudioType" == "na" ]
+        	then
+			ffmpeg -override_ffserver -r "$VideoFPS" -s "$Resolution" -input_format h264 -osd 0 -flicker 60 -vbrate "$VideoBitRate"000 -gop "$VideoFPS" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$VideoBitRate"K -flags +global_header -strict -2 -vsync 1 http://127.0.0.1:8090/feed1.ffm < /dev/null &
+        	else
+			if [ "$AudioType" == "aac" ]
+			then
+				echo "start "$VideoFPS"fps/"$VideoBitRate"Kbps, "$AudioType" "$Info_Enable" "$DualCPU_Enable", Audio "$SampleRate"KHz "$AudioBitRate"Kbps"
+				if [ "$DualCPU_Enable" == "2cpu" ]
+				then
+					echo "Start Dual CPU AAC ..."
+					ffmpeg -override_ffserver -ss $ass_time -f alsa -ar "$SampleRate"000 -ac 2 -i hw:0,0 -vthread 0 -r "$VideoFPS" -s "$Resolution" -input_format h264 -osd 0 -flicker 60 -vbrate "$VideoBitRate"000 -gop "$VideoFPS" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$VideoBitRate"K -c:a "$AudioType" -b:a "$AudioBitRate"000 -ar "$SampleRate"000 -ac 2 -flags +global_header -strict -2 -async 2 -vsync 1 -aac_2nd_cpu 1 http://127.0.0.1:8090/feed1.ffm < /dev/null &
+				else
+					echo "Start CPU_A AAC ..."
+					ffmpeg -override_ffserver -ss $ass_time -f alsa -ar "$SampleRate"000 -ac 2 -i hw:0,0 -vthread 0 -r "$VideoFPS" -s "$Resolution" -input_format h264 -osd 0 -flicker 60 -vbrate "$VideoBitRate"000 -gop "$VideoFPS" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$VideoBitRate"K -c:a "$AudioType" -b:a "$AudioBitRate"000 -ar "$SampleRate"000 -ac 2 -flags +global_header -strict -2 -async 2 -vsync 1 http://127.0.0.1:8090/feed1.ffm < /dev/null &
+				fi
+			else
+				echo "Start pcm_mulaw ..."
+				ffmpeg -override_ffserver -ss $ass_time -f alsa -ar "$SampleRate"000 -ac 2 -i hw:0,0 -vthread 0 -r "$VideoFPS" -s "$Resolution" -input_format h264 -osd 0 -flicker 60 -vbrate "$VideoBitRate"000 -gop "$VideoFPS" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$VideoBitRate"K -c:a "$AudioType" -ar "$SampleRate"000 -ac 2 -flags +global_header -strict -2 -async 2 -vsync 1 http://127.0.0.1:8090/feed1.ffm < /dev/null &
+			fi
+        	fi
+	fi
+#	ffserver -d -f /etc/ffsrv.conf > /var/log/ffserver_debug.log &
+	;;
+stop)
+	echo "Stop RTSP streaming server..."
+	#killall ffmpeg
+	kill $(ps aux | grep 'ffserver' | awk '{print $1}')
+	;;
+pause)
+	echo "Pause RTSP streaming..."
+	kill $(ps aux | grep 'ffmpeg' | grep 'video' | awk '{print $1}')
+	;;
+restart)
+	"$0" stop
+	sleep 3
+	"$0" start
+	;;
+*)
+	echo "Usage: $0 {start|stop|pause|restart} {1080p|720p|VGA} {fps} {videobitrate} { aac|pcm_mulaw } {with Info|wo Info} {2cpu|1cpu} {samplerate} {audiobitrate}"
+	echo "Example: RtspServerB start 1080p 30 5000 aac info 2cpu 32 64"
+	exit 1
+	;;
+esac
+
+cd ~/
+

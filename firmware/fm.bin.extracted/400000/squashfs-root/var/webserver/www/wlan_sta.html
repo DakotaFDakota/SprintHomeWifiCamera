@@ -1,0 +1,235 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
+		<link rel="stylesheet" href="/css/style.css">
+		
+		<title>Streamer</title>
+	</head>
+	<body class="background">
+	<script type="text/javascript">
+		var myxml;
+function createXMLHttpRequest() {
+    var xmlHttp;
+    if (window.XMLHttpRequest) { //if we can get XMLHttpRequest
+        xmlHttp = new XMLHttpRequest();  // Mozilla、Firefox、Safari
+    }
+    else if (window.ActiveXObject) { //if we can get ActiveXObject
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); // Internet Explorer
+    }
+    return xmlHttp;
+}
+
+
+
+
+function select_val_idx(id,setval,defval){
+  var  e = document.getElementById(id);
+  //selval=e.options[e.selectedIndex].value;
+  //alert(e.options[e.selectedIndex].value)
+  //alert(setval)
+  for(i=0;i<defval.length;i++){
+     //alert(setval);
+     //alert(defval[i])
+     if(setval==defval[i])
+        e.selectedIndex=i;
+  }
+}
+
+
+function parsevalue(tmpstr){
+
+   var data=tmpstr.split("&");
+
+   //alert(data);
+   key_value = data[0].split("=");    
+   document.getElementById("idap_sta").value=key_value[1];
+   key_value = data[1].split("=");
+   document.getElementById("id_sta_ssid").value=key_value[1];
+   key_value = data[2].split("=");
+   document.getElementById("id_proto").value=key_value[1];
+   key_value = data[3].split("=");
+   
+   document.getElementById("id_key_mgmt").value=key_value[1];
+   key_value = data[4].split("=");
+   
+   document.getElementById("id_pairwise").value=key_value[1];
+
+   key_value = data[5].split("=");
+   document.getElementById("id_group").value=key_value[1];
+
+   key_value = data[6].split("=");
+   document.getElementById("id_psk").value=key_value[1];
+
+}
+
+ 
+function handleGetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response:" + myxml.responseText);
+	parsevalue(myxml.responseText);
+      //document.GetVal.t1.value=myxml.responseText; 
+     }
+   }
+}
+function handleSetStateChange() {
+   if (myxml.readyState == 4) {
+     if (myxml.status == 200) {
+          //alert("Server Response" + myxml.responseText);
+          //document.SetVal.t2.value=myxml.responseText;
+	  alert(myxml.responseText);
+	  //parsevalue(myxml.responseText);
+     }
+   }
+}
+
+
+ 
+function startGetRequest()
+{
+    
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleGetStateChange;
+    myxml.open("GET", "/cgi-bin/wireless_client?wireless.apstaswitch&wireless.sta.ssid&wireless.proto&wireless.key_mgmt&wireless.pairwise&wireless.group&wireless.wpa.psk&end",true); 
+    myxml.send("");
+
+}
+function startSetRequest()
+{
+   var e = document.getElementById("ddlViewBy");
+   var strUser = e.options[e.selectedIndex].text;
+
+   var str_value = new Array();
+
+   //if(){
+   //document.streamer.streamer_video_resolution_sel.options[e.selectedIndex].value;
+
+   //}
+
+   str_value[0] = document.streamer.streamer_video_resolution_sel.value;
+   //alert(str_value[0]);
+   str_value[1] = document.streamer.streamer_video_pixel_fmt_sel.selectedIndex;
+   str_value[2] = document.streamer.streamer_video_framerate.value;
+   str_value[3] = document.streamer.streamer_video_bitrate.value;
+   str_value[4] = document.streamer.streamer_video_source_sel.selectedIndex;
+   str_value[5] = document.streamer.streamer_audio_samplerate_sel.selectedIndex;
+ 
+    myxml=createXMLHttpRequest();
+    if (!myxml) alert("ajax not supported")
+    myxml.onreadystatechange = handleSetStateChange;
+    myxml.open("POST", "/cgi-bin/runcgi",true);
+    
+    myxml.send("wireless.apstaswitch"+str_value[0]+"wireless.ssid"+str_value[1]+"&wireless.proto"+str_value[2]+"&wireless.key_mgmt"+str_value[3]+"&wireless.pairwise"+str_value[4]+"&wireless.group"+str_value[5]+"&wireless.wpa.psk"+str_value[6]+"&end");
+}
+ 
+
+	</script>
+
+	<form action="/cgi-bin/wireless_client" method=POST name="wireless">
+		<table border=0 width="700" cellspacing=1>
+			<tr>
+			<td>
+			<p class=title><b>Wireless</p>
+			</br>
+			</br>
+			</td>
+			</tr>
+			<tr>
+			<td  width="35%">
+				Wrieless Mode
+			</td>
+			<td  width="65%">
+				<select name="ap_sta_sel" id="idap_sta">
+				 
+				<option value="0">AP mode</option>
+				<option value="1" >Station mode</option>
+				<!--<option value="HD"  >HD</option>-->
+				<!--<script>
+            			</script>-->
+				</select>
+			</td>
+			</tr>
+			<tr>
+
+			<td  width="35%">
+				SSID
+			</td>
+
+	   
+           		<td  width="65%">
+				<input type="text" name="wlan_connect_sta_ssid" id="id_sta_ssid" size="20" maxlength="20" value="">
+				 
+			</td>
+		</tr>
+
+			<tr>
+			<td  width="35%">
+				Proto
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_proto" id="id_proto" size="20" maxlength="20" value="">
+				
+			</td>
+			
+		</tr>
+
+		<tr>
+			<td  width="35%">
+				Key_mgmt
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_key_mgmt" id="id_key_mgmt" size="20" maxlength="20" value="">
+				
+			</td>
+		</tr>
+
+		
+			<tr>
+			<td  width="35%">
+				Pairwise
+			</td>
+			<td width="65%">
+				<input type="text" name="wlan_connect_pairwise" id="id_pairwise" size="20" maxlength="20" value="">
+			</td>
+		</tr>
+		
+		<tr>
+			<td  width="35%">
+				Group
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_group" id="id_group" size="20" maxlength="20" value="">
+				
+			</td>
+			</td>
+		</tr>
+<tr>
+			<td  width="35%">
+				Psk
+			</td>
+			<td  width="65%">
+				<input type="text" name="wlan_connect_psk" id="id_psk" size="20" maxlength="20" value=""> 
+	                       
+				</select>
+			</td>
+			</td>
+		</tr>
+
+	</table>
+		
+	<table>
+<script type="text/javascript">startGetRequest();</script>
+	<tr>
+	<td>
+	<input type="submit" value="apply" name="wlan_sta_apply" class="button" >
+	</td>
+	</tr>
+	</table>
+</form>
+
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+#!/bin/sh
+#######################
+#RTSP Streaming Server#
+#######################
+
+DualAudio=0
+if [ "$6" == "na" ]
+then
+SampleRate=16 #KHz
+else
+SampleRate=$6
+fi
+
+cd /var/log/
+echo 5 > /proc/sys/vm/dirty_ratio
+case "$1" in
+start)
+	echo "Start UDP streaming ..."
+	sleep 1
+	if [ "$5" == "info" ]
+	then
+        	if [ "$4" == "na" ]
+        	then
+                	ffmpeg -r "$2" -s 1920x1080 -input_format h264 -osd 0 -flicker 60 -vbrate "$3"000 -gop "$2" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$3"K -flags +global_header -strict -2 -vsync 1 -f mpegts udp://192.168.1.10:8428 < /dev/null &
+        	else
+                	ffmpeg -f alsa -ar "$SampleRate"000 -ac 2 -i hw:0,0 -r "$2" -s 1920x1080 -input_format h264 -osd 0 -flicker 60 -vbrate "$3"000 -gop "$2" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$3"K -c:a "$4" -b:a 96k -flags +global_header -ar "$SampleRate"000 -ac 2 -strict -2  -async 1 -vsync 1 -aac_2nd_cpu 1 -f mpegts udp://192.168.1.10:8428 < /dev/null &
+        	fi
+	else
+		if [ "$4" == "na" ]
+                then
+                        ffmpeg -r "$2" -s 1920x1080 -input_format h264 -osd 0 -flicker 60 -vbrate "$3"000 -gop "$2" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$3"K -flags +global_header -strict -2 -vsync 1 -f mpegts udp://192.168.1.10:8428 -loglevel error < /dev/null &
+                else
+                        ffmpeg -f alsa -ar "$SampleRate"000 -ac 2 -i hw:0,0 -r "$2" -s 1920x1080 -input_format h264 -osd 0 -flicker 60 -vbrate "$3"000 -gop "$2" -f v4l2 -i /dev/video0 -c:v copy -copyinkf -b:v "$3"K -c:a "$4" -b:a 96k -flags +global_header -ar "SampleRate"000 -ac 2 -strict -2  -async 1 -vsync 1 -aac_2nd_cpu 1 -f mpegts udp://192.168.1.10:8428 -loglevel error < /dev/null &
+                fi
+	fi
+	;;
+stop)
+	echo "Stop UDP streaming server..."
+	killall ffmpeg
+	#kill $(ps aux | grep 'ffserver' | awk '{print $1}')
+	;;
+restart)
+	"$0" stop
+	sleep 3
+	"$0" start
+	;;
+*)
+	echo "Usage: $0 {start|stop|restart} {fps} {videobitrate} { aac|mp2|na } {info} {samplerate}"
+	exit 1
+	;;
+esac
+
+cd ~/
+

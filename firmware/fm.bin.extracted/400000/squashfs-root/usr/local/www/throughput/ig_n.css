@@ -1,0 +1,110 @@
+H1      { color: black;   font: bold xx-large   Arial,Helvetica,sans-serif; }
+H2      { color: black;   font: bold x-large    Arial,Helvetica,sans-serif; }
+H3      { color: black;   font: bold large      Arial,Helvetica,sans-serif; }
+H4      { color: black;   font: bold medium     Arial,Helvetica,sans-serif; }
+BIG     { font: bold 16px Arial, Helvetica, sans-serif; }
+BIG.sw  { font: bold 16px Arial, Helvetica, sans-serif; }
+DL, DT  { color: #666666; font: bold medium     Arial,Helvetica,sans-serif; }
+B       { color: black; font: bold 12px Arial,Helvetica,sans-serif; }
+em      { color: black;   font: bold medium     Arial,Helvetica,sans-serif; }
+small   { color: black;   font: normal x-small  Arial,Helvetica,sans-serif; }
+tt      { color: black;   font: normal small    Courier,serif; }
+caption { color: black; font: bold 12px Arial,Helvetica,sans-serif; text-align:left; }
+BODY { color: black; font: normal 9pt Arial, Helvetica, sans-serif; min-height: 400px; background: transparent; }
+TABLE { background: transparent; }
+P, TD, UL, OL, LI, DD { color: black; font: normal 9pt Arial, Helvetica, sans-serif; background: transparent; }
+A.fixmenu         { color: yellow;  font: bold 12pt Arial,Helvetica,sans-serif; text-decoration: none; }
+A.fixmenu:hover   { color: yellow;  text-decoration: underline; }
+A.fixmenu:visited { color: yellow;}
+
+A.mainmenu        { color: white;  font: bold 12pt Arial,Helvetica,sans-serif; text-decoration: none; }
+A.mainmenu:hover  { color: white;  text-decoration: none; }
+A.mainmenu:visited {color: white;}
+A.submenu         { color: white;  font: bold 10pt Arial,Helvetica,sans-serif; text-decoration: none; }
+A.submenu:hover   { color: white;  text-decoration: underline; }
+A.submenu.visited { color: white; }
+
+.title            { color: white;  font: bold 14pt Arial,Helvetica,sans-serif; text-decoration: none; }
+caption.normal    { color: black;  font: normal small Arial,Helvetica,sans-serif; text-align : left; }
+
+TH                { background: transparent; font-weight:bold; width:150px; font: bold 12px Arial,Helvetica,sans-serif; }
+.headrow          { background: transparent; }
+.headrow TD          { padding-left: 25px; padding-top:15px; }
+th.bottomrow      { background: transparent; }
+td.bottomrow      { background: transparent; }
+.swhead
+{
+	background-color:#E6E6E6;
+}
+.swhead TD
+{
+	background-color:#E6E6E6;
+	background-image: url(img/sw_h_bg.png);
+	background-position:50% 50%;
+	background-repeat:repeat-x;
+	border-color:#AAAAAA;
+	border-style:solid;
+	border-width:1px;
+}
+.swbot            { background: white; }
+
+.wizheadrow       { background: #009900; }
+.wiztab           { margin-left: 30px; }
+.rightie          { margin-right:10px; }
+
+.num      { color: black; font: normal 12px Arial, Helvetica, sans-serif; }
+.bignum   { color: blue;  font: bold 12pt Courier,serif; }
+.smallnum      { color: black;  font: 9pt Courier New,Courier,serif; }
+.fwlist   { color: black;  font: normal 10pt Courier,serif; }
+.fwhead   { color: black; font: bold 10pt Arial,Helvetica,sans-serif; }
+.hint     { color: #0099cc; font: bold 12px Arial, Helvetica, sans-serif; }
+
+
+/* Add */
+HR { background-color: #FFFFFF; height:1px; border: none; color:#FFFFFF; }
+INPUT { color: #000000; font: normal 12px Arial, Helvetica, sans-serif; }
+SELECT { color: #000000; font: normal 12px Arial, Helvetica, sans-serif; }
+DIV.lst_til {
+	border:1px solid #aaaaaa;
+	color: #222222;
+	text-align:center;
+	font-weight: bold;
+	font-size: 14px;
+	background-color: #cccccc;
+	background-image: url(img/lst_h_bg.png);
+	background-repeat: repeat-x;
+	background-position: 50% 50%;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	margin: 2px;
+	padding: 5px;
+	width: inherit;
+}
+TABLE.lst {
+	width:90%;
+	border-collapse:collapse;
+	border-color:#CCCCCC;
+	border-style:solid;
+	border-width:1px;
+}
+TABLE.lst TD {
+	border-collapse:collapse;
+	border-color:#CCCCCC;
+	border-style:solid;
+	border-width:1px;
+}
+TABLE.cfg_big {
+	width:90%;
+	border-collapse:collapse;
+	border-color:#CCCCCC;
+	border-style:solid;
+	border-width:0px;
+}
+
+.bottom_right {
+	position: relative;
+	text-align: right;
+	bottom: 20px;
+	right: 20px;
+}

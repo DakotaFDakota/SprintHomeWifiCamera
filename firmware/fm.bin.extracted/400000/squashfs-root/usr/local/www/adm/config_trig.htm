@@ -1,0 +1,1296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" > 
+<head> 
+<meta http-equiv = "X-UA-Compatible" content = "IE=EmulateIE7" /> 
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css"> 
+<title>Config Trigger Event</title> 
+ 
+ 
+ 
+<style type="text/css"> 
+ 
+SELECT
+{
+	background-color:#FFF;
+}
+ 
+.box_top1
+{
+	height:18px;
+	width:25px;
+	background: url(../buttons/line_top.gif) no-repeat;
+}
+ 
+.box_top2
+{
+	height:18px;
+	width:900px;
+	background: url(../buttons/line_top.gif) no-repeat;
+}
+ 
+.box_bottom
+{
+	height: 0;
+}
+.box
+{
+	width:100%;
+	border-left:none 1px #666;
+	border-right:none 1px #666;
+}
+ 
+#pir_range
+{
+	font-size:12px;
+	font-family:Arial, Helvetica, sans-serif
+}
+ 
+select.snum
+{
+	font-size:11px;
+}
+ 
+a.evt:link
+{
+	color: #000;
+	text-decoration: none;
+}
+a.evt:visited {color: #000;text-decoration: none;}
+a.evt:hover {color: #036;  text-decoration: none;}
+a.evt:active {color: #C30;text-decoration: none;}
+ 
+#mesg
+{
+	position: absolute;
+	display:none;
+	z-index:60;
+}
+ 
+table.mesg
+{
+	border:groove 2px #FFF;
+	background: #FFCBBC;
+	
+}
+	
+#mask
+{
+	position: fixed;
+	width:800px;
+	height:700px;
+	display:block;
+	background:#333;
+	z-index:9;
+}
+ 
+.padleft
+{
+	width:50px;
+}
+ 
+.rpad
+{
+	width:100px;
+}
+ 
+.block_len
+{
+	width:440px;
+}
+ 
+#add_event {
+	position:absolute;
+	top:2px;
+	left:3px;
+	width: 454px;
+	display:block;
+}
+ 
+#float_main {
+	width:100%;
+	background-color:  #EEE;
+	border:solid;
+	border-width: 0px 2px 2px 0px;
+	border-color: #999;
+}
+.subhead2 {
+	color: black;
+	background: transparent;
+	font: bold 11pt Arial, Helvetica, sans-serif;
+	text-align: left;
+}
+ 
+ 
+ 
+</style> 
+ 
+ 
+ 
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../message.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../sch.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../libctrl.js"></script> 
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script> 
+<script language="JavaScript" type="text/javascript"> 
+<!-- Start Script
+ 
+var pre =  new Array(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1);
+var post = new Array(20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1);
+ 
+var pre2 =  new Array(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1);
+var post2 = new Array(60,59,58,57,56,55,54,53,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1);
+ 
+ 
+function check_same_name(index, options, text)
+{
+	var i;
+	var name; 
+ 
+	for (i=0; i<options.length; i++) {
+		var vals = options[i].value;
+		name = getValueInString("name", vals);
+		if (name == text && i != index) {
+			alert("The Event Name has existed in the list!");
+			return true;
+		}
+	}
+	return false;
+}
+ 
+function check_valid()
+{
+	var cf = document.forms[0];
+	
+	var shur = cf.sch_hr.value;
+	var smin = cf.sch_min.value;
+	var fhur = cf.hrend.value;
+	var fmin = cf.minend.value;
+ 
+	if(cf.eventName.value.length == 0)
+	{
+		alert("Event Name empty!");
+		return false;
+	}
+	
+	if(cf.eventName.value.length > 32)
+	{
+		alert("Event Name too long!");
+		return false;
+	}
+	
+ 
+  if(cf.eventmode[1].checked == 1)
+  {
+		if(cf.weekdays[0].checked == 0
+			&& cf.weekdays[1].checked ==0
+			&& cf.weekdays[2].checked ==0
+			&& cf.weekdays[3].checked ==0
+			&& cf.weekdays[4].checked ==0
+			&& cf.weekdays[5].checked ==0
+			&& cf.weekdays[6].checked ==0
+			)	
+		{
+			alert("Please select weekdays!");
+			return false;
+		}
+  }
+ 
+	
+	
+	//check time
+	if ((shur > fhur) || (shur==fhur && smin >= fmin)) 
+	{
+		alert(msg_finish_after_start);
+		return false;
+	}
+	
+	if(cf.trigger[0].checked == 0
+		&& cf.trigger[1].checked ==0
+		&& cf.trigger[2].checked ==0
+		&& cf.trigger[3].checked ==0
+		&& cf.trigger[4].checked ==0
+		//&& cf.trigger[5].checked ==0
+		)
+	{
+		alert("Please choose a trigger!");
+		return false;
+	}
+	
+	
+	if(cf.act_email.checked == 0
+		&& cf.act_http_post.checked ==0
+		&& cf.act_ftp.checked ==0
+//		&& cf.act_out1.checked ==0
+		&& cf.act_im.checked ==0
+//		&& cf.act_smb.checked ==0
+		&& cf.act_sd.checked ==0
+		&& cf.act_sd_rec.checked ==0
+//		&& cf.act_smbc_rec.checked ==0
+		)
+	{
+		alert("Please select at least one action!");
+		return false;
+	}
+	else if(cf.trigger[4].checked == 1)
+	{
+		if(cf.act_sd_rec.checked ==0)// && cf.act_smbc_rec.checked == 0)
+		//if(cf.act_smbc_rec.checked == 0)
+		{
+			alert("Please select the action!");
+			return false;
+		}
+	}
+	return true;
+}
+ 
+ 
+ 
+function add_to_list(index)
+{	
+	var cf_r = window.dialogArguments;
+	var cf = cf_r;
+	var cform = document.forms[0];
+	tmp = document.createElement('option');
+	tmp2 = document.createElement('option');
+	var pane = document.getElementById("lenDIV");
+	var valueArray = new Array();
+	var options;
+	//check data
+	if(false == check_valid())
+	{
+		return false;
+	}
+	if(isChrome())
+	{
+		options = this.opener.options;
+	}
+	else
+	{
+		options = cf.options;
+	}
+	
+	if(true == check_same_name(index, options, cform.eventName.value))	
+	{	
+		return false;
+	}
+	
+	value = new Object();
+	value.value = "";
+	//name
+	setValueInString("name", value, getValueByTagname("eventName"));
+	//input source
+	setValueInString("channel", value, document.getElementById("default_channel").value);
+	//mode
+	var event_mode = getValueByTagname("eventmode");
+	setValueInString("mode", value, event_mode);
+	if (event_mode == 1)
+	{
+		//weekdays
+		setValueInString("weekdays", value, getValueByTagname("weekdays"));
+		//time
+		tmp_str = document.getElementsByName("sch_hr")[0].value + ":"+ document.getElementsByName("sch_min")[0].value + "," + document.getElementsByName("hrend")[0].value + ":"+ document.getElementsByName("minend")[0].value;
+		setValueInString("time", value, tmp_str);		
+	}
+	//by
+	setValueInString("by", value, getValueByTagname("trigger"));
+	//action
+	setValueInString("action_list", value, getValueByTagname("actions"));
+	//interval
+	setValueInString("interval", value, getValueByTagname("interval"));
+	//event_file_info
+	tmp_str = "avi," + document.getElementsByName("pre_len")[0].value + "," + document.getElementsByName("post_len")[0].value + ",1"; 
+	setValueInString("event_file_info", value, tmp_str);	
+ 
+	tmp.value = value.value;
+	tmp2.value = tmp.value;
+	if(isChrome())
+	{
+		var neop = tmp.innerHTML+modal_separator+tmp.value+modal_separator+tmp2.text+modal_separator+tmp2.value;
+		var selpane = window.opener.document.getElementById("eventlist");
+		var temp = document.createElement('Option');
+		if(neop != null)
+		{
+			var vals = neop.split(modal_separator);
+			temp.innerHTML = vals[0];
+			temp.value = vals[1];
+			try
+			{
+				selpane.add(temp,null);	// standards compliant
+				if(index != null)
+				{
+					selpane.remove(index);
+				}
+			}
+			catch(ex)
+			{	
+				selpane.options[selpane.length] = new Option(vals[2], vals[3]);
+			}
+		}
+	
+		for (var i=0; i<selpane.options.length; i++)
+		{
+			vals = selpane.options[i];
+			window.opener.refresh_optiontext(vals);
+		}
+	}
+	else
+	{
+		window.returnValue = tmp.innerHTML+modal_separator+tmp.value+modal_separator+tmp2.text+modal_separator+tmp2.value;
+	}
+	window.close();
+}
+ 
+function save_to_list()
+{
+	var title;
+	var options;
+	var selectedIndex;
+	if(isChrome())
+	{
+		title = this.opener.title;
+		options = this.opener.options;
+		selectedIndex = this.opener.selectedIndex;
+	}
+	else
+	{
+		var cf = window.dialogArguments;
+		title = cf.title;
+		options = cf.options;
+		selectedIndex = cf.selectedIndex;
+	}
+	if(title == "edit")
+	{
+		add_to_list(selectedIndex);
+	}
+	else
+	{
+		add_to_list(null);
+	}
+}
+ 
+function read_from_list()
+{
+	var title;
+	var options;
+	var selectedIndex;
+	if(isChrome())
+	{
+		title = this.opener.title;
+		options = this.opener.options;
+		selectedIndex = this.opener.selectedIndex;
+	}
+	else
+	{
+		var cf = window.dialogArguments;
+		title = cf.title;
+		options = cf.options;
+		selectedIndex = cf.selectedIndex;
+	}
+	if(title == "add")
+	{
+		return ;
+	}
+	var cform = document.forms[0];
+	var vals = options[selectedIndex].value;
+	var format_str="";
+    
+	//name
+	setValueByTagname("eventName", getValueInString("name", vals));	
+	//mode
+	getValueInString("mode", vals);
+	setValueByTagname("eventmode", getValueInString("mode", vals));	
+	var modeCheck = document.getElementsByName("eventmode");
+	if(modeCheck[1].checked == 1)
+	{
+		//weekdays
+		setValueByTagname("weekdays", getValueInString("weekdays", vals));
+		//time
+		tmp_str = getValueInString("time", vals);
+		setValueByTagname("sch_hr", tmp_str.slice(0,2));
+		setValueByTagname("sch_min", tmp_str.slice(3,5));
+		setValueByTagname("hrend", tmp_str.slice(6,8));
+		setValueByTagname("minend", tmp_str.slice(9,11));
+	}
+	//by
+	setValueByTagname("trigger", getValueInString("by", vals));
+	//action
+	setValueByTagname("actions", getValueInString("action_list", vals));
+	//interval
+	setValueByTagname("interval", getValueInString("interval", vals));
+	//event_file_info
+	tmp_str = getValueInString("event_file_info", vals);
+	setValueByTagname("pre_len", tmp_str.split(',')[1]);
+	setValueByTagname("post_len", tmp_str.split(',')[2]);
+	//setValueByTagname("pre_len_2", tmp_str.split(',')[1]);
+	//setValueByTagname("post_len_2", tmp_str.split(',')[3]);
+}
+ 
+ 
+function close_trig_pane()
+{
+	window.close();
+}
+ 
+function show_tframe()
+{
+	var cf = document.forms[0];
+	
+	if(cf.scheduleType[1].checked == 1)
+	{
+		cf.weekdays[0].disabled = 0;
+		cf.weekdays[1].disabled = 0;
+		cf.weekdays[2].disabled = 0;
+		cf.weekdays[3].disabled = 0;
+		cf.weekdays[4].disabled = 0;
+		cf.weekdays[5].disabled = 0;
+		cf.weekdays[6].disabled = 0;
+		
+		cf.sch_hr.disabled = 0;
+		cf.sch_min.disabled = 0;
+		cf.hrend.disabled = 0;
+		cf.minend.disabled = 0;
+	}
+	else
+	{
+		cf.weekdays[0].disabled = 1;
+		cf.weekdays[1].disabled = 1;
+		cf.weekdays[2].disabled = 1;
+		cf.weekdays[3].disabled = 1;
+		cf.weekdays[4].disabled = 1;
+		cf.weekdays[5].disabled = 1;
+		cf.weekdays[6].disabled = 1;
+		
+		cf.sch_hr.disabled = 1;
+		cf.sch_min.disabled = 1;
+		cf.hrend.disabled = 1;
+		cf.minend.disabled = 1;
+	}
+}
+ 
+function show_interval()
+{
+	var event_cfg_list = window.dialogArguments;
+	var cf = document.getElementById("a_wait");
+	var ac_1 = document.getElementById("ac_1");
+	var ac_2 = document.getElementById("ac_2");
+	//var ac_3 = document.getElementById("ac_3");
+	var ac_4 = document.getElementById("ac_4");
+	//var ac_5 = document.getElementById("ac_5");
+	var ac_6 = document.getElementById("ac_6");
+	var ac_7 = document.getElementById("ac_7");
+	var ac_8 = document.getElementById("ac_8");
+	//var ac_9 = document.getElementById("ac_9");
+	var cform = document.forms[0];
+	if(document.forms[0].trigger[4].checked == 1)
+	{
+		cf.style.display = "none";
+		ac_1.style.display = "none";
+		ac_2.style.display = "none";
+		//ac_3.style.display = "none";
+		ac_4.style.display = "none";
+		//ac_5.style.display = "none";
+		ac_6.style.display = "none";
+		ac_7.style.display = "none";
+		ac_8.style.display = "block";
+		//ac_9.style.display = "block";
+		cform.act_email.checked = 0;
+		cform.act_im.checked = 0;
+		cform.act_ftp.checked = 0;
+		cform.act_http_post.checked = 0;
+		//cform.act_out1.checked = 0;
+		//cform.act_wlled.checked = 0;
+		cform.act_sd.checked = 0;
+		//cform.act_smb.checked = 0;
+	}
+	else
+	{
+		cf.style.display = "block";
+		ac_1.style.display = "block";
+		ac_2.style.display = "block";
+		//ac_3.style.display = "block";
+		ac_4.style.display = "block";
+		//ac_5.style.display = "block";
+		ac_6.style.display = "block";
+		ac_7.style.display = "block";
+		ac_8.style.display = "none";
+		//ac_9.style.display = "none";
+		cform.act_sd_rec.checked = 0;
+		//cform.act_smbc_rec.checked = 0;
+	}
+}
+function show_time_frame()
+{
+	var cf = document.getElementsByName("eventmode");
+	var time_div = document.getElementById("timeDiv");
+	if(cf[0].checked == 1)
+	{
+		document.forms[0].weekdays[0].disabled = 1;
+		document.forms[0].weekdays[1].disabled = 1;
+		document.forms[0].weekdays[2].disabled = 1;
+		document.forms[0].weekdays[3].disabled = 1;
+		document.forms[0].weekdays[4].disabled = 1;
+		document.forms[0].weekdays[5].disabled = 1;
+		document.forms[0].weekdays[6].disabled = 1;
+		document.forms[0].sch_hr.disabled = 1;
+		document.forms[0].sch_min.disabled = 1;
+		document.forms[0].hrend.disabled = 1;
+		document.forms[0].minend.disabled = 1;
+	}
+	else if(cf[1].checked == 1)
+	{
+		document.forms[0].weekdays[0].disabled = 0;
+		document.forms[0].weekdays[1].disabled = 0;
+		document.forms[0].weekdays[2].disabled = 0;
+		document.forms[0].weekdays[3].disabled = 0;
+		document.forms[0].weekdays[4].disabled = 0;
+		document.forms[0].weekdays[5].disabled = 0;
+		document.forms[0].weekdays[6].disabled = 0;
+		document.forms[0].sch_hr.disabled = 0;
+		document.forms[0].sch_min.disabled = 0;
+		document.forms[0].hrend.disabled = 0;
+		document.forms[0].minend.disabled = 0;
+	}
+	else if(cf[2].checked == 1)
+	{
+		document.forms[0].weekdays[0].disabled = 1;
+		document.forms[0].weekdays[1].disabled = 1;
+		document.forms[0].weekdays[2].disabled = 1;
+		document.forms[0].weekdays[3].disabled = 1;
+		document.forms[0].weekdays[4].disabled = 1;
+		document.forms[0].weekdays[5].disabled = 1;
+		document.forms[0].weekdays[6].disabled = 1;
+		document.forms[0].sch_hr.disabled = 1;
+		document.forms[0].sch_min.disabled = 1;
+		document.forms[0].hrend.disabled = 1;
+		document.forms[0].minend.disabled = 1;
+	}
+}
+ 
+function show_pane()
+{
+	show_time_frame();
+	var pane = document.getElementById("lenDIV");
+	var cf = document.forms[0];
+	
+	if ((document.getElementById("act_email").checked == 1
+	|| document.getElementById("act_ftp").checked == 1
+	|| document.getElementById("act_http_post").checked == 1
+	|| document.getElementById("act_sd").checked == 1
+	//|| document.getElementById("act_sd_rec").checked == 1
+	//|| document.getElementById("act_smb").checked == 1
+	//|| document.getElementById("act_im").checked == 1
+    ) && cf.trigger[4].checked == 0)
+	{	
+		pane.style.display = "block";
+	}
+	else
+	{	
+		pane.style.display = "none";
+	}
+	setcap();
+	
+	show_interval();
+}
+ 
+function delay(obj)
+{
+	var pagemain_flag = 0;
+	var	mubd = obj.document.getElementById("mubd");
+	if(mubd == null)
+	{
+		mubd = obj.document.getElementById("pagemain");
+		if(mubd != null) {pagemain_flag = 1;}
+	}
+	var headimage = obj.document.getElementById("headimage");
+	if (headimage == null)
+	{
+		headimage = obj.document.getElementById("headimage4");
+	}
+	var topmenu = obj.document.getElementById("topmenu");
+	var menuframe = obj.document.getElementsByName("menuframe")[0];
+ 
+	if((mubd != null && headimage != null && topmenu != null && 0 == pagemain_flag)
+		|| (mubd != null && headimage != null && topmenu != null &&menuframe != null && 1 == pagemain_flag))
+	{
+		headimage.style.display = "none";
+		topmenu.style.display = "none";
+		
+		mubd.style.top = "3px";
+		if (pagemain_flag)
+		{
+			mubd.style.left = "3px";
+			if (menuframe != null)
+			{
+				menuframe.style.display = "none";
+			}
+		}
+		else
+		{
+			mubd.style.left = "-153px";
+		}
+	}
+	else
+	{
+		window.setTimeout("delay(chld);",100);
+	}
+}
+ 
+ 
+function open_part(urls)
+{
+	var str = urls;
+	
+	try
+	{
+		chld = window.opener.open(str,"","modal=1"+"height=500px, width=680px,  toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes",false);
+	}
+	catch(ex)
+	{
+		chld = open(str,"","height=500px, width=680px,  toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+	}
+	
+	var i =0;
+	var mubd;
+  var headimage;
+	window.setTimeout('delay(chld);',100);
+}
+ 
+function setcap()
+{	
+	var str_a="";
+	var str_b="";
+	var cf = document.forms[0];
+	var pane = document.getElementById("lenDIV");
+	//var pane_2 = document.getElementById("lenDIV_2");
+	if (pane.style.display == "block")
+	{
+		str_a = cf.pre_len;
+		str_b = cf.post_len;
+ 
+		var index = str_a.value;
+		var chIndex = str_b.value;
+ 
+		str_b.options.length = post[index] - pre[index] + 1;
+		for (var i = pre[index]; i <= post[index]; i++)
+		{
+			str_b.options[i - pre[index]].text = i;
+			str_b.options[i - pre[index]].value = i;
+		}
+		str_b.selectedIndex = getSelIndex(str_b, chIndex);
+	}
+}	
+ 
+//var http_att=0;
+function init()
+{
+	read_from_list();
+	
+	//var read = new GroupCtrl();
+	//var array_get=[
+	//		["HTTP_NOTIFY", "http_att", "http_att"]
+	//	];
+	//read.callback = show_pane;
+	//read.getvalue(array_get);
+	var read = new GroupCtrl();
+	var array_get=[
+			["VIDEO", "default_channel", "default_channel"]
+		];
+	read.get(array_get);
+ 
+	show_pane();
+}
+ 
+ 
+ 
+//end script -->
+</script> 
+ 
+</head> 
+ 
+ 
+<body onload="init();"  topmargin="0" leftmargin="0" marginheight="0" marginwidth="0"  style="overflow-x:hidden;overflow-y:scroll;"> 
+ 
+ 
+ 
+<div id="add_event"> 
+<table width="70%" cellspacing="0" id="float_main" > 
+<form> 
+ 
+<TR><TD width="20px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD> 
+<TD width="440"> 
+ 
+<table> 
+ 
+<TR><TD class="block_len">&nbsp;</TD> 
+ 
+ 
+<TR> 
+<TD> 
+<table> 
+<tr> 
+<TD class="subhead2">Name:</TD> 
+<TD><input name="eventName" type="text" size="32" maxlength="32"></input></TD> 
+</tr> 
+<!--
+<tr>
+ 
+<TD colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="eventmode" type="checkbox" >&nbsp;Enable this event</input></TD>
+</tr>
+--> 
+ 
+</table> 
+</TD> 
+</TR> 
+ 
+<TR><td > 
+<table class="block_len" cellpadding="0" cellspacing="0" > 
+<TR> 
+<TD > 
+    <table> 
+    <tr> 
+    <td class="box_top1" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    <td class="subhead2">&nbsp;&nbsp;Schedule&nbsp;&nbsp;</td> 
+    <td class="box_top2"></td> 
+    <td class="rpad">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    </tr> 
+    </table> 
+</TD> 
+</TR> 
+<tr> 
+<TD colspan="2" style="padding-left:25px"><input name="eventmode" type="radio" checked="1" value=0 onClick="show_time_frame();">&nbsp;Always</input></TD> 
+</tr> 
+<tr> 
+<TD colspan="2" style="padding-left:25px"><input name="eventmode" type="radio" value=1 onClick="show_time_frame();">&nbsp;Schedule</input></TD> 
+</tr> 
+ 
+<TR> 
+<TD> 
+<div id="timeDiv" style="display:block"> 
+<table class="box" cellpadding="0" cellspacing="0"> 
+<TR><TD> 
+<table class="rc" cellpadding="0"> 
+<TR> 
+<TD> 
+<table cellpadding="0" cellspacing="0"> 
+<TR> 
+ 
+<TD class="rc" style="padding-left:40px">&nbsp;<input type="checkbox" name="weekdays" value="1" >Sun</input></TD> 
+<TD class="rc"><input type="checkbox" name="weekdays" value="2" >Mon</input></TD> 
+<TD class="rc"><input type="checkbox" name="weekdays" value="3" >Tue</input></TD> 
+<TD class="rc"><input type="checkbox" name="weekdays" value="4" >Wed</input></TD> 
+<TD class="rc"><input type="checkbox" name="weekdays" value="5" >Thu</input></TD> 
+<TD class="rc"><input type="checkbox" name="weekdays" value="6" >Fri</input></TD> 
+<TD class="rc"><input type="checkbox" name="weekdays" value="7" >Sat</input></TD> 
+</TR> 
+</table> 
+</TD> 
+</TR> 
+<TR> 
+<TD class="rc" style="padding-left:35px" > 
+&nbsp;
+From
+<select name="sch_hr" size="1" class="snum"> 
+<option value="00" selected="1">00</option> 
+<option value="01">01</option> 
+<option value="02">02</option> 
+<option value="03">03</option> 
+<option value="04">04</option> 
+<option value="05">05</option> 
+<option value="06">06</option> 
+<option value="07">07</option> 
+<option value="08">08</option> 
+<option value="09">09</option> 
+<option value="10">10</option> 
+<option value="11">11</option> 
+<option value="12">12</option> 
+<option value="13">13</option> 
+<option value="14">14</option> 
+<option value="15">15</option> 
+<option value="16">16</option> 
+<option value="17">17</option> 
+<option value="18">18</option> 
+<option value="19">19</option> 
+<option value="20">20</option> 
+<option value="21">21</option> 
+<option value="22">22</option> 
+<option value="23">23</option> 
+</select> :
+<select name="sch_min" size="1" class="snum"> 
+<option value="00" selected="1">00</option> 
+<option value="01">01</option> 
+<option value="02">02</option> 
+<option value="03">03</option> 
+<option value="04">04</option> 
+<option value="05">05</option> 
+<option value="06">06</option> 
+<option value="07">07</option> 
+<option value="08">08</option> 
+<option value="09">09</option> 
+<option value="10">10</option> 
+<option value="11">11</option> 
+<option value="12">12</option> 
+<option value="13">13</option> 
+<option value="14">14</option> 
+<option value="15">15</option> 
+<option value="16">16</option> 
+<option value="17">17</option> 
+<option value="18">18</option> 
+<option value="19">19</option> 
+<option value="20">20</option> 
+<option value="21">21</option> 
+<option value="22">22</option> 
+<option value="23">23</option> 
+<option value="24">24</option> 
+<option value="25">25</option> 
+<option value="26">26</option> 
+<option value="27">27</option> 
+<option value="28">28</option> 
+<option value="29">29</option> 
+<option value="30">30</option> 
+<option value="31">31</option> 
+<option value="32">32</option> 
+<option value="33">33</option> 
+<option value="34">34</option> 
+<option value="35">35</option> 
+<option value="36">36</option> 
+<option value="37">37</option> 
+<option value="38">38</option> 
+<option value="39">39</option> 
+<option value="40">40</option> 
+<option value="41">41</option> 
+<option value="42">42</option> 
+<option value="43">43</option> 
+<option value="44">44</option> 
+<option value="45">45</option> 
+<option value="46">46</option> 
+<option value="47">47</option> 
+<option value="48">48</option> 
+<option value="49">49</option> 
+<option value="50">50</option> 
+<option value="51">51</option> 
+<option value="52">52</option> 
+<option value="53">53</option> 
+<option value="54">54</option> 
+<option value="55">55</option> 
+<option value="56">56</option> 
+<option value="57">57</option> 
+<option value="58">58</option> 
+<option value="59">59</option> 
+</select> 
+&nbsp;to&nbsp;
+<select name="hrend" size="1" class="snum"> 
+<option value="00">00</option> 
+<option value="01">01</option> 
+<option value="02">02</option> 
+<option value="03">03</option> 
+<option value="04">04</option> 
+<option value="05">05</option> 
+<option value="06">06</option> 
+<option value="07">07</option> 
+<option value="08">08</option> 
+<option value="09">09</option> 
+<option value="10">10</option> 
+<option value="11">11</option> 
+<option value="12">12</option> 
+<option value="13">13</option> 
+<option value="14">14</option> 
+<option value="15">15</option> 
+<option value="16">16</option> 
+<option value="17">17</option> 
+<option value="18">18</option> 
+<option value="19">19</option> 
+<option value="20">20</option> 
+<option value="21">21</option> 
+<option value="22">22</option> 
+<option value="23" selected="1">23</option> 
+ 
+</select> :
+<select name="minend" size="1" class="snum"> 
+<option value="00">00</option> 
+<option value="01">01</option> 
+<option value="02">02</option> 
+<option value="03">03</option> 
+<option value="04">04</option> 
+<option value="05">05</option> 
+<option value="06">06</option> 
+<option value="07">07</option> 
+<option value="08">08</option> 
+<option value="09">09</option> 
+<option value="10">10</option> 
+<option value="11">11</option> 
+<option value="12">12</option> 
+<option value="13">13</option> 
+<option value="14">14</option> 
+<option value="15">15</option> 
+<option value="16">16</option> 
+<option value="17">17</option> 
+<option value="18">18</option> 
+<option value="19">19</option> 
+<option value="20">20</option> 
+<option value="21">21</option> 
+<option value="22">22</option> 
+<option value="23">23</option> 
+<option value="24">24</option> 
+<option value="25">25</option> 
+<option value="26">26</option> 
+<option value="27">27</option> 
+<option value="28">28</option> 
+<option value="29">29</option> 
+<option value="30">30</option> 
+<option value="31">31</option> 
+<option value="32">32</option> 
+<option value="33">33</option> 
+<option value="34">34</option> 
+<option value="35">35</option> 
+<option value="36">36</option> 
+<option value="37">37</option> 
+<option value="38">38</option> 
+<option value="39">39</option> 
+<option value="40">40</option> 
+<option value="41">41</option> 
+<option value="42">42</option> 
+<option value="43">43</option> 
+<option value="44">44</option> 
+<option value="45">45</option> 
+<option value="46">46</option> 
+<option value="47">47</option> 
+<option value="48">48</option> 
+<option value="49">49</option> 
+<option value="50">50</option> 
+<option value="51">51</option> 
+<option value="52">52</option> 
+<option value="53">53</option> 
+<option value="54">54</option> 
+<option value="55">55</option> 
+<option value="56">56</option> 
+<option value="57">57</option> 
+<option value="58">58</option> 
+<option value="59" selected="1">59</option> 
+</select> (hh:mm)
+</TD> 
+</TR> 
+</table> 
+</TD> 
+</TR> 
+</table> 
+</div> 
+</TD> 
+</TR> 
+<TR> 
+<TD class="box_bottom"></TD> 
+</TR> 
+</table> 
+ 
+ 
+</TD> 
+</TR> 
+ 
+<tr> 
+<TD colspan="2" style="padding-left:25px"><input name="eventmode" type="radio" value=2 onClick="show_time_frame();">&nbsp;Never&nbsp;(Disabled)</input></TD> 
+</tr> 
+ 
+<TR><TD> 
+<table class="block_len" cellpadding="0" cellspacing="0" > 
+<TR> 
+<TD> 
+    <table> 
+    <tr> 
+    <td class="box_top1" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    <td class="subhead2">&nbsp;&nbsp;Trigger&nbsp;&nbsp;</td> 
+    <td class="box_top2"></td> 
+    <td class="rpad">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    </tr> 
+    </table> 
+</TD> 
+</TR> 
+<TR> 
+ 
+<TD style="padding-left:20px"> 
+<table class="box" cellpadding="0" cellspacing="0"> 
+ 
+<TR> 
+<TD> 
+<table  class="rc" cellpadding="0"> 
+	
+<TR><TD width="23"> 
+<input type="radio" name="trigger" onClick="show_pane();" checked="1" value="2"></input></td><td colspan="2"> 
+<a href="#" onClick="open_part('m_detect.htm');" class="evt" target="_self">Motion Detection</a> 
+</TD> 
+</TR> 
+ 
+<!--TR><TD width="23"> 
+<input type="radio" name="trigger" onClick="show_pane();" checked="1" value="11"></input></td><td colspan="2"> 
+<a href="#" onClick="open_part('iva_detect.htm');" class="evt" target="_self">People Detection</a> 
+</TD> 
+</TR--> 
+<!--TR> 
+<!--td class = "rc"><input type="radio" name="trigger" onClick="show_pane();" value="3"></input></td><td colspan="2">PIR</td-->
+<!--td class = "rc">+<input type="checkbox" name="pir_mot_mode" id="pir_mot_mode" onClick="show_pane();" value="pir_motion">Motion</input></td-->
+<!--/TR--> 
+ 
+<!--TR>
+<td><input type="radio" name="trigger" onClick="show_pane();" value="0"></input></td>
+<td><a href="#" onClick="open_part('io.htm');" class="evt" target="_self">Input</a></td>
+</TR--> 
+ 
+<TR> 
+<TD><input type="radio" name="trigger" onClick="show_pane();" value="4"></input></td><td colspan="2"> 
+<a href="#" onClick="open_part('au_trig.htm');" class="evt" target="_self">Audio Detection</a> 
+</TD> 
+</TR> 
+ 
+<TR> 
+<TD><input type="radio" name="trigger" onClick="show_pane();" value="5"></input></td> 
+<td colspan="2"> 
+HTTP CGI</TD> 
+</TR> 
+ 
+<TR> 
+<TD><input type="radio" name="trigger" onClick="show_pane();" value="6"></input></td> 
+<td colspan="2"> 
+Periodically</TD> 
+</TR> 
+ 
+<TR> 
+<TD><input type="radio" name="trigger" onClick="show_pane();" value="7"></input></td> 
+<td colspan="2">Continuously</label> 
+</TD> 
+</TR> 
+</TABLE> 
+ 
+<TABLE> 
+<TR><TD class="rc" colspan="3" > 
+<div id="a_wait" style="display:none"> 
+ Interval:
+<input type="text" name="interval" size="1" maxlength="3" style="font-size:12px" value="0"></input>
+<!--select name="interval" size="1" style="font-size:12px"> 
+<option value="0">0</option> 
+<option value="1">1</option> 
+<option value="2" selected="selected">2</option> 
+<option value="3">3</option> 
+<option value="4">4</option> 
+<option value="5">5</option> 
+<option value="10">10</option> 
+<option value="15">15</option> 
+</select--> 
+(0-900) Second(s) before detecting the next event.</div></TD> 
+</TR> 
+ 
+</TABLE> 
+</TD> 
+</TR> 
+ 
+ 
+</table> 
+</TD> 
+</TR> 
+<TR> 
+<TD class="box_bottom"></TD> 
+</TR> 
+</table> 
+</TD> 
+</TR> 
+ 
+<TR><TD> 
+<table class="block_len" cellpadding="0" cellspacing="0" > 
+<TR> 
+<TD> 
+    <table> 
+    <tr> 
+    <td  class="box_top1" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    <td class="subhead2">&nbsp;&nbsp;Action&nbsp;&nbsp;</td> 
+    <td  class="box_top2"></td> 
+    <td class="rpad">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> 
+    </tr> 
+    </table> 
+</TD> 
+</TR> 
+ 
+<TR> 
+<TD style="padding-left:20px"> 
+ 
+<table cellpadding="0" cellspacing="0"> 
+<!--TR>
+<TD id="ac_3" >
+<input type="checkbox" id="act_out1" name="actions"  value="op1">
+<a href="#" onClick="open_part('io.htm');" class="evt" target="_self">Output Port</a>
+</input>
+</TD>
+</TR>
+ 
+	<TR>
+	<TD id="ac_9" >
+		<input type="checkbox" id="act_wlled" name="actions" onClick="show_pane();" value="wlled">
+		White Light LEDs
+		</input>
+	</TD>
+	<td id="conf_wlled"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Turn on:
+	<select style="width:40px; font-size:11px;" name="wlled_time" size="1" class="time">
+	 <option value="10">10</option>
+	 <option value="20">20</option>
+	 <option value="30">30</option>
+	 </select>Second(s) &nbsp;
+	</td>
+	</TR--> 
+ 
+<TD id="ac_4"> 
+<input type="checkbox" id="act_im" name="actions" onClick="show_pane();" value="httpn"> 
+<a href="#" onClick="open_part('im.htm');" class="evt" target="_self">HTTP</a> 
+</input> 
+</TD> 
+</TR> 
+</Table> 
+</td> 
+</tr> 
+ 
+<tr> 
+<td style="padding-left:20px"> 
+<table cellpadding="0" cellspacing="0"> 
+ 
+</Table> 
+</td> 
+</tr> 
+	
+<tr> 
+<td> 
+<table cellpadding="0" cellspacing="0" valign="top"> 
+<tr> 
+<td width="150" valign="top" style="padding-left:20px"> 
+	<table cellpadding="0" cellspacing="0" valign="top"> 
+	<TR> 
+	<TD width="130px" id="ac_1"> 
+	<input type="checkbox" id="act_email" name="actions" onClick="show_pane();" value="email"> 
+	<a href="#" onClick="open_part('alerts.htm');" class="evt" target="_self">E-Mail</a> 
+	</input> 
+	</TD> 
+	</TR> 
+	<TR> 
+	<TD width="130px" id="ac_2"> 
+	<input type="checkbox" id="act_ftp" name="actions" onClick="show_pane();" value="ftpu"> 
+	<a href="#" onClick="open_part('ftp.htm');" class="evt" target="_self">FTP</a> 
+	</input> 
+	</TD> 
+	</TR> 
+	<TR> 
+	<TD width="130px" id="ac_6"> 
+	<input type="checkbox" id="act_http_post" name="actions" onClick="show_pane();" value="httppost"> 
+	<a href="#" onClick="open_part('im.htm');" class="evt" target="_self">HTTP/HTTPS Post</a> 
+	</input> 
+	</TD> 
+	</TR>
+	<TR> 
+	<TD id="ac_7"> 
+	<input type="checkbox" id="act_sd" name="actions"  onClick="show_pane();" value="sd"> 
+	<a href="#" onClick="open_part('mcard.htm');" class="evt" target="_self">SD</a> 
+	</input> 
+	</TD> 
+	</TR> 		
+	<TR> 
+	<TD id="ac_8"> 
+	<input type="checkbox" id="act_sd_rec" name="actions"  onClick="show_pane();" value="sd_rec"> 
+	<a href="#" onClick="open_part('mcard.htm');" class="evt" target="_self">SD Recording</a> 
+	</input> 
+	</TD> 
+	</TR>
+ 
+ 
+	</TABLE> 
+</td> 
+<td> 
+	<div id="lenDIV" style="display:block;width:100%"> 
+	<table width="100%" class="msg" cellpadding="1" cellspacing="1"> 
+	<tr> 
+	 <td width="20%"   class="rc" nowrap="nowrap">Pre-Capture:&nbsp;</td> 
+	 <td width="80%"   align="left" class="rc"> 
+	   <select style="width:40px; font-size:11px; " name="pre_len" size="1"  class="time" onChange="setcap();"> 
+		   <option value="0">0</option> 
+		   <option value="1">1</option> 
+		   <option value="2">2</option> 
+		   <option value="3">3</option> 
+		   <option value="4">4</option> 
+		   <option value="5">5</option> 
+		   <option value="6">6</option> 
+		   <option value="7">7</option> 
+		   <option value="8">8</option> 
+		   <option value="9">9</option> 
+		   <option value="10">10</option>
+		   <option value="11">11</option> 
+		   <option value="12">12</option> 
+		   <option value="13">13</option> 
+		   <option value="14">14</option> 
+		   <option value="15">15</option> 
+		   <option value="16">16</option> 
+		   <option value="17">17</option> 
+		   <option value="18">18</option> 
+		   <option value="19">19</option>
+		 </select>Second(s)</td> 
+	</tr> 
+ 
+	<tr> 
+	 <td width="20%"  class="rc" nowrap="nowrap">Post-Capture:&nbsp;</td> 
+	 <td width="80%"  class="rc"  > 
+	 <select style="width:40px;font-size:11px" name="post_len" size="1"  class="time"> 
+		 <option value="1">1</option> 
+		 <option value="2">2</option> 
+		 <option value="3">3</option> 
+		 <option value="4">4</option> 
+		 <option value="5">5</option> 
+		 <option value="6">6</option> 
+		 <option value="7">7</option> 
+		 <option value="8">8</option> 
+		 <option value="9">9</option> 
+		 <option value="10">10</option>
+		 <option value="11">11</option> 
+		 <option value="12">12</option> 
+		 <option value="13">13</option> 
+		 <option value="14">14</option> 
+		 <option value="15">15</option> 
+		 <option value="16">16</option> 
+		 <option value="17">17</option> 
+		 <option value="18">18</option> 
+		 <option value="19">19</option> 
+		 <option value="20">20</option> 
+		 </select>Second(s)</td> 
+	</tr> 
+ 
+	<tr> 
+	 <td width="100%" colspan="4"  align="left" > 
+	(Capture AVI file)&nbsp;&nbsp;
+	</td> 
+	</tr> 
+	</table> 
+	</div> 
+</td> 
+</tr> 
+</table> 
+</td> 
+</tr> 
+ 
+</table> 
+</TD> 
+</TR> 
+ 
+<TR> 
+<TD> 
+<table cellpadding="0" cellspacing="0" valign="top">
+	<TR> 
+	<TD class="box_bottom">&nbsp;</TD> 
+	</TR> 
+</TABLE> 
+</td> 
+</TR> 
+<input type="Hidden" name="default_channel" id="default_channel" value=""> 
+ 
+<TR> 
+<TD align="center"> 
+<input type="button" id="apply_button" value="Apply" onClick="save_to_list();"></input> 
+<input type="button" value="Cancel" onClick="close_trig_pane();"></input> 
+<input type="button" value="Help" onClick="openHelpWin('hlp_config_trig.htm')"></input> 
+</TD><TR> 
+</table> 
+</TD></TR> 
+</form> 
+</table> 
+</div> 
+</body> 
+</html> 

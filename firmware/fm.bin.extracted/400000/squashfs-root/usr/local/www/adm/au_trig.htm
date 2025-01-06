@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Event</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../slider.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!--
+
+var isIE = navigator.userAgent.indexOf("MSIE") !=  - 1;
+
+//var v1,v2=0;
+function setWidth(obj,theWidth, id)
+{
+	document.getElementById(obj).style.width=Number(theWidth*10);
+	if(obj == "v_value2")
+	{
+  		document.forms[0].h_au_vol.value = Number(theWidth * 100);
+		if (0 == document.forms[0].h_au_vol.value)
+		{
+			document.forms[0].h_au_vol.value = 1;
+		}
+		else if (100 == document.forms[0].h_au_vol.value)
+		{
+			document.forms[0].h_au_vol.value = 99;
+		}
+	}
+}
+
+function changeVolume(obj, theWidth, id)
+{
+	setWidth(obj, theWidth, id);
+	setTimeout("mySlider2.setValue(parseInt(document.forms[0].h_au_vol.value)/100);",10);
+}
+
+var mySlider2 = new Slider("Slider2");
+mySlider2.onchange = "changeVolume('v_value2', this.getValue(1), 0)"; //"setWidth('v_value2',this.getValue(1), 1)";
+mySlider2.buttonHeight = 16;
+mySlider2.buttonWidth = 9;
+mySlider2.maxSlide = 75;
+mySlider2.offsetX = 0;
+if(isIE)
+{
+	if (IEVersion()==8)
+		mySlider2.offsetY = -8;
+	else
+		mySlider2.offsetY = -8;
+}
+else
+{
+	mySlider2.offsetY = 3;
+}
+mySlider2.buttonImg = "../buttons/b_slidebar.gif";
+mySlider2.buttonHiliteImg = "../buttons/b_slidebar2.gif";
+mySlider2.writeSlider();
+
+function set_all()
+{
+	getCurrentVolume();
+	setTimeout("mySlider2.setValue(parseInt(document.forms[0].h_au_vol.value)/100);",10);
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+	mySlider2.placeSlider();
+}
+
+function init()
+{
+	var cf = document.forms[0];
+//	dataToVisible(document.forms[0]);
+	menuframe.highLight('auDIV');
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			["AUDIO", "au_trigger_volume", "h_au_vol"],
+			["AUDIO", "au_trigger_method", "au_trigger_method"]
+		];
+	read.callback = set_all;
+	read.get(array_get);
+}
+
+function getCurrentVolume()
+{
+	current_volume_frame.window.location.reload();
+}
+
+function checkData()
+{
+	var cf = document.forms[0];
+	if (document.forms[0].h_au_vol.value < 0 || document.forms[0].h_au_vol.value > 100)
+	{
+		alert("Volume setting error!");
+		return false;
+	}
+//    dataToHidden(cf);
+	var save = new GroupCtrl();
+	var array_set=[
+			["AUDIO", "au_trigger_volume", "h_au_vol"],
+			["AUDIO", "au_trigger_method", "au_trigger_method"]
+		];
+	save.set(array_set);
+	return true;
+}
+
+//-->
+</script>
+
+</head>
+
+<body onLoad="init();showMsg()">
+<FORM name="au_trig" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>
+<td class="leftspacer"></td>
+<td colspan="3" class="rightspacer"></td>
+</tr>
+
+<tr>
+<td class="subhead" colspan="4" height="20">Set Detection Volume </td>
+</tr>
+
+<tr>
+<td class="lc">Current Volume: </td>
+<td class="rc" width="25%">
+<div class="ind">
+  <img src="../buttons/v_bar1.gif" alt="Indicator 1" border="0" name="Slider5RailImg" id="Slider5RailImg">
+  <div id="v_value1" class="value" style="height:10px"></div>
+</div>
+</td>
+<td class="rc">
+  <input type="button" name="checkvol" value="Refresh" onClick="getCurrentVolume();">
+</td>
+</tr>
+
+<tr>
+<td class="lc">Triggered Volume:</td>
+<td colspan="2" class="rc">
+	<div class="slii" style="padding:0px;overflow:hidden" nowrap>
+	<img src="../buttons/v_bar1.gif" name="Slider2RailImg" id="Slider2RailImg">
+ 	<div id="v_value2" class="valuer"></div>
+	</div></td>
+</tr>
+
+<tr>
+<td class="lc">Triggered When: </td>
+<td colspan="2" class="rc"><select name="au_trigger_method" size="1">
+<option value="0">Low to high</option>
+<option value="1">High to low</option>
+</select></td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td colspan="3" class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+ <input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_au.htm')"> </td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+
+</table>
+</td>
+</tr>
+</table>
+</div>
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+<IFRAME NAME="current_volume_frame" ID="current_volume_frame" SRC="cur_volume.htm" scrolling="no" frameborder="0" align="center" class="ireg_status"></iframe>
+
+<input type="Hidden" name="h_au_vol" value="">
+
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>

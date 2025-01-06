@@ -1,0 +1,795 @@
+/*======  Standard tags  ============= */
+BODY    {
+	background: #ffffff;
+	color: black;
+	font: normal 9pt Arial, Helvetica, sans-serif;
+	margin-top: 10px;
+	margin-left: 10px;
+}
+P, TD, UL, OL, LI, DD { 
+	color: black;   
+	font: normal 9pt Arial, Helvetica, sans-serif;
+}
+CAPTION { 
+	color: black;   
+	font: bold 10pt Arial, Helvetica, sans-serif; 
+	text-align : left; 
+}
+
+/*======  Top of page,  Main table  ============= */
+/* border: top right bottom left */
+
+.imenu  {
+	border-style: solid;
+	border-width: 0px 0px 2px 0px;
+	border-color: #999999 ;
+	width: 150px;
+	height: 548px;
+	position:absolute; 
+	top:88px; 
+	left:10px ;	
+}
+
+.imu  {
+	position: relative;
+	width: 150px;
+	height: 620px;
+}
+
+td.menutd
+{
+	text-align: left;
+	border-right: 5px solid White;
+	width: 150px;
+}
+
+td.maintd
+{
+	height: 538px;
+}
+
+#mubd  {
+	background-color: #EBEBEB;
+	position: absolute;
+	top: 84px;
+	left: 10px;
+}
+
+.titletab  {
+	border-style: solid;
+	border-width: 0px 0px 2px 0px;
+	border-color: #999999;
+	width: 150px;
+	height: 550px;
+}	
+
+#titlemenu {
+	float: none;
+	position:absolute; 
+	top:88px; 
+	left:10px ;	
+}
+
+#pagemain {
+	background-color: #EBEBEB;
+	float: none;
+	position:absolute; 
+	top: 88px; 
+	left:164px ;
+}
+
+#videomain {
+	float: none;
+	position:absolute;
+	top: 88px;
+	left:12px;
+}
+
+#topmenu {
+	position: absolute;
+	top: 55px;
+	left: 25px;
+	z-index: 2;
+	width: 170px;
+	height: 20px;
+	text-align: left;
+	background: transparent;
+	color: #000000;
+	font: bold 12px Arial, Helvetical, sans-serif;
+}
+
+.topmenulink  {
+	color: #000000;
+	font:  bold 12px Arial, Helvetical, sans-serif;	
+}	
+
+
+.bluelink  {
+	color: #0000ff;
+	font:  bold 12px Arial, Helvetical, sans-serif;	
+}		
+
+#topmodel {
+	position: absolute;
+	top: 42px;
+	left: 722px;
+	z-index: 3;
+	text-align: left;
+	background: transparent;
+	color: #000000;
+	font:  14px Arial, Helvetical, sans-serif;
+}
+#topimage {
+	position: absolute;
+	top: 0px;
+	left: 440px;
+	z-index: 4;
+}
+
+#headimage {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	z-index: 1;
+	width: 815px;
+	height: 75px;
+	text-align: right;
+	background: transparent url(buttons/background_br.gif) repeat-x;
+}
+
+#headimage2 {
+	position: absolute;
+	top: 10px;
+	left: 12px;
+	z-index: 2;
+	width: 820px;
+	height: 75px;
+	text-align: right;
+	background: transparent url(buttons/background_br.gif) repeat-x;
+}
+
+#headimage3 {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	z-index: -1;
+	width: 1434px;
+	height: 75px;
+	text-align: right;
+	background: transparent url(buttons/background_br.gif) repeat-x;
+}
+
+
+table.toptab  {
+	border-style: solid;
+	border-width: 0px 2px 0px 0px;
+	border-color: #999999;
+	width: 100%;
+}	
+
+.videotab  {	
+	border-style: solid;
+	border-width: 0px 2px 2px 0px;
+	border-color: #999999;
+	margin: 0px 0px 0px 0px;
+	width: 826px;
+	height: 525px;
+}	
+
+.maintab  {
+	border-width: 0px 2px 2px 0px;
+	margin: 0px 0px 30px 0px;
+	width: 650px;
+	height: 100%;
+}	
+.maintab td {
+	padding-left: 10px;
+	padding-right: 8px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+	
+.maintab3  {
+	border-width: 0px 2px 2px 0px;
+	margin: 0px 0px 30px 0px;
+	width: 570px;
+	height: 100%;
+}
+.maintab2  {
+	border-style: solid;
+	border-width: 0px 2px 2px 0px;
+	border-color: #999999;
+	margin: 0px 0px 0px 0px;
+	width: 815px;
+	height: 100%;
+	background-color: #EBEBEB;
+}	
+
+.lc {
+	color: black;
+	background-color: transparent ;
+	width: 170px;
+}
+.lc2 {
+	color: black;
+	background-color: transparent ;
+	width: 200px;
+}
+.lc3 {
+	color: black;
+	background-color: transparent ;
+	width: 150px;
+}
+.lcauto {
+	color: black;
+	background-color: transparent ;
+}
+.lcbb { /*before the "save" button*/
+	color: black;
+	background-color: transparent ;
+	height: 80%;
+}
+.lcbt {  /*before bottom*/
+	color: black;
+	background-color: transparent ;
+	height: 10px;
+}
+.upnptvtab  {
+	border-style: solid;
+	border-width: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	width: 620px;
+}
+.upnptvtab td {
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+.upnptvtablc {
+	color: black;
+	background-color: transparent ;
+	width: 220px;
+}
+td.upnptvtd {
+	padding-left: 8px;
+	padding-right: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+.leftspacer {
+	height: 8px;
+	background-color:  transparent ;
+}
+.leftspacer1 {
+	height: 30px;
+	background-color:  transparent ;
+}
+.rc {
+	color: black;
+	background-color: transparent ;
+}
+.erc {
+	color: black;
+	background-color: transparent ;
+}
+.rrc {
+	color: black;
+	background-color: transparent ;
+	padding-left: 1px;
+	height: 24px;
+}
+.rcc {
+	color: black;
+	background-color: transparent;
+}
+
+.rightspacer {
+	height: 8px;
+	background-color:   transparent ;
+}
+.rightspacer1 {
+	height: 30px;
+	background-color:   transparent ;
+}
+
+.mc {
+	color: black;
+	background-color: transparent ;
+	width: 100px;
+}
+
+td.leftbuttonrow {
+	height: 35px;
+	background-color:  transparent ;
+}
+td.rightbuttonrow {
+	height: 35px;
+	background-color:  transparent ;
+	
+}
+/*======  Classes  -  headings  ============= */
+
+
+.subhead {
+	color: black;
+	background: transparent;
+	font: bold 11pt Arial, Helvetica, sans-serif;
+}	
+
+.menuhead {
+	color: white;
+	background: black;
+	font: bold 14px Arial, Helvetica, sans-serif;
+}	
+
+td.itemhead {
+    width: 110px;
+	vertical-align:top;
+}	
+
+/*======  Classes - text  ============= */
+
+.num { 
+	color: black;  
+	font: normal 10pt "Courier New",Courier,serif; 
+}
+.bignum { 
+	color: black;  
+	font: bold 12pt "Courier New",Courier,serif; 
+}
+.smallnum { 
+	color: black;  
+	font: 8pt "Courier New",Courier,serif; 
+}
+
+
+.closetab td {
+	padding-left: 2px;
+	padding-right: 2px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+
+.butttonimg {
+	color : black;
+	width: 102px;
+	height: 28px;
+	font: normal 10pt sans-serif;
+	border-style : none;
+	border-color: #cccccc;
+	background-image : url(adm/Button_100.jpg);
+}	
+
+/*======  main-windows' subwin   ============= */
+
+.wintab  {
+	margin-top: 10px;
+	width: 240px;
+}	
+
+.wintab_pad  {
+	width: 250px;
+}
+
+/*======  Sub-windows   ============= */
+
+body.subwin {
+	background: white; 
+	color: black;
+	font: normal 9pt Arial, Helvetica, sans-serif; 
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
+.subwinhead {
+	color: black;
+	background : white ;
+	font: bold 12pt Arial, Helvetica, sans-serif; 
+	text-align: left;
+	width: 420px;
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-top: 0px;
+	padding-bottom: 8px;
+}	
+
+.subwintab  {
+	border-style: none;
+	border-width: thin;
+	border-color: #999999 ;
+	background: #ffffff;
+	margin: 0px;
+	width: 420px;
+}	
+
+.subwintab td {
+	padding-left: 8px;
+	padding-right: 8px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+div.subwinbuttons {      /*  Help, Close buttons */
+	padding-left: 0px;
+	padding-right: 8px;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	background-color: white;
+	width: 420px;
+	text-align: right;
+}	
+
+/*====== Links ========================== */
+
+A.tmenu  {
+	color: black; 
+	font: bold 11pt Arial, Helvetica, sans-serif; 
+	text-decoration: none; 
+	text-align: left;
+	padding-left: 15px;
+}
+A.tmenu:hover  {
+	text-decoration: underline; 
+}
+
+
+A.mainmenu  {
+	color: black;
+	font: bold 12px Arial, Helvetica, sans-serif;
+	text-decoration: none;
+	text-align: center;
+}
+A.mainmenu:hover  { 
+	text-decoration: underline; 
+}
+A.mainmenu:active  {
+	background: white;
+}
+
+A.logout  { 
+	color: black;  
+	font: bold 9pt Arial, Helvetica, sans-serif; 
+	text-decoration: none; 
+}
+A.logout:hover  { 
+	text-decoration: underline; 
+}
+
+table.p_top
+{
+	background-image: url(buttons/background_top.gif);
+	background-repeat: no-repeat;
+	width: 161px;
+	height: 155px;
+}
+
+table.p_middle
+{
+	background-image: url(buttons/background_middle.gif);
+	background-repeat: no-repeat;
+	width: 161px;
+	height: 75px;
+}
+
+table.p_pt
+{
+	/*background-image: url(buttons/background_ppt.gif);
+	background-repeat: no-repeat;*/
+	width: 116px;
+	height: 116px;
+}
+
+td.pt_ctr {
+	width: 90px;
+	height: 89px;
+	text-align: center;
+	vertical-align: middle;
+	background: transparent url(./buttons/background_pt.gif) no-repeat;
+}
+
+.pt_ctr1 {
+	width: 90px;
+	height: 89px;
+	text-align: center;
+	vertical-align: middle;
+	background: transparent url(./buttons/background_pt.gif) no-repeat center;
+}
+
+table.p_bottom
+{
+	background-image: url(buttons/background_bottom.gif);
+	background-repeat: no-repeat;
+	width: 161px;
+	height: 112px;
+}
+
+td.p_space
+{
+	height: 0px;
+}
+
+td.mainmenu  {
+	color: black;
+	font: bold 12px Arial, Helvetica, sans-serif;
+	text-decoration: none;
+	text-align: left;
+	padding-left: 15px;
+}
+
+td.buttonmenu  {
+	color: black;
+	font: bold 12px Arial, Helvetica, sans-serif;
+	text-decoration: none;
+	text-align: center;
+}
+
+td.contro
+{
+	width: 25px;
+	height: 89px;
+	text-align:center;
+}
+
+td.controlr
+{
+	width: 90px;
+	height: 25px;
+	vertical-align:middle;
+	text-align: center;
+}
+
+div.sl
+{
+	display: block;
+	margin: 0;
+	padding: 0px;
+	width: 3px;
+	height: 80px;
+	background-image: url(./buttons/volume.gif);
+	background-repeat: no-repeat;
+}
+
+div.sli
+{
+	display: block;
+	margin: 0;
+	padding: 0px;
+	width: 82px;
+	height: 12px;
+	background-image: url(./buttons/volume.gif);
+	background-repeat: no-repeat;
+}
+
+.padbox {
+	margin: 0 auto;
+	padding: 20px 0px 0px 22px;
+}
+
+.padbox1 {
+	margin: 0 auto;
+	padding: 0;
+	width: 111px;
+	height: 111px;
+	background-image: url(./buttons/background_pt.gif);
+	background-repeat: no-repeat;
+}
+
+.padbox2 {
+	margin: 0 auto;
+	padding: 0;
+	width: 161px;
+	height: 147px;
+	background-image: url(./buttons/background_pt.gif);
+	background-repeat: no-repeat;
+	padding-left: 20px;
+}
+
+td.v_lbottom {
+	height: 35px;
+	background-color: transparent;
+	width: 50%;
+}
+td.v_rbottom {
+	height: 35px;
+	background-color: transparent;
+	width: 50%;
+}
+
+table.v_video
+{
+	height: 524px;
+	width: 640px;
+}
+
+td.control
+{
+	text-align: left;
+	color: Black;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+	font-style: normal;
+	font-weight: bold;
+	padding-left: 8px;
+	border: 0px;
+}
+
+td.control2
+{
+	text-align: left;
+	color: Black;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+	font-style: normal;
+	font-weight: normal;
+	padding-left: 8px;
+	border: 0px;
+	padding-top: 10px;
+	height: 10px;
+}
+
+td.control3
+{
+	text-align: left;
+	color: Black;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+	font-style: normal;
+	font-weight: normal;
+	padding-left: 8px;
+	border: 0px;
+	padding-top: 8px;
+	height: 10px;
+}
+
+td.up
+{
+	height: 46px;
+	text-align: center;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+table.detect
+{
+	border: Black;
+	width: 100px;
+	height: 70px;
+}
+
+.value
+{
+	background-image: url(./buttons/x.gif);
+	background-repeat: repeat-x;
+	width: 0px;
+	height: 0px;
+}
+
+.valu
+{
+	background-image: url(./buttons/v_value.gif);
+	background-repeat: repeat-y;
+	width: 0px;
+	height: 0px;
+}
+
+.valuer
+{
+	background-image: url(./buttons/v_valuer.gif);
+	background-repeat: repeat-x;
+	width: 0px;
+	height: 0px;
+}
+
+.ind
+{
+	display: block;
+	margin: 0;
+	padding: 0px;
+	width: 85px;
+	height: 24px;
+	background-image: url(./buttons/vol.gif);
+	background-repeat: no-repeat;
+}
+
+.ind1
+{
+	display: block;
+	margin: 0;
+	padding: 0px;
+	width: 85px;
+	height: 12px;
+	background-image: url(./buttons/vol1.gif);
+	background-repeat: no-repeat;
+}
+
+.vol
+{
+	display: none;
+}
+
+.slii
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	width: 85px;
+	height: 12px;
+	background-image: url(./buttons/volume.gif);
+	background-repeat: no-repeat;
+}
+
+md_pt
+{
+	text-align: left;
+	padding-left: 20px;
+}
+
+td.sdiv
+{
+	text-align: left;
+	padding-left: 0px;
+}
+
+table.v_table {
+	background-image: url(buttons/v_table.gif);
+	background-repeat: repeat-x;
+	background-position: left;
+}
+
+.port {
+	background-image: none;
+	background-color: transparent;
+	background-position: center;
+	background-repeat: no-repeat;
+	text-align: center;
+}
+
+td.pannel {
+	color: Black;
+	font: bold 10pt Arial,Helvetica,sans-serif;
+	text-decoration: none;
+	padding-left: 0px;
+	position: relative;
+	vertical-align: bottom;
+}
+
+td.bmenu  {
+	color: Black;
+	font: bold 12px Arial, Helvetica, sans-serif;
+	text-decoration: none;
+	text-align: center;
+}
+
+table.zoom {
+	margin: 0 auto;
+	padding: 0;
+	width: 135px;
+	height: 85px;
+	padding-left: 2px;
+	padding-top: 5px;
+}
+
+td.sound {
+	margin: 0 auto;
+	padding: 0;
+	width: 174px;
+	height: 53px;
+}
+
+table.b_buttons  {
+	width: 380px;
+}
+
+.imenu_upnptv  {
+	border-style: solid;
+	border-width: 1px 1px 1px 1px;
+	border-color: #999999 ;
+	background-color: white;
+	width: 344px;
+}
+.upnptvspan1 {  background-color:#EBEBEB;  display:-moz-inline-box;  display:inline-block;  width:110px;}
+.upnptvspan2 {  background-color:#EBEBEB;  display:-moz-inline-box;  display:inline-block;  width:55px;}
+.upnptvspan3 {  background-color:#EBEBEB;  display:-moz-inline-box;  display:inline-block;  width:64px;}

@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Help -  Event Condition</TITLE>
+
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus()">
+<table width="100%">
+<tr>
+  <th class="help">Help -  Event</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+<p>An trigged event is a set of parameters describing how and when the Video Server will perform certain triggered actions, according to requirements.
+<br>
+<UL>
+<LI>It is important to note that adding a new event will 
+stop any event that is currently running. A scheduled event 
+will automatically resume, if the time is still within the 
+scheduled period. A triggered event will need to be 
+re-triggered. 
+<LI>The Video Server can be configured for up to 10 events.<BR>
+    <BR></LI></UL>
+    
+<p><b>Settings</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Enable</td>
+  <td>Check to perform all of the event(s) that were configured.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Add</td>
+  <td>Add a new event to the event confiuration table.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Edit</td>
+  <td>Edit the configuration of the selected event.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Delete</td>
+  <td>Delete a event from the event confiuration table.</td>
+</tr>
+</table>
+<p><b>Motion Position</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Enable Motion</td>
+  <td>If select, enable Motion Detectio in all position.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Disable Pan/Tile</td>
+  <td>If select, disable Pan/Tilt while Motion Detection is enabled.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Disable Motion</td>
+  <td>If select, disable Motion Detection while current position is incorrect, and can set go to Motion Detection position wait minutes.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">idle time</td>
+  <td>If select this check box, Go to Motion Detection position if idle some minutes.</td>
+</tr>
+
+</table>	
+</body>
+</html>
+

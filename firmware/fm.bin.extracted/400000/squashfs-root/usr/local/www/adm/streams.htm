@@ -1,0 +1,1032 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+
+<title>Network Camera - Video &amp; Audio</title>
+
+<link rel="stylesheet" type="text/css" href="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+/*
+var v1_code_old;
+var v2_code_old;
+*/
+var array_value=
+[
+	["H264", "mode", "h_h264_mode"],
+	["H264", "resolution", "h_h264_resolution"],		
+	["H264", "quality_type", "h_h264_bwopt"],
+	["H264", "quality_level", "h_h264_compression"],	
+	["H264", "bit_rate", "h_h264_bitrate"],
+	["H264", "frame_rate", "h_h264_frate"],		
+	["H264", "sp_uri", "h264_code"],	
+	["H264", "profile", "h_h264_profile"],
+	["H264", "gov_length", "h264_gov_length"],		
+	["H264", "mode2", "h_h264_mode2"],
+	["H264", "resolution2", "h_h264_resolution2"],		
+	["H264", "quality_type2", "h_h264_bwopt2"],
+	["H264", "quality_level2", "h_h264_compression2"],	
+	["H264", "bit_rate2", "h_h264_bitrate2"],
+	["H264", "frame_rate2", "h_h264_frate2"],		
+	["H264", "sp_uri2", "h264_code2"],	
+	["H264", "profile2", "h_h264_profile2"],
+	["H264", "gov_length2", "h264_gov_length2"],	
+	["VIDEO", "default_channel", "def_stream_ch"],
+	["VIDEO", "aspect_ratio", "aspect_ratio"]
+];
+
+function set_all()
+{
+	var cf = document.forms[0];
+    var i = 1;
+	array_value.pop();
+	array_value.pop();
+	array_value.pop();
+	convert_data_in();
+	dataToVisible(cf);
+
+	hdResChange(0);
+    for (i=1;i<=2;i++)
+    {
+        video_mode_chg(i);
+    	resChange_in(i,0);
+    }
+/*
+	v1_code_old = randomString(6, "1234567890");
+	v2_code_old = randomString(6, "1234567890");
+	cf.v1_spuri.value = v1_code_old;
+	cf.v2_spuri.value = v2_code_old;
+*/
+	setHiddenElement();
+
+	//cf.v1_format.disabled = 1;
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+	menuframe.highLight('streamDIV');
+	var read = new GroupCtrl();
+	array_value.push(["SYSTEM", "model_num", "model_num"]);
+	array_value.push(["STREAMS", "view_v1_format", "view_v1_format"]);
+	array_value.push(["STREAMS", "view_v2_format", "view_v2_format"]);
+	read.callback = set_all;
+	read.get(array_value);
+}
+
+function convert_data_in()
+{
+	var cf = document.forms[0];
+	cf.h_v1_mode.value = 1;
+	cf.h_v2_mode.value = 1;
+	
+	//alert("cf.aspect_ratio.value="+cf.aspect_ratio.value+"\n"+"cf.h_h264_resolution.value="+cf.h_h264_resolution.value);
+	//streaming 1
+	if (1 == cf.h_h264_mode.value || 1 == cf.view_v1_format.value)
+	{
+		cf.h_v1_mode.value = cf.h_h264_mode.value;
+		//h.264
+		cf.h_v1_format.value = 1;
+		cf.h_v1_resolution.value = cf.h_h264_resolution.value; 
+		cf.h_v1_frate.value = cf.h_h264_frate.value;
+		cf.h_v1_bwopt.value = cf.h_h264_bwopt.value;
+		cf.h_v1_bitrate.value = cf.h_h264_bitrate.value;
+		cf.h_v1_compression.value = cf.h_h264_compression.value;
+		cf.v1_spuri.value = cf.h264_code.value;
+		cf.v1_gov_length.value = cf.h264_gov_length.value;
+	}	
+
+	//streaming 2
+	if (1 == cf.h_h264_mode2.value || 1 == cf.view_v2_format.value)
+	{
+		//h.264
+		cf.h_v2_mode.value = cf.h_h264_mode2.value;
+		cf.h_v2_format.value = 1;
+		cf.h_v2_resolution.value = cf.h_h264_resolution2.value;
+		cf.h_v2_frate.value = cf.h_h264_frate2.value;
+		cf.h_v2_bwopt.value = cf.h_h264_bwopt2.value;
+		cf.h_v2_bitrate.value = cf.h_h264_bitrate2.value;
+		cf.h_v2_compression.value = cf.h_h264_compression2.value;
+		cf.v2_spuri.value = cf.h264_code2.value;
+		cf.v2_gov_length.value = cf.h264_gov_length2.value;
+	}	
+}
+
+
+function convert_data_out()
+{
+	var msg = "";
+	var cf = document.forms[0];
+	
+	//alert(cf.h_v1_resolution.value);
+	//alert(cf.h_v2_resolution.value);
+	
+	if (0 == cf.aspect_ratio.value)  //mixed
+	{	
+		cf.h_v1_resolution.value = parseInt(cf.h_v1_resolution.value) + 3;
+		cf.h_v2_resolution.value = parseInt(cf.h_v2_resolution.value) + 3;
+	}
+	else if (1 == cf.aspect_ratio.value)  //16:9
+	{	
+		cf.h_v1_resolution.value -= 3;	
+		cf.h_v2_resolution.value -= 3;
+	}
+	
+	if (cf.h_v1_resolution.value == 5 && cf.h_v2_resolution.value == 5)
+	{
+		msg += "stream 1 and stream 2 cannot be both 1080P!";
+	}
+	
+	//streaming 1
+	cf.h_h264_mode.value = 0;
+	
+    if (cf.v1_mode.checked != true)
+    {
+		cf.h_h264_mode.value = 0;
+    }
+	else if (1 == cf.v1_format.value)
+	{	
+		//h.264 format 
+		cf.h_h264_mode.value = 1;
+		cf.h_h264_resolution.value = cf.h_v1_resolution.value;
+		cf.h_h264_frate.value = cf.h_v1_frate.value;
+		cf.h_h264_bwopt.value = cf.h_v1_bwopt.value;
+		cf.h_h264_bitrate.value = cf.h_v1_bitrate.value;
+		cf.h_h264_compression.value = cf.h_v1_compression.value;
+		cf.h264_code.value = cf.v1_spuri.value;
+		//cf.pwd_chg_h264_code.value = (cf.v1_spuri.value != v1_code_old)?1:0;
+		cf.h264_gov_length.value = cf.v1_gov_length.value;
+		msg += checkInt(cf.v1_gov_length, msg_gov_length, 2, 150, true);
+	}
+
+	//streaming 2
+    if (cf.v2_mode.checked != true)
+    {
+		cf.h_h264_mode2.value = 0;
+    }
+	else if (1 == cf.v2_format.value)
+	{
+		//h.264 format 
+		cf.h_h264_mode2.value = 1;
+		cf.h_h264_resolution2.value = cf.h_v2_resolution.value;
+		cf.h_h264_frate2.value = cf.h_v2_frate.value;
+		cf.h_h264_bitrate2.value = cf.h_v2_bitrate.value;
+		cf.h_h264_bwopt2.value = cf.h_v2_bwopt.value;
+		cf.h_h264_compression2.value = cf.h_v2_compression.value;
+		cf.h264_code2.value = cf.v2_spuri.value;
+		//cf.pwd_chg_h264_code2.value= (cf.v2_spuri.value != v2_code_old)?1:0;
+		cf.h264_gov_length2.value = cf.v2_gov_length.value;
+		msg += checkInt(cf.v2_gov_length, msg_gov_length, 2, 150, true);
+	}
+	
+	return msg;
+}
+
+function video_mode_chg(video_ch)
+{
+	var video_mode_str      = "v"+video_ch+"_mode";
+	var video_format_str    = "v"+video_ch+"_format";
+	var video_res_str       = "v"+video_ch+"_resolution";
+	var video_fps_str       = "v"+video_ch+"_frate";
+	var video_bitrate_str   = "v"+video_ch+"_bitrate";
+	var video_compress_str  = "v"+video_ch+"_compression";
+	var video_gov_str       = "v"+video_ch+"_gov_length";
+	var video_spuri_str     = "v"+video_ch+"_spuri";
+	var video_profile_str     = "h264_profile"+video_ch;
+	var bwoptObj;
+	var bwoptObjStr = "bwoptObj=document.forms[0].v"+video_ch+"_bwopt";
+	
+	eval(bwoptObjStr);
+	if (video_ch == 1)
+	{
+		video_profile_str = "h264_profile";
+	}
+    if (document.getElementById(video_mode_str).checked)
+    {
+        document.getElementById(video_format_str).disabled = false;
+        document.getElementById(video_res_str).disabled = false;
+        document.getElementById(video_fps_str).disabled = false;
+        bwoptObj[0].disabled = false;        
+        bwoptObj[1].disabled = false;        
+        document.getElementById(video_gov_str).disabled = false;
+        document.getElementById(video_spuri_str).disabled = false;
+        document.getElementById(video_profile_str).disabled = false;
+        check_bwopt_in(video_ch);
+    }
+    else
+    {
+        document.getElementById(video_format_str).disabled = true;
+        document.getElementById(video_res_str).disabled = true;
+        document.getElementById(video_fps_str).disabled = true;
+        bwoptObj[0].disabled = true;        
+        bwoptObj[1].disabled = true;        
+        document.getElementById(video_bitrate_str).disabled = true;
+        document.getElementById(video_compress_str).disabled = true;
+        document.getElementById(video_gov_str).disabled = true;
+        document.getElementById(video_spuri_str).disabled = true;
+        document.getElementById(video_profile_str).disabled = true;
+    }
+    
+    update_channel_list();
+}
+
+function update_channel_list()
+{
+    var opt_obj = document.getElementById("def_stream_ch");
+    var obj_length = 0;
+    var i = 1;
+    var obj_str = "";
+    var old_val = opt_obj.value
+
+	opt_obj.options.length = 2;
+    for (i=1;i<=2;i++)
+    {
+        obj_str = "v"+i+"_mode";
+        if (document.getElementById(obj_str).checked)
+        {
+            obj_length ++;
+            opt_obj.options[obj_length-1].value =  i;
+            opt_obj.options[obj_length-1].text = "Streaming "+i;
+        }
+    }
+    if (obj_length < 1)
+    {
+        obj_length ++;
+        opt_obj.options[obj_length-1].value =  0;
+        opt_obj.options[obj_length-1].text = "No Channel";
+    }
+	opt_obj.options.length = obj_length;
+	opt_obj.selectedIndex =  getSelIndex(opt_obj, old_val, true);
+}
+
+function checkData()
+{
+	var cf = document.forms[0];
+    var msg = "";
+    var video_str = "";
+    var stream_id = 0;
+	
+    if ((cf.v1_spuri.value.length > 0 && cf.v1_spuri.value == cf.v2_spuri.value)
+    ||  (cf.v2_spuri.value.length > 0 && cf.v2_spuri.value == cf.v1_spuri.value)
+	)
+    {
+        msg += msg_uri_same_err;
+    }
+
+	dataToHidden(cf);
+	msg += convert_data_out(); 
+ 	if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	
+   	var save = new GroupCtrl();	
+	save.set(array_value);   
+	return true;
+}
+
+var BitrateValue = new Array( 64, 	128, 	256, 	384, 	512,	768,	1000,	1500, 	2000,	2500, 	3000, 	3500,	4000,   5000,  6000,  8000);
+var BitrateText =  new Array("64", 	"128", 	"256", 	"384", 	"512",	"768",	"1.0",	"1.5", 	"2.0",	"2.5", 	"3.0", 	"3.5",	"4.0",  "5.0",  "6.0", "8.0");
+var StartBitrateIndex = new Array(0, 0, 0, 0);
+var EndBitrateIndex = new Array(8, 8, 8, 8);
+
+function setbitrate(opt_obj, cur_val, res_index)
+{	//alert("cur_val="+cur_val+"\n"+"res_index="+res_index);
+	opt_obj.options.length = EndBitrateIndex[res_index] - StartBitrateIndex[res_index] + 1;
+	for (var i = StartBitrateIndex[res_index]; i <= EndBitrateIndex[res_index]; i++)
+	{
+		opt_obj.options[i - StartBitrateIndex[res_index]].value =  BitrateValue[i];
+		if (BitrateValue[i] < 1000)
+		{
+			opt_obj.options[i - StartBitrateIndex[res_index]].text = BitrateText[i]+" Kbps";
+		}
+		else
+		{
+			opt_obj.options[i - StartBitrateIndex[res_index]].text = BitrateText[i]+" Mbps";
+		}
+	}
+	opt_obj.selectedIndex = getSelIndex(opt_obj, cur_val, true);
+}	 
+
+function resChange(type)
+{
+	resChange_in(type,1);
+}
+
+function resChange_in(video_ch, flag)
+{
+    var bit_str = "v"+video_ch+"_bitrate";
+    var res_str = "v"+video_ch+"_resolution";
+	
+    //alert(bit_str+","+res_str);
+	setbitrate(document.getElementById(bit_str), document.getElementById(bit_str).value, video_ch-1);
+    
+	if(flag)
+	{
+		alert(msg_res_change);
+	}
+}
+
+function frateChange()
+{
+	alert(msg_frate_change);
+}
+
+function typeChange()
+{
+	var msg = msg_typechange;
+	alert(msg);
+}
+
+function qlChange()
+{
+	alert(msg_quality_change);
+}
+
+function check_bwopt_in(video_ch)
+{
+    var video_bitrate_str = "v"+video_ch+"_bitrate";
+    var video_compress_str = "v"+video_ch+"_compression";
+	var bwoptObj;
+	var bwoptObjStr = "bwoptObj=document.forms[0].v"+video_ch+"_bwopt";
+
+	eval(bwoptObjStr);    
+	if (bwoptObj[0].checked)   
+	{    
+        document.getElementById(video_compress_str).disabled = true;
+        document.getElementById(video_bitrate_str).disabled = false;
+	}
+	else
+	{  	
+        document.getElementById(video_compress_str).disabled = false;
+        document.getElementById(video_bitrate_str).disabled = true;
+	}
+}
+
+function check_bwopt()
+{
+    var i = 1;
+    
+    for (i=1;i<=2;i++)
+    {
+        check_bwopt_in(i);
+    }
+}
+
+function vformat_chg(stream_id)
+{
+	var cf = document.forms[0];
+	var res_str = "v"+stream_id+"_resolution";
+	var format_str = "v"+stream_id+"_format";
+	var format ;
+
+	format = document.getElementById(format_str).value;
+    setresolution(document.getElementById(res_str), document.getElementById(res_str).value, stream_id);
+    
+	if (stream_id == 1)
+	{
+		if (format == 1)
+		{
+			cf.h_v1_bwopt.value = cf.h_h264_bwopt.value;
+			cf.v1_gov_length.value = cf.h264_gov_length.value;
+		}
+		if (cf.h_v1_bwopt.value == 1)
+		{
+			cf.v1_bwopt[1].checked = true;
+		}
+		else
+		{
+			cf.v1_bwopt[0].checked = true;
+		}
+        check_bwopt_in(1);
+	}
+	else if (stream_id == 2)
+	{
+		if (format == 1)
+		{
+			cf.h_v2_bwopt.value = cf.h_h264_bwopt2.value;
+			cf.v2_gov_length.value = cf.h264_gov_length2.value;
+		}
+		if (cf.h_v2_bwopt.value == 1)
+		{
+			cf.v2_bwopt[1].checked = true;
+		}
+		else
+		{
+			cf.v2_bwopt[0].checked = true;
+		}
+        check_bwopt_in(2);
+	}
+
+	resChange(stream_id);
+	setHiddenElement();
+}
+
+function setHiddenElement()
+{
+	var cf = document.forms[0];
+
+	if (cf.v1_format.value == 1)
+	{
+		document.getElementById("v1qc").style.display = "block";
+		document.getElementById("v1vbr_b").style.display = "block";
+		//document.getElementById("v1vbr").style.display = "block";
+		document.getElementById("v1cbr_b").style.display = "block";
+		document.getElementById("v1cbr").style.display = "block";
+		document.getElementById("v1gov_b").style.display = "block";
+		document.getElementById("v1gov").style.display = "block";
+		//document.getElementById("v1uri_b").style.display = "block";
+		//document.getElementById("v1uri").style.display = "block";
+		document.getElementById("v1fq_b").style.display = "none";
+		//document.getElementById("v1fq").style.display = "none";
+		document.getElementById("v1profile_b").style.display = "block";
+		document.getElementById("v1profile").style.display = "block";
+	}
+	
+	if (cf.v2_format.value == 1)
+	{
+		document.getElementById("v2qc").style.display = "block";
+		document.getElementById("v2vbr_b").style.display = "block";
+		//document.getElementById("v2vbr").style.display = "block";
+		document.getElementById("v2cbr_b").style.display = "block";
+		document.getElementById("v2cbr").style.display = "block";
+		document.getElementById("v2gov_b").style.display = "block";
+		document.getElementById("v2gov").style.display = "block";
+		//document.getElementById("v2uri_b").style.display = "block";
+		//document.getElementById("v2uri").style.display = "block";
+		document.getElementById("v2fq_b").style.display = "none";
+		//document.getElementById("v2fq").style.display = "none";
+		document.getElementById("v2profile_b").style.display = "block";
+		document.getElementById("v2profile").style.display = "block";
+	}
+}
+
+var ResListValue = new Array(0,1,2,3,4,5,6,7,8);
+var ResListText =  new Array("640*480","1280*720","1920*1080","640*480","960*720","1440*1080","640*360","1280*720","1920x1080");
+var StartResIndex = new Array(0, 0, 0, 0); //mixed
+var EndResIndex = new Array(2, 2, 0, 2);
+var StartResIndex_4_3 = new Array(3, 3, 3, 3);  //4:3
+var EndResIndex_4_3 = new Array(5, 5, 3, 5);
+var StartResIndex_16_9 = new Array(6, 6, 6, 6);  //16:9
+var EndResIndex_16_9 = new Array(8, 8, 6, 8);
+
+var FpsListValue = new Array(1,2,3,4,5,6,8,10,15,20,25,30);
+var FpsListText =  new Array(1,2,3,4,5,6,8,10,15,20,25,30);
+var StartFpsIndex = new Array(0, 0, 0);
+var EndFpsIndex = new Array(11, 11, 11);
+
+function setresolution(opt_obj, cur_val, res_index)
+{	//alert("res_index->"+res_index+"\n"+"opt_obj.options.length->"+opt_obj.options.length+"\n"+"cur_val->"+cur_val);
+	//alert(res_index);
+	var startIdx, endIdx;
+	var aspectRatio = document.getElementById("aspect_ratio").value;
+	var cur_idx = document.getElementsByName("h_v" + res_index + "_resolution")[0].value;
+	
+	var format_str = "v"+res_index+"_format";
+	var format = document.getElementById(format_str).value;
+	
+	if ("0" == aspectRatio)  //mixed
+	{
+		startIdx = StartResIndex[res_index-1];
+		endIdx = EndResIndex[res_index-1];
+	}
+	else if ("1" == aspectRatio)  //16:9
+	{	
+		startIdx = StartResIndex_16_9[res_index-1];
+		endIdx = EndResIndex_16_9[res_index-1];
+	}
+	else if ("2" == aspectRatio)  //4:3
+	{
+		startIdx = StartResIndex_4_3[res_index-1];
+		endIdx = EndResIndex_4_3[res_index-1];
+	}
+	opt_obj.options.length = endIdx - startIdx + 1;
+	//alert("length="+opt_obj.options.length+"startIdx="+startIdx+"endIdx="+endIdx);
+	for (var i = startIdx; i <= endIdx; i++)
+	{	
+		var obj_idx = i - startIdx;
+		opt_obj.options[obj_idx].value = ResListValue[i];
+		opt_obj.options[obj_idx].text = ResListText[i];
+	}
+	//opt_obj.selectedIndex = getSelIndex(opt_obj, cur_idx, true);
+	opt_obj.selectedIndex = parseInt(cur_idx) - 3;
+	if (opt_obj.selectedIndex < 0)
+	{
+		opt_obj.selectedIndex = 0;
+	}
+}	 
+
+function setframerate(opt_obj, cur_val, res_index)
+{
+	opt_obj.options.length = EndFpsIndex[res_index] - StartFpsIndex[res_index] + 1;
+	for (var i = StartFpsIndex[res_index]; i <= EndFpsIndex[res_index]; i++)
+	{
+		opt_obj.options[i - StartFpsIndex[res_index]].value =  FpsListValue[i];
+		opt_obj.options[i - StartFpsIndex[res_index]].text = FpsListText[i];
+	}
+	opt_obj.selectedIndex =  getSelIndex(opt_obj, cur_val, true);
+    if(opt_obj.options[opt_obj.selectedIndex].value != cur_val && opt_obj.options[opt_obj.selectedIndex].text != cur_val)
+    {
+        opt_obj.selectedIndex = opt_obj.options.length - 1;
+    }
+}	 
+
+function hdResChange(flag)
+{
+	var cf = document.forms[0];
+	var i = 1;
+	var res_str = "";
+	var format_str = "";
+	var res_cur_value;
+
+	for(i=1;i<=2;i++)
+	{
+		res_str = "v"+i+"_resolution";
+		setresolution(document.getElementById(res_str),document.getElementById(res_str).value, i);
+		res_str = "v"+i+"_frate";    
+		setframerate(document.getElementById(res_str),document.getElementById(res_str).value,0);
+	}
+	if (flag)
+	{
+		alert(msg_video_mode_change);
+	}
+}
+
+// End Script -->
+</script>
+</head>
+
+<body onLoad="init();showMsg()" >
+<form name="image" method="post" action="file.cgi">
+
+<div ID="headimage">
+	<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+		<tr>
+			<td nowrap height="75" align="right" valign="top"></td>
+		</tr>
+	</table>
+	<div   ID="topimage" >	
+		<img src="../header.gif" alt="" border="0">
+	</div>
+	<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+	<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+	<strong>|</strong>
+	<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+	<strong>|</strong>
+	<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+<div ID="mubd" style="display:none;">
+	<table class="maintab2" cellspacing="0">
+		<tr> 
+			<td nowrap valign="top" class="menutd">
+				<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+			</td>
+			<td nowrap valign="top">
+				<table  class="maintab" cellspacing="0">
+					<tr>  <!-- layout row, adds spacing below heading -->
+						 <td class="leftspacer"> </td>
+						 <td class="rightspacer"> </td>
+					</tr> 
+					
+					<tr>  <!-- layout row, adds spacing below heading -->
+						 <td class="leftspacer"> </td>
+						 <td class="rightspacer"> </td>
+					</tr> 
+					
+					<tr>  <!-- layout row, do not delete -->
+						<td class="subhead" nowrap colspan="2">Default Streaming Channel</td>
+					</tr>
+					
+					<tr>
+						<td class="lc" nowrap>Aspect Ratio Setting: </td>
+						<td class="rc" nowrap>
+							<select name="aspect_ratio"  id="aspect_ratio" size="1" onChange="convert_data_in();hdResChange(0);" style="{width:140}">
+							<option value="0">mixed</option>
+							<option value="1">16:9</option>
+							<option value="2">4:3</option>
+							</select>							
+						</td>
+					</tr>
+								
+					<tr>
+						<td class="lc" nowrap>Streaming Channel: </td>
+						<td class="rc" nowrap>
+							<select name="def_stream_ch"  id="def_stream_ch" size="1"  style="{width:140}">
+							<option value="1">Streaming 1</option>
+							<option value="2">Streaming 2</option>
+							</select>							
+						</td>
+					</tr>
+					
+					<tr>  <!-- layout row, adds spacing below heading -->
+						 <td class="leftspacer"> </td>
+						 <td class="rightspacer"> </td>
+					</tr>
+					<tr>  <!-- layout row, do not delete -->
+						<td class="subhead" nowrap colspan="1" >Streaming 1 Settings </td>
+						<td class="rc" nowrap>
+							<div id="v1mode" style="display:none">
+								<input type="checkbox" name="v1_mode" id="v1_mode" value="1" onClick="video_mode_chg(1)"> Enable
+							</div>
+						</td>
+					</tr>
+
+					<tr>
+						<td class="lc" nowrap>Video Format: </td>
+						<td class="rc" nowrap>
+							<select name="v1_format" id="v1_format" size="1" onChange="vformat_chg(1);resChange_in(1,0);" style="{width:140}">
+							<option value="1">H.264</option>
+							</select>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="lc" nowrap>Resolution: </td>
+						<td class="rc" nowrap>
+								<select name="v1_resolution"  id="v1_resolution" size="1" onChange="resChange(1)" style="{width:140}">
+								<option value="1">160*120</option>
+								<option value="2">320*240</option>
+								<option value="3">640*480</option>
+								<option value="4">1280*720</option>
+								</select>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="lc" nowrap colspan="2">
+							<div id="v1qc">
+								Video Quality Control:
+							</div>
+						</td>
+					</tr>
+
+					<tr>
+						<td class="lc" nowrap>
+							<div id="v1cbr_b">
+							&nbsp;&nbsp;<input type="radio" name="v1_bwopt" value="0" onClick="check_bwopt_in(1);"> Constant Bit Rate:
+						</div>
+						</td>
+						<td class="rc" nowrap>
+							<div id="v1cbr">
+							<select name="v1_bitrate" size="1" id="v1_bitrate" style="{width:140}" onChange="qlChange()">
+							<option value="64">64 Kbps</option>
+							<option value="128">128 Kbps</option>
+							<option value="256">256 Kbps</option>
+							<option value="384">384 Kbps</option>
+							<option value="512">512 Kbps</option>
+							<option value="768">768 Kbps</option>
+							<option value="1000">1.0 Mbps</option>
+							<option value="1500">1.5 Mbps</option>
+							<option value="2000">2.0 Mbps</option>
+							<option value="2500">2.5 Mbps</option>
+							<option value="3000">3.0 Mbps</option>
+							<option value="3500">3.5 Mbps</option>
+							<option value="4000">4.0 Mbps</option>
+							<option value="5000">5.0 Mbps</option>
+							<option value="6000">6.0 Mbps</option>
+							<option value="8000">8.0 Mbps</option>
+							</select>
+						</div>
+						</td>
+					</tr>
+					
+					<tr>
+						<td nowrap class="lc">
+							<div id="v1fq_b">	
+								Fix Video Quality: 
+							</div>
+							<div id="v1vbr_b">
+								&nbsp;&nbsp;<input type="radio" name="v1_bwopt" value="1" onClick="check_bwopt_in(1);">Fixed Quality:
+							</div>
+						</td>
+						<td nowrap class="rc">
+							<div id="v1vbr">
+								<select name="v1_compression" size="1" id="v1_compression" style="{width:140}" onChange="qlChange()">
+								<option value="1">Very Low</option>
+								<option value="2">Low</option>
+								<option value="3">Normal</option>
+								<option value="4">High</option>
+								<option value="5">Very High</option>
+								</select> 	
+							</div>	
+						</td>
+					</tr>
+					
+					<tr>
+						<td nowrap class="lc">
+							<div id="v1profile_b">
+								Profile:
+							</div>
+						</td>
+						<td nowrap class="rc">
+							<div id="v1profile">
+								<select name="h264_profile" id="h264_profile" size="1" style="{width:140}">
+								<option value="66">Baseline Profile</option>
+								<option value="77">Main Profile</option>
+								<option value="100">High Profile</option>
+								</select>
+							</div>
+					</tr>
+					
+					<tr>
+						<td nowrap class="lc">
+							<div id="v1gov_b">
+								GOV Length:
+							</div>
+						</td>
+						<td nowrap class="rc">
+							<div id="v1gov">
+								<input type="text" name="v1_gov_length" id="v1_gov_length" size="3" maxlength="3" style="{width:70}" value=""> (2~150)</td>
+							</div>
+					</tr>
+					
+					<tr>
+						<td class="lc" nowrap>Max Frame Rate: </td>
+						<td class="rc" nowrap>
+							<select name="v1_frate" id="v1_frate" size="1" style="{width:70}" onChange="frateChange()" width=70>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="8">8</option>
+							<option value="10">10</option>
+							<option value="15">15</option>
+							<option value="20">20</option>
+							<option value="25">25</option>
+							<option value="30">30</option>
+							</select> fps						
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="lc" nowrap>
+							<div id="v1uri_b" >
+								User Defined URI: 
+							</div>
+						</td>
+						<td class="rc" nowrap>
+							<div id="v1uri" >
+								<input type="text" name="v1_spuri" id="v1_spuri" size="40" maxlength="32" style="{width:200}" value="">				
+							</div>												
+						</td>
+					</tr>		
+					
+					<tr>  <!-- layout row, adds spacing below heading -->
+						<td class="leftspacer"> </td>
+						<td class="rightspacer"> </td>
+					</tr> 
+
+					<tr>  <!-- layout row, do not delete -->
+						<td class="subhead" nowrap  colspan="1">Streaming 2 Settings</td>
+						<td class="rc" nowrap>
+							<input type="checkbox" name="v2_mode" id="v2_mode" value="0" onClick="video_mode_chg(2)"> Enable
+						</td>
+					</tr>
+
+					<tr>
+						<td class="lc" nowrap>Video Format: </td>
+						<td class="rc" nowrap>
+							<select name="v2_format"  id="v2_format" size="1" onChange="vformat_chg(2);resChange_in(2,0);" style="{width:140}">
+							<option value="1">H.264</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="lc" nowrap>Resolution:</td>
+						<td class="rc" nowrap>
+							<select name="v2_resolution" size="1" id="v2_resolution" style="{width:140}" onChange="resChange(2)">
+							<option value="1">160*120</option>
+							<option value="2">320*240</option>
+							<option value="3">640*480</option> 
+							<option value="4">1280*720</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="lc" nowrap colspan="2">
+							<div id="v2qc">
+								Video Quality Control:
+							</div>
+						</td>
+					</tr>
+
+					<tr>
+						<td class="lc" nowrap>
+							<div id="v2cbr_b">
+							&nbsp;&nbsp;<input type="radio" name="v2_bwopt" value="0" onClick="check_bwopt_in(2);"> Constant Bit Rate:
+						</div>
+						</td>
+						<td class="rc" nowrap>
+							<div id="v2cbr">
+							<select name="v2_bitrate" size="1" id="v2_bitrate" style="{width:140}" onChange="qlChange()">
+							<option value="64">64 Kbps</option>
+							<option value="128">128 Kbps</option>
+							<option value="256">256 Kbps</option>
+							<option value="384">384 Kbps</option>
+							<option value="512">512 Kbps</option>
+							<option value="768">768 Kbps</option>
+							<option value="1000">1.0 Mbps</option>
+							<option value="1500">1.5 Mbps</option>
+							<option value="2000">2.0 Mbps</option>
+							<option value="2500">2.5 Mbps</option>
+							<option value="3000">3.0 Mbps</option>
+							<option value="3500">3.5 Mbps</option>
+							<option value="4000">4.0 Mbps</option>
+							<option value="5000">5.0 Mbps</option>
+							<option value="6000">6.0 Mbps</option>
+							<option value="8000">8.0 Mbps</option>
+							</select>
+						</div>
+						</td>
+					</tr>
+
+					<tr>
+						<td nowrap class="lc">
+							<div id="v2fq_b">
+								Fix Video Quality:
+							</div> 
+							<div id="v2vbr_b">
+								&nbsp;&nbsp;<input type="radio" name="v2_bwopt" value="1" onClick="check_bwopt_in(2);">Fixed Quality:
+							</div>
+						</td>
+						<td nowrap class="rc">
+							<div id="v2vbr">
+								<select name="v2_compression" size="1" id="v2_compression" style="{width:140}" onChange="qlChange()">
+								<option value="1">Very Low</option>
+								<option value="2">Low</option>
+								<option value="3">Normal</option>
+								<option value="4">High</option>
+								<option value="5">Very High</option>
+								</select>
+							</div>
+						</td>
+					</tr>
+					
+					<tr>
+						<td nowrap class="lc">
+							<div id="v2profile_b">
+								Profile:
+							</div>
+						</td>
+						<td nowrap class="rc">
+							<div id="v2profile">
+								<select name="h264_profile2" id="h264_profile2" size="1" style="{width:140}">
+								<option value="66">Baseline Profile</option>
+								<option value="77">Main Profile</option>
+								<option value="100">High Profile</option>
+								</select>
+							</div>
+					</tr>
+					
+					<tr>
+						<td nowrap class="lc">
+							<div id="v2gov_b">
+								GOV Length:
+							</div>
+						</td>
+						<td nowrap class="rc">
+							<div id="v2gov">
+								<input type="text" name="v2_gov_length" id="v2_gov_length" size="3" maxlength="3" style="{width:70}" value=""> (2~150)</td>
+							</div>
+					</tr>
+
+					<tr>
+						<td nowrap class="lc">Max Frame Rate:</td>
+						<td class="rc" nowrap>
+							<select name="v2_frate" size="1" id="v2_frate" style="{width:70}" onChange="frateChange()" width=70>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="8">8</option>
+							<option value="10">10</option>
+							<option value="15">15</option>
+							<option value="20">20</option>
+							<option value="25">25</option>
+							<option value="30">30</option>
+							</select> fps
+						</td>
+					</tr>
+					<tr>
+						<td nowrap class="lc">
+							<div id="v2uri_b">
+								User Defined URI:
+							</div>
+						</td>
+						<td class="rc" nowrap>
+							<div id="v2uri">
+								<input type="text" name="v2_spuri" id="v2_spuri" size="40" maxlength="32" style="{width:200}" value="">
+							</div>
+						</td>
+					</tr>
+
+					<tr>
+						<td class="leftspacer"> </td>
+						<td class="rightspacer"> </td>
+					</tr> 
+
+					<tr>
+						<td class="lcbb"  colspan="2"> </td>
+					</tr> 
+
+					<tr>
+						<td class="leftbuttonrow">&nbsp;  </td>
+						<td class="rightbuttonrow">
+							<input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();"> 
+							<input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+							<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_streams.htm')"> 
+						</td>
+					</tr>
+					<tr>  <!-- layout row, pushes data up, buttons down -->
+						<td class="lcbt" colspan="2" > </td>
+					</tr> 
+			  </table>
+			</td>
+		</tr>
+	</table> 
+</div>   
+<!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+<!--H.264-->
+<input type="Hidden" name="h_h264_mode" value="">
+<input type="Hidden" name="h_h264_resolution" value="">
+<input type="Hidden" name="h_h264_frate" value="">
+<input type="Hidden" name="h_h264_bitrate" value="">
+<input type="Hidden" name="h_h264_bwopt" value="">
+<input type="Hidden" name="h_h264_compression" value="">
+<input type="Hidden" name="h264_code" value="">
+<!--input type="Hidden" name="pwd_chg_h264_code" value="@pwd_chg_h264_code#"-->
+<input type="Hidden" name="h_h264_profile" value="">
+<input type="Hidden" name="h264_gov_length" value="">
+
+<input type="Hidden" name="h_h264_mode2" value="">
+<input type="Hidden" name="h_h264_resolution2" value="">
+<input type="Hidden" name="h_h264_frate2" value="">
+<input type="Hidden" name="h_h264_bitrate2" value="">
+<input type="Hidden" name="h_h264_bwopt2" value=""><!--quality_type-->
+<input type="Hidden" name="h_h264_compression2" value=""><!--quality_level-->
+<input type="Hidden" name="h264_code2" value="">
+<!--input type="Hidden" name="pwd_chg_h264_code2" value="@pwd_chg_h264_code2#"-->
+<input type="Hidden" name="h_h264_profile2" value="">
+<input type="Hidden" name="h264_gov_length2" value="">
+<!--end-->
+
+<input type="Hidden" name="h_v1_mode" value="">
+<input type="Hidden" name="h_v1_format" value="">
+<input type="Hidden" name="h_v1_resolution" value="">
+<input type="Hidden" name="h_v1_frate" value="">
+<input type="Hidden" name="h_v1_compression" value="">
+<input type="Hidden" name="h_v1_bwopt" value="">
+<input type="Hidden" name="h_v1_bitrate" value="">
+<input type="Hidden" name="view_v1_format" value="">
+
+<input type="Hidden" name="h_v2_mode" value="">
+<input type="Hidden" name="h_v2_format" value="">
+<input type="Hidden" name="h_v2_resolution" value="">
+<input type="Hidden" name="h_v2_frate" value="">
+<input type="Hidden" name="h_v2_compression" value="">
+<input type="Hidden" name="h_v2_bwopt" value="">
+<input type="Hidden" name="h_v2_bitrate" value="">
+<input type="Hidden" name="view_v2_format" value="">
+
+<input type="Hidden" name="this_file" value="streams.htm">
+<input type="Hidden" name="next_file" value="streams.htm">
+<input type="Hidden" name="todo" value="save">
+<input type="hidden" name="video_file" value="">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>

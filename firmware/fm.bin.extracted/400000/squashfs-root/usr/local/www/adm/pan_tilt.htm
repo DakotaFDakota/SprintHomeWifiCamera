@@ -1,0 +1,405 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Setup</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+var MaxPositions = 20;
+var separator = ";";
+
+function checkData()
+{
+    var cf = document.forms[0];
+    var msg = "";
+
+
+    if (msg.length > 1)
+	{
+		alert(msg);
+		return false;
+	}
+	dataToHidden(cf);
+	cf.h_seq_list.value = getOptionList(cf.seq_list, "value");
+	var save = new GroupCtrl();
+	var array_set=[
+			//["PTZ", "PtzMode", "pt"],
+			//["PTZ", "PtzPanSpeed", "pt_speed"],
+			//["PTZ", "PtzTiltSpeed", "pt_speed"],
+			//["PTZ", "PtzPanPerstep", "pan_perstep"],
+			//["PTZ", "PtzTiltPerstep", "tilt_perstep"],
+			["PTZ", "PatrolStyle", "pat_seq"],
+			["PTZ", "Preset1Name", "preset1"],		
+			["PTZ", "Preset2Name", "preset2"],
+			["PTZ", "Preset3Name", "preset3"],		
+			["PTZ", "Preset4Name", "preset4"],
+			["PTZ", "Preset5Name", "preset5"],		
+			["PTZ", "Preset6Name", "preset6"],
+			["PTZ", "Preset7Name", "preset7"],		
+			["PTZ", "Preset8Name", "preset8"],
+			["PTZ", "Preset9Name", "preset9"],
+			["PTZ", "Patrol1Position", "h_seq_list"]	
+		];
+	save.set(array_set);
+
+	return true;	
+}
+
+function set_preset()
+{
+	var cf = document.forms[0];
+	for(i=0;i<cf.preset_list.options.length;i++)
+	{	
+		j=i+1;
+		cf.preset_list.options[i].text = j+")"+eval("cf.preset"+j+".value");
+		
+	}
+}
+function set_all()
+{
+	set_preset();
+	//setPT();
+	setSequenceList();
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+	var cf = document.forms[0];
+//	dataToVisible(document.forms[0]);
+//	setSequenceList();
+	menuframe.highLight('panDIV');
+//	setPT();
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			//["PTZ", "PtzMode", "pt"],
+			//["PTZ", "PtzPanSpeed", "pt_speed"],
+			//["PTZ", "PtzTiltSpeed", "pt_speed"],
+			//["PTZ", "PtzPanPerstep", "pan_perstep"],
+			//["PTZ", "PtzTiltPerstep", "tilt_perstep"],
+			["PTZ", "PatrolStyle", "pat_seq"],
+			["PTZ", "Preset1Name", "preset1"],		
+			["PTZ", "Preset2Name", "preset2"],
+			["PTZ", "Preset3Name", "preset3"],		
+			["PTZ", "Preset4Name", "preset4"],
+			["PTZ", "Preset5Name", "preset5"],		
+			["PTZ", "Preset6Name", "preset6"],
+			["PTZ", "Preset7Name", "preset7"],		
+			["PTZ", "Preset8Name", "preset8"],
+			["PTZ", "Preset9Name", "preset9"],
+			["PTZ", "Patrol1Position", "h_seq_list"]			
+		];
+	read.callback = set_all;
+	read.get(array_get);
+	dataToVisible(cf);
+}
+
+function setSequenceList()
+{
+    var cf = document.forms[0];
+	var listA =  cf.h_seq_list.value.split(separator);
+	var itemA; 
+	var textStr;
+	var indexP, indexT;
+	cf.seq_list.options.length = 0;
+	for (var i = 0; i < listA.length; i++)
+	{
+		itemA = listA[i].split(",");
+		if(itemA.length == 2)
+		{
+			indexP = getSelIndex(cf.preset_list, itemA[0], true);
+			indexT = getSelIndex(cf.timer, itemA[1], true);
+			textStr = cf.preset_list.options[indexP].text + " (" + cf.timer.options[indexT].text + ")";
+			addOption(cf.seq_list, textStr, listA[i]) ;
+		}
+	}
+}
+
+function addPreset()
+{
+    var cf = document.forms[0];
+    var indexAdd = cf.preset_list.selectedIndex;
+    if(!chkSelected(cf.preset_list, msg_select_preset))
+        return;
+    if( cf.seq_list.options.length >= MaxPositions )
+    {
+        alert(addstr(msg_cycle_limit, MaxPositions));
+        return;
+    }
+    if(cf.preset_list.options[indexAdd].text.charAt(2)=="")
+    {
+				alert(msg_add_blank_preset);
+				return;
+    }
+	addOption(cf.seq_list, cf.preset_list.options[indexAdd].text + " (" + cf.timer.options[cf.timer.selectedIndex].text + ")", 
+	cf.preset_list.options[indexAdd].value + "," + cf.timer.options[cf.timer.selectedIndex].value );
+}
+
+
+function delPreset()
+{
+    var cf = document.forms[0];
+	if(chkSelected(cf.seq_list, msg_select_preset))
+		 delOption(cf.seq_list, cf.seq_list.selectedIndex);
+}
+
+
+function setPT()
+{
+ 	var cf = document.forms[0];
+	var dflag = (!(cf.pt.checked));
+	cf.pat_seq.disabled = cf.pt_speed.disabled = cf.setpreset.disabled = cf.preset_list.disabled = cf.timer.disabled = cf.add.disabled = cf.remove.disabled = cf.seq_list.disabled = dflag; 
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg()">
+
+<FORM name="pan_tilt" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="subhead">Pan/Tilt</td>
+ <td class="rc" nowrap>&nbsp;</td>
+</tr> 
+
+<tr>
+ <td colspan="2" style="padding-left:0px; padding-top:0px">
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<!--tr>
+ <td class="lc">
+ Pan/Tilt Control:
+ </td>
+ <td class="rc">
+  <input type="checkbox" name="pt" value="" onClick="setPT()">&nbsp;
+  Enable
+ </td>
+</tr-->
+
+<!--tr>
+ <td class="lc">Pan/Tilt Speed:</td>
+ <td class="rc">
+ <select name="pt_speed" size="1">
+ <option value="1">100 pixels/sec</option>
+ <option value="2">200 pixels/sec</option>
+ <option value="4">400 pixels/sec</option>
+ <option value="6">600 pixels/sec</option>
+ <option value="8">800 pixels/sec</option>
+ <option value="10">1000 pixels/sec</option>
+ </select>
+ </td>
+</tr-->
+
+<!--tr>
+  <td colspan="2">Pixels to move per step in control panel:</td>
+</tr>
+<tr>
+  <td width="207" align="right" nowrap>Pan:</td>
+  <td nowrap><input type="text" class="num" name="pan_perstep" value="" size="4" maxlength="3">
+    &nbsp;(5~80)</td>
+</tr>
+<tr>
+  <td width="207" align="right" nowrap>Tilt:</td>
+  <td nowrap><input type="text" class="num" name="tilt_perstep" value="" size="4" maxlength="3">
+    &nbsp;(5~40)</td>
+</tr-->
+
+<tr>
+ <td class="lc" width="207">Patrol:</td>
+ <td class="rc">
+ <select name="pat_seq" size="1">
+ <option value="0">Once</option> 
+ <option value="2">Two Times</option>
+ <option value="3">Three Times</option>
+ <option value="1">Always</option>
+ 
+ </select></td>
+</tr> 
+
+<tr>
+ <td class="lc">&nbsp; </td>
+ <td class="rc">
+ <input type="button" class="stdbuttton" name="setpreset" value="Preset Point Position" onClick="if(!this.disabled) location.href='pt_preset.htm'" style="width:150px">
+ </td>
+</tr>
+</table>
+ </td>
+</tr>
+
+<tr>
+ <td height="30"></td><td></td>
+</tr>
+
+<tr>
+ <td colspan="2" style="padding-left:0px; padding-top:0px">
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	
+<tr>
+ <td class="subhead" width="207">Set Patrol Sequence</td>
+</tr> 
+</table>
+ </td>
+</tr> 
+
+<tr>
+ <td colspan="2" align="center">
+ 
+  <table border="0" cellspacing="0" cellpadding="0" style="padding:0px">
+
+ <tr>
+<td valign="top" align="left">
+<div align="center">Preset</div>
+<div style="padding-top:2px">
+<select name="preset_list" style="width:140px" size="9">
+ <option value="1">1) preset1</option>
+ <option value="2">2) preset2</option>
+ <option value="3">3) preset3</option>
+ <option value="4">4) preset4</option>
+ <option value="5">5) preset5</option>
+ <option value="6">6) preset6</option>
+ <option value="7">7) preset7</option>
+ <option value="8">8) preset8</option>
+ <option value="9">9) preset9</option>
+</select></div></td>
+
+ <td align="center" valign="top">
+ <div style="padding-top:25px">Time</div>
+ 
+ <div style="padding-top: 2px">
+ <select name="timer" size="1">
+ <option value="5">&nbsp; 5 secs</option>
+ <option value="10">10 secs</option>
+ <option value="30">30 secs</option>
+ <option value="60">60 secs</option>
+ </select>
+ </div>
+ <div style="padding-top: 8px">
+ &nbsp;<INPUT type="button" class="button" name="add" value="Add &gt;&gt;" style="width:70px" onClick="return addPreset();">
+ </div>
+  <div style="padding-top: 40px">
+ &nbsp;<input type="button" class="button" name="remove" value="Remove" style="width:70px" onClick="delPreset()">
+ </div>
+
+ </td>
+
+ <td align="center" style="padding:6px;margin:0px">Sequence
+<div style="padding-top:2px">
+<select name="seq_list" size="9" style="width:200px">
+</select></div>
+</td>
+ </tr>
+</table>
+ 
+ </td>
+</tr>
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc" height="80%"> </td>
+ <td class="rc" height="80%"> </td>
+</tr> 
+
+
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_pan.htm')">
+ </td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+<!-- pagemain -->
+<input type="hidden" name="preset1" value="">
+<input type="hidden" name="preset2" value="">
+<input type="hidden" name="preset3" value="">
+<input type="hidden" name="preset4" value="">
+<input type="hidden" name="preset5" value="">
+<input type="hidden" name="preset6" value="">
+<input type="hidden" name="preset7" value="">
+<input type="hidden" name="preset8" value="">
+<input type="hidden" name="preset9" value="">
+
+<input type="hidden" name="h_preset_list" value="1">  <!-- sets default value only  --> 
+<input type="hidden" name="h_timer" value="30">       <!-- sets default value only  --> 
+
+<!--input type="hidden" name="h_pt" value="@h_pt#"-->
+<!--input type="hidden" name="h_pt_speed" value=""-->
+<input type="hidden" name="h_pat_seq" value="">
+<input type="hidden" name="h_seq_list" value="">  <!-- numbers (1 ~ 9) separated by \t -->
+
+<!--input type="Hidden" name="this_file" value="pan_tilt.htm"-->
+<!--input type="Hidden" name="next_file" value="pan_tilt.htm"-->
+<!--input type="Hidden" name="todo" value="save"-->
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

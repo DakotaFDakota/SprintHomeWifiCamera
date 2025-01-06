@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Help -  HTTP</TITLE>
+
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus()">
+<table width="100%">
+<tr>
+  <th class="help">Help -  HTTP</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+<p><b>HTTP Notification</b>
+<br>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">URL</td>
+  <td>Enter the Uniform Resource Locator (URL) of your HTTP notification server.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">User Name</td>
+  <td>Enter your user name for the HTTP notification server.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Password</td>
+  <td>Enter your password for the HTTP notification server.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Proxy Server Name<br>(optional)</td>
+  <td>In order to connect your HTTP notification server indirectly, you need to specify the proxy server name here.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Proxy User Name<br>(optional)</td>
+  <td>Enter your user name for the Proxy Server.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Proxy Password<br>(optional)</td>
+  <td>Enter your password for the Proxy Server.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Proxy Port Number<br>(optional)</td>
+  <td>Enter the port number here when you make an indirect network connection through a proxy server.</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Method</td>
+  <td>Select the desired method of form data encoding.&nbsp; The default method is set to "GET".
+  <br>"GET" should be used if and only if the form processing is idempotent, which typically means a pure query form. Generally it is advisable to do so.
+  <br>However, if there are problems related to long URLs and non-ASCII character repertoires, which can make it necessary to use "POST" even for idempotent processing.
+  </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">With Payload</td>
+  <td>Select this check box if there are payload to post and method is POST.</td>
+</tr>
+</table>
+
+</body>
+</html>
+

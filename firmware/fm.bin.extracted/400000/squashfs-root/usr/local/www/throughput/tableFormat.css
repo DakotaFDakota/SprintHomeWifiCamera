@@ -1,0 +1,117 @@
+@charset "utf-8";
+/* tableFormat css
+ * 
+*/
+
+.even {
+	background-color: #EEE;
+}
+.odd {
+	background-color: #F3F3F3;
+}
+.tableHeader {
+	background-color: #EDEDED;
+	border-collapse:0px;
+	border-spacing: 0px;
+	border-right-width: 1px;
+	border-bottom-width: thin;
+	border-left-width: 1px;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-left-style: solid;
+	border-right-color: #d3d3d3;
+	border-bottom-color: #B6B6B6;
+	border-left-color: #d3d3d3;
+	border-top-style: solid;
+	border-top-width: 1px;
+	border-top-color: #d3d3d3;
+	font-size: 9pt;
+	overflow: hidden;
+}
+.tableformat {
+	border-collapse:collapse;
+	width:450 px;
+	overflow:hidden;
+	table-layout:auto;
+	padding-right: 5px;
+}
+#tbDiv {
+	border: 1px solid #ACACAC;
+	margin-right: 10px;
+	margin-left: 10px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.tdformat {
+	border-collapse:collapse;
+	border: 1px solid #D3D3D3;
+	height: 25px;
+	overflow: hidden;
+}
+.highLight {
+	background-color: #FFFFC4;
+}
+
+.tbFormatBtn{
+	padding-right: 5px;
+	padding-left: 5px;	
+}.subwin_title {
+	border:1px solid #aaaaaa;
+	color: #222222;
+	font-weight: bold;
+	font-size: 14px;
+	background-color: #cccccc;
+	background-image: url(../openSource/jquery_UI/images/ui-bg_highlight-soft_75_cccccc_1x100.png);
+	background-repeat: repeat-x;
+	background-position: 50% 50%;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	margin: 2px;
+	padding: 5px;
+	position: relative;
+}
+.popup_tb {
+	margin: 10px;
+}
+.popup {
+	background-color: #EBEBEB;
+	font-size: 9px;
+	border:1px solid #aaaaaa;
+	-moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px;
+}
+.close_subwin{
+	background-image: url(../openSource/jquery_UI/images/ui-icons_222222_256x240.png);
+	background-position: -32px -192px;
+	height: 16px;
+	width: 16px;
+	position: absolute;
+	margin: 2px;
+}
+.subwin_button {
+	border-top-width: 1px;
+	border-top-style: solid;
+	border-top-color: #aaaaaa;
+	margin-bottom: 7px;
+	margin-left: 10px;
+	margin-right: 10px;
+	padding: 3px;
+	text-align: right;
+}
+
+.close_subwin_link{
+	position: absolute;
+	width: 20px;
+	top: 2px;
+	bottom: 2px;
+	right: 5px;
+}
+
+.close_subwin_link:hover {
+	background-color: #D5D5D5;
+	border: 1px solid #aaaaaa;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}

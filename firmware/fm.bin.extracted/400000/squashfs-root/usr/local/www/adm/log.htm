@@ -1,0 +1,347 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Administration</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function reloadScrn()
+{
+  var cf = document.forms[0];
+  	cf.sys_log.value = "";
+	cf.todo.value = "reload";
+	cf.submit();
+}
+
+
+function checkData()
+{
+	var cf = document.forms[0];
+    var msg = ""; 
+    
+	if(cf.syslog_serv_en.checked == "1")
+	{
+		msg+= checkBlank(cf.syslog_serv_addr, msg_log_server);
+		msg+= checkDomainName(cf.syslog_serv_addr,msg_log_server,Valid_domain);
+		//msg+= checkValid(cf.syslog_serv_addr, msg_log_server, Valid_Stri, 64, false);
+	}
+	if (msg.length > 1)	
+	{
+		alert(msg);
+		return false;
+	}
+	var save = new GroupCtrl();
+	var array_set=[
+			["LOG", "syslog_mode", "syslog_serv_en"],
+			["LOG", "syslog_server", "syslog_serv_addr"]
+		];
+	save.set(array_set);	
+//	dataToHidden(cf);
+	return true;	
+}
+
+var cgi_cnt = 0;
+var content="";
+/*
+var http_request2;
+function logcgi_response()
+{
+	var cf = document.forms[0];
+	var resp_context;
+	if (http_request2.readyState == 4 || http_request2.readyState == 'complete')
+	{
+		resp_context = http_request2.responseText;
+		if (resp_context != "")
+		{
+			cf.sys_log.value = resp_context;
+		}
+		http_request2.abort();
+		http_request2 = null;
+	}
+	log_cgi_done = 1;	
+}
+
+function call_http_cgi()
+{
+	var cf = document.forms[0];
+	var src_file;
+
+	if(http_request2 == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request2 = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request2 = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request2 = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request2 = null; }
+			}
+		}
+	}
+
+	if (!http_request2)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+
+	src_file =  '../adm/log.cgi';
+
+	http_request2.onreadystatechange = function() { logcgi_response(); };
+	http_request2.open('GET', src_file, true);
+	http_request2.send(null);
+}
+*/
+function logcgi_response()
+{
+	var cf = document.forms[0];
+	//alert("content="+content);
+	if (content != "")
+	{
+		cf.sys_log.value = content;
+	}
+	cgi_cnt--;
+	if(cgi_cnt == 0)
+	{
+		document.getElementById("ongoing").style.display="none";
+		document.getElementById("mubd").style.display="block";	
+	}
+}
+function init()
+{
+	cgi_cnt = 0;
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+		menuframe.highLight('logDIV');
+//	dataToVisible(document.forms[0]);
+	var src_file = '../adm/log.cgi';
+	cgi_cnt++;
+	call_http_cgi(src_file,logcgi_response);
+	cgi_cnt++;
+	var read = new GroupCtrl();
+	var array_get=[
+			["SYSTEM", "model_num", "model_num"],
+			//["HIDDEN", "sys_log", "sys_log"],		
+			["LOG", "syslog_mode", "syslog_serv_en"],
+			["LOG", "syslog_server", "syslog_serv_addr"]
+		];
+	read.callback = set_syslog;
+	read.get(array_get);
+//	set_log();
+}
+
+/*function set_log()
+{
+    var cf = document.forms[0];
+	cf.h_syslog_serv_en.value = (cf.syslog_serv_en.checked) ? "1" : "0";
+	set_syslog(); 
+}*/
+
+function set_syslog()
+{
+    var cf = document.forms[0];
+	var dFlag = ( cf.syslog_serv_en.checked );
+	
+	cf.syslog_serv_addr.disabled = !dFlag; 
+	cgi_cnt--;
+	if(cgi_cnt == 0)
+	{
+		document.getElementById("ongoing").style.display="none";
+		document.getElementById("mubd").style.display="block";	
+	}
+}
+
+var http_request;
+function response_clearlog()
+{
+	var cf = document.forms[0];
+
+	if (http_request.readyState == 4 || http_request.readyState == 'complete')
+  	{	
+		if (http_request.status == 200)
+		{
+			/*var read = new GroupCtrl();
+			var array_get=[
+					["HIDDEN", "sys_log", "sys_log"]
+				];
+			read.get(array_get);*/
+			cf.sys_log.value = "";
+		}
+		http_request.abort();
+		http_request = null;
+		cf.clear.disabled = false;
+	}
+}
+
+function clear_log()
+{
+	var cf = document.forms[0];
+	var src_file;
+
+	if(http_request == null)
+	{
+		if(window.XMLHttpRequest)
+		{ http_request = new XMLHttpRequest(); } 
+		else if(window.ActiveXObject)
+		{
+			try
+			{ http_request = new ActiveXObject("Msxml2.XMLHTTP"); } 
+			catch(e)
+			{
+				try
+				{ http_request = new ActiveXObject("Microsoft.XMLHTTP"); } 
+				catch(e)
+				{ http_request = null; }
+			}
+		}
+	}
+
+	if (!http_request)
+	{ alert('Giving up :( Cannot create an XMLHTTP instance'); return false; }
+	cf.clear.disabled = true;
+
+	src_file =  '../adm/clear_log.cgi';
+
+	http_request.onreadystatechange = function() { response_clearlog(); };
+	http_request.open('GET', src_file, true);
+	http_request.send(null);	
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg();">
+<FORM name="log" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="file.cgi?next_file=logout.htm&adm_todo=logout" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, adds spacing below heading -->
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td nowrap align="center">
+ <textarea readonly rows="28" cols="77" name="sys_log" style="word-wrap : normal;" style="overflow-y:auto" style="overflow-x:auto" class="smallnum">@sys_log#</textarea>
+ <br><br>
+ <table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+	 <td nowrap width="150">&nbsp;</td>
+	 <td nowrap>
+	 <input type="button" class="stdbuttton" name="reload" value="Refresh" onClick="location.href='log.htm'"> &nbsp;
+ 	 <input type="button" class="stdbuttton" name="clear" value="Clear Log" onClick="clear_log()">
+	 </td>
+	</tr>
+ </table>
+ </td>
+</tr>
+
+<tr>
+ <td class="rc" nowrap align="left">
+ <table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+	 <td nowrap width="165"><input type="Checkbox" name="syslog_serv_en" value="1" onClick="set_syslog();">&nbsp; Enable Syslog Service</td>
+	 <td nowrap>&nbsp;</td>
+	</tr>
+	<tr>
+	 <td nowrap align="right">Syslog Server Address</td>
+	 <td nowrap>
+	 <input type="text" name="syslog_serv_addr" size="40" maxlength="64" value="" style="{width:370}" width=370>
+	 </td>
+	</tr>
+	</table>
+ </td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+<tr>
+	<td class="leftbuttonrow" colspan="2" align="center">
+	<input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+	<input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+	<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_log.htm')">
+	</td>
+</tr>
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+
+
+
+<!--input type="Hidden" name="this_file" value="log.htm"-->
+<!--input type="Hidden" name="next_file" value="log.htm"-->
+<input type="Hidden" name="todo" value="save">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

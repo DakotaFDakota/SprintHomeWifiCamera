@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Setup</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+var msgVar="@message#";
+
+function checkData()
+{
+	var cf = document.forms[0];
+	var msg = "";
+
+	var value1 = cf.Output_1_Trig.value;
+	
+	if (value1=="2")
+	{ msg+= checkInt(cf.output1_dur, msg_Output_time, 10, 10000, value1=="2"); }
+	else {}
+
+	if (msg.length > 1)
+    {
+        alert(msg);
+		return false;
+    }
+
+	var save = new GroupCtrl();
+	var array_set=[
+			["IO", "in1_type", "Input_1_Trig"],
+//			["IO", "in2_type", "Input_2_Trig"],
+			["IO", "out1_init", "norm1"],
+//			["IO", "out2_init", "norm2"],
+			["IO", "out1_action", "Output_1_Trig"],
+//			["IO", "out2_action", "Output_2_Trig"],
+			["IO", "out1_pulse_duration", "output1_dur"],
+//			["IO", "out2_pulse_duration", "output2_dur"],
+			["IO", "acthl1", "acthl1"],
+//			["IO", "acthl2", "acthl2"]
+		];
+	save.set(array_set);
+//    dataToHidden(cf);
+    return true;
+}
+
+////////////////////////////////////////
+
+function setoTime1()
+{
+    var cf = document.forms[0];
+	var value = cf.Output_1_Trig.value;
+	
+	setVisible("oTime1DIV", (value == "2"));
+}
+
+function setNorm1(user_chg)
+{
+    var cf = document.forms[0];
+	var value = cf.norm1.value;
+	
+	if (value == "1")
+	{
+		cf.Output_1_Trig.options[0].text = "None";
+		cf.Output_1_Trig.options[1].text = "Low";
+		if (user_chg == 1)
+		{
+    		cf.Output_1_Trig.value = "0";
+		}
+	}
+	else
+	{
+		cf.Output_1_Trig.options[0].text = "High";
+		cf.Output_1_Trig.options[1].text = "None";
+		if (user_chg == 1)
+		{
+    		cf.Output_1_Trig.value = "1";
+		}
+	}
+	setoTime1();
+	//actdd1();
+}
+
+function setNorm()
+{
+	setNorm1(0);
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function init()
+{
+//    var cf = document.forms[0];
+
+//	dataToVisible(cf);
+
+//	setNorm1(0);
+	
+	menuframe.highLight('ioDIV');
+	var read = new GroupCtrl();
+	var array_get=[	
+			["SYSTEM", "model_num", "model_num"],
+			["IO", "in1_type", "Input_1_Trig"],
+			["IO", "in2_type", "Input_2_Trig"],
+			["IO", "out1_init", "norm1"],
+			["IO", "out2_init", "norm2"],
+			["IO", "out1_action", "Output_1_Trig"],
+			["IO", "out2_action", "Output_2_Trig"],
+			["IO", "out1_pulse_duration", "output1_dur"],
+			["IO", "out2_pulse_duration", "output2_dur"],	
+			["IO", "inputState_1", "inputState_1"],
+			["IO", "inputState_2", "inputState_2"],
+			["IO", "outputState_1", "outputState_1"],
+			["IO", "outputState_2", "outputState_2"],
+			["IO", "acthl1", "acthl1"],
+			["IO", "acthl2", "acthl2"]
+		];
+	read.callback = setNorm;
+	read.get(array_get);
+}
+
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg()">
+<form name="io" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+<div ID="mubd">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, adds spacing below heading --> 
+ <td class="leftspacer"> </td>
+ <td class="rightspacer" colspan="2"> </td>
+</tr>
+
+<tr>
+ <td class="subhead" nowrap="nowrap">Input Port</td>
+ <td class="rc" nowrap="nowrap">&nbsp;  </td>
+</tr>
+
+<tr>
+ <td class="mc" nowrap="nowrap" valign="top">
+ <table cellspacing=0 cellPadding=0 width="100%" border=0>
+   <tr>
+     <td height="35" nowrap>Current State</td>
+   <tr>
+   <tr>
+     <td height="35" nowrap><a name="inputState_1"></a></td>
+   <tr>
+  </table></td>
+ <td class="rc" nowrap="nowrap" valign="top">
+ <table cellspacing=0 cellpadding=0 width="100%" border=0>
+   <tr>
+     <td nowrap colspan="1" height="35">Triggered When...</td>
+   </tr>
+   <tr>
+     <!-- <td nowrap height="35"><input type="checkbox" name="input_1" value="disable" onClick="setin1()"></td> -->
+     <td nowrap height="35"><select size="1" name="Input_1_Trig" style="{width:70}" width="70">
+         <option value="1">High</option>
+         <option value="0">Low</option>
+         <option value="3">Rising</option>
+         <option value="2">Falling</option>
+       </select>     </td>
+   </tr>
+ </table></td>
+</tr>
+
+<tr>  <!-- layout row, adds spacing below heading --> 
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr>
+
+<tr>
+ <td class="subhead" nowrap="nowrap">Output Port</td>
+ <td class="rc" nowrap="nowrap">&nbsp;  </td>
+</tr>
+
+<tr>
+ <td class="mc" nowrap="nowrap" valign="top">
+<table cellspacing=0cellPadding=0 width="100%" border=0>
+   <tr>
+     <td height="35" nowrap>Current State</td>
+   <tr>
+   <tr>
+     <td height="35" nowrap><a name="outputState_1"></a></td>
+   <tr>
+  </table> </td>
+ <td class="rc" nowrap="nowrap" valign="top">
+ <TABLE cellSpacing=0 cellPadding=0 width="100%" border=0>
+              <TR>
+				<TD nowrap height="35" width="20%">Default State</TD>
+				<TD nowrap height="35" width="20%">Manual Trigger</TD>
+				<td nowrap colspan="2">Action When Triggered</td>
+              </TR>
+			<tr>
+			<td nowrap height="35"> <select size="1" name="norm1" onChange="setNorm1(1);" style="{width:70}" width="70">
+			 <option value="1">High</option>
+			 <option value="0">Low</option>
+			</select></td>
+				<TD nowrap height="35" width="20%"><select size="1" name="acthl1" onChange="">
+			 <option value="0">ON maps to High</option>
+			 <option value="1">ON maps to Low</option>
+			</select></TD>
+			<td nowrap align="center">
+			<select size="1" name="Output_1_Trig" onChange="setoTime1();" style="{width:70}" width="70">
+			 <option value="1">High</option>
+			 <option value="0">Low</option>
+			 <option value="2">Pulse</option>
+			</select>
+			  </td>
+			<td nowrap> <div id="oTime1DIV">
+			 <INPUT size=5 name="output1_dur" value=""> ms 
+			 </div> </td>
+			</tr>
+          </TABLE> </td>
+</tr>
+
+<tr>  <!-- layout row, pushes data up, buttons down -->
+ <td class="mc" height="80%"> </td>
+ <td class="rc" height="80%"> </td>
+</tr> 
+
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbb" colspan="2" > </td>
+	</tr> 
+
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();"> 
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_io.htm')">
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<input type="button" class="stdbuttton" name="refresh" value="Refresh" onClick="window.open('io.htm','_self')">
+</td>
+</tr>
+	<tr>  <!-- layout row, pushes data up, buttons down -->
+		<td class="lcbt" colspan="2" > </td>
+	</tr> 
+<!-- table footer -->
+</table>
+ </td>
+</tr>
+
+</table>
+</div>   <!-- pagemain -->
+
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+
+</form>
+
+</body>
+</html>

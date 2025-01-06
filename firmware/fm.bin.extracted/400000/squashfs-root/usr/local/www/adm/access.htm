@@ -1,0 +1,650 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="description" content="RC8510A">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<title>Network Camera - Video &amp; Audio</title>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+
+<script language="JavaScript" type="text/javascript" src="../linux.js"></script>
+<script language="JavaScript" type="text/javascript" src="../rc8510a_stdlib.js"></script>
+<script language="JavaScript" type="text/javascript" src="../message.js"></script>
+<script language="JavaScript" type="text/javascript" src="../sch.js"></script>
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!-- Start Script
+
+function sch_submit()
+{
+	var i, str;
+	var cf = document.forms[0];
+
+	str = "";
+	for (i=0; i<cf.vac_periods.options.length; i++) {
+		if (str.length > 0) {
+			str += sch_separator;
+		}
+		str += cf.vac_periods.options[i].value;
+	}
+	//cf.h_access_list.value		= "";
+	cf.set_schedule_type.value	= "sch_access";
+	cf.set_schedule_value.value	= str;
+	return;
+}
+
+function sch_show_items_text()
+{
+	var i, j;
+	var day, dtm, str;
+	var cf = document.forms[0];
+
+	for (i=0; i<cf.vac_periods.options.length; i++) {
+		str = cf.vac_periods.options[i].value;
+		j = str.indexOf(sch_separator_item);
+		if (j < 0) {
+			continue;
+		}
+		day = str.substr(0, j);
+		dtm = str.substr(j+1, str.length-j-1);
+		j = dtm.indexOf(sch_separator_item);
+		if (j < 0) {
+			continue;
+		}
+		dtm = dtm.substr(0,j)+"-"+dtm.substr(j+1,dtm.length-j-1);
+		for (j=0; j<cf.sch_day.options.length; j++) {
+			if (cf.sch_day.options[j].value == day) {
+				str = cf.sch_day.options[j].text;
+			}
+		}
+		str += " ";
+		str += dtm;
+		cf.vac_periods.options[i].text = str;
+	}
+	return;
+}
+
+function sch_add()
+{
+    var cf = document.forms[0];
+
+	var shur = cf.sch_hr.value;
+	var smin = cf.sch_min.value;
+	var fhur = cf.hrend.value;
+	var fmin = cf.minend.value;
+
+	if ((shur > fhur) || (shur==fhur && smin >= fmin)) {
+		alert(msg_finish_after_start);
+		return false;
+	}
+
+	var sch_time= shur + ":"+ smin + sch_separator_item + fhur + ":"+ fmin;
+	var sch_val	= cf.sch_day.value+sch_separator_item+sch_time;
+
+	if (!select_add_item(cf.vac_periods, "", sch_val)) {
+		return false;
+	}
+
+	sch_show_items_text();
+
+	if (schedule_use_action) {
+	sch_submit();
+
+	dataToHidden(cf);
+	cf.todo.value = "set_schedule";
+	cf.submit();
+	}
+
+	return true;
+}
+function sch_del()
+{
+    var cf = document.forms[0];
+
+	if (!select_del_item(cf.vac_periods)) {
+		return false;
+	}
+
+	if (schedule_use_action) {
+	sch_submit();
+
+	dataToHidden(cf);
+	cf.todo.value = "set_schedule";
+	cf.submit();
+	}
+
+	return true;
+}
+
+function init()
+{
+//	dataToVisible(document.forms[0]);
+	//document.getElementById("mubd").style.display="none";
+	//document.getElementById("ongoing").style.display="block";
+	clearorcancel();
+	menuframe.highLight('accessDIV');
+	var read = new GroupCtrl();
+	var array_get=[
+			["USER", "login_check", "vauth"],
+			["VIDEO", "video_schedule", "access"],
+			["VIDEO", "video_define1", "video_define1"],
+			["VIDEO", "video_define2", "video_define2"],
+			["VIDEO", "video_define3", "video_define3"],
+			["VIDEO", "video_define4", "video_define4"],
+			["VIDEO", "video_define5", "video_define5"],
+			["VIDEO", "video_define6", "video_define6"],
+			["VIDEO", "video_define7", "video_define7"],
+			["VIDEO", "video_define8", "video_define8"],
+			["VIDEO", "video_define9", "video_define9"],
+			["VIDEO", "video_define10", "video_define10"],
+			["SYSTEM", "model_num", "model_num"]
+			//["HIDDEN", "h_access_list", "h_access_list"]
+		];
+	read.callback = set_all;
+	read.get(array_get);
+
+//	cf.access.checked	= (1 == cf.h_access.value) ? true : false;
+//	set_va();
+
+//	cf.vauth.checked	= (1 == cf.h_vauth.value) ? true : false; 
+}
+
+function set_all()
+{
+	var cf = document.forms[0];
+	var i,value;
+	cf.vac_periods.options.length = 0;
+	//select_show_items(cf.vac_periods, cf.h_access_list.value);
+	for(i=1;i<=10;i++)
+	{
+		value = eval("cf.video_define"+i+".value");
+		if(value != "")
+		{
+			cf.vac_periods.options[cf.vac_periods.options.length] = new Option("", value);
+		}
+	}
+	sch_show_items_text();
+	set_va();
+	document.getElementById("ongoing").style.display="none";
+	document.getElementById("mubd").style.display="block";
+}
+
+function set_va()
+{
+	var i;
+	var cf = document.forms[0];
+
+	if (!cf.access.checked) {
+		i = 1;
+	} else {
+		i = 0;
+	}
+	cf.vac_periods.disabled = 
+	cf.deleteperiod.disabled = 
+	cf.sch_day.disabled = 
+	cf.sch_hr.disabled = 
+	cf.sch_min.disabled = 
+	cf.hrend.disabled = 
+	cf.minend.disabled = 
+	cf.addperiod.disabled = 
+	cf.clearcancelButton.disabled = i;
+}
+
+function setEndMin()
+{
+	var cf = document.forms[0];
+
+	if (cf.hrend.value == "24") {
+		cf.minend.selectedIndex = getSelIndex(cf.minend, "00");
+		cf.minend.disabled = true;
+	} else {
+		cf.minend.disabled = false;
+	}
+}
+
+function clearorcancel()
+{
+    var cf = document.forms[0];
+
+	cf.sch_day.value	= "9";
+	cf.sch_hr.value		= "00";
+	cf.sch_min.value	= "00";
+	cf.hrend.value		= "00";
+	cf.minend.value		= "00";
+
+	setEndMin();
+}
+
+function checkData()
+{
+    var cf = document.forms[0];
+
+//	dataToEnable(cf);
+
+//	cf.h_access.value	= cf.access.checked ? "1" : "0";
+//	cf.h_vauth.value	= cf.vauth.checked ? "1" : "0";
+
+	if (!schedule_use_action) {
+		var i, str;
+		var obj;
+		str = "";
+		for (i=0; i<cf.vac_periods.options.length; i++) {
+			//if (str.length > 0) {
+			//	str += sch_separator;
+			//}
+			//str += cf.vac_periods.options[i].value;
+			obj = eval("cf.video_define"+(i+1));
+			obj.value = cf.vac_periods.options[i].value;
+			}
+		for(;i<10;i++)
+		{
+			obj = eval("cf.video_define"+(i+1));
+			obj.value = "";
+		}
+		//cf.h_access_list.value		= str;
+		cf.set_schedule_type.value	= "";
+		cf.set_schedule_value.value	= "";
+	}
+	var save = new GroupCtrl();
+	var array_set=[
+			["USER", "login_check", "vauth"],
+			["VIDEO", "video_schedule", "access"],
+			["VIDEO", "video_define1", "video_define1"],
+			["VIDEO", "video_define2", "video_define2"],
+			["VIDEO", "video_define3", "video_define3"],
+			["VIDEO", "video_define4", "video_define4"],
+			["VIDEO", "video_define5", "video_define5"],
+			["VIDEO", "video_define6", "video_define6"],
+			["VIDEO", "video_define7", "video_define7"],
+			["VIDEO", "video_define8", "video_define8"],
+			["VIDEO", "video_define9", "video_define9"],
+			["VIDEO", "video_define10", "video_define10"]
+			//["HIDDEN", "h_access_list", "h_access_list"]
+		];
+	save.set(array_set);
+
+//	cf.todo.value		= "save";
+
+	return true;	
+}
+
+// End Script -->
+</script>
+
+
+</head>
+
+<body onLoad="init();showMsg()">
+<FORM name="access_page" method="post" action="file.cgi">
+
+<div ID="headimage">
+<table border=0 cellspacing=0 cellpadding=10 class="toptab">
+<tr>
+	<td nowrap height="75" align="right" valign="top"></td>
+</tr>
+</table>
+<div   ID="topimage" >	
+<img src="../header.gif" alt="" border="0">
+</div>
+
+<div ID="topmodel"><a name="model_num"></a></div>
+</div>
+
+<div ID="topmenu">
+<a href="../main.cgi?next_file=index.htm" class="topmenulink" target="_top">Home</a>
+<strong>|</strong>
+<a href="../img/main.cgi?next_file=main.htm" class="topmenulink" target="_top">View Video</a>
+<strong>|</strong>
+<a href="../logout.htm" class="topmenulink" target="_top">Logout</a>
+</div>
+
+
+
+<div ID="mubd" style="display:none;">
+<table class="maintab2" cellspacing="0">
+<tr> 
+ <td nowrap valign="top" class="menutd">
+ 	<IFRAME NAME="menuframe" allowTransparency="true" SRC="menu.htm" scrolling="no" frameborder="0" align="left" class="imu"></iframe> 
+ 	</td>
+ <td nowrap valign="top">
+
+<table class="maintab" cellspacing="0">
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>
+ <td class="lc" nowrap>User Access: </td>
+ <td class="rc" nowrap><input type="checkbox" name="vauth" value="disable"> Enable Security Checking </td>
+</tr>
+
+<tr>
+ <td class="lc" nowrap>Video Access: </td>
+ <td class="rc" nowrap><input type="checkbox" name="access" value="disable" onClick="set_va();"> Enable Scheduled Video Access </td>
+</tr>
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="subhead" nowrap valign="top">Access Schedule </td>
+ <td class="rc" nowrap>
+<table border="0" cellspacing="0" cellpadding="0" class="wintab">
+
+<tr>
+ <td nowrap valign="top">
+ <select name="vac_periods" multiple size="8" class="fixfont" style="width:240px"></select>
+ <p><input type="button" class="stdbuttton" name="deleteperiod" value="Delete" style="width:70px" onClick="return sch_del();">
+ </td>
+</tr>
+</table>
+ </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="leftspacer"> </td>
+ <td class="rightspacer"> </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="subhead" nowrap valign="bottom">Add New Schedule </td>
+ <td class="rc" nowrap valign="bottom">&nbsp; </td>
+</tr>
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc" nowrap>Day: </td>
+ <td class="rc" nowrap>
+<table border="0" cellspacing="0" cellpadding="0" class="wintab_pad">
+<tr>
+ <td nowrap>
+ <select name="sch_day" size="1">
+ <option value="9">Every day</option>
+ <option value="8">Weekdays (Mon - Fri)</option>
+ <option value="1">Sunday</option>
+ <option value="2">Monday</option>
+ <option value="3">Tuesday</option>
+ <option value="4">Wednesday</option>
+ <option value="5">Thursday</option>
+ <option value="6">Friday</option>
+ <option value="7">Saturday</option>
+ </select></td>
+</tr>
+</table>
+ </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc" nowrap>Start Time: </td>
+ <td class="rc" nowrap>
+<table border="0" cellspacing="0" cellpadding="0" class="wintab_pad">
+<tr>
+ <td nowrap><select name="sch_hr" size="1">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select> :
+<select name="sch_min" size="1">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select> (hh:mm)</td>
+</tr>
+</table>
+ </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc" nowrap>End Time: </td>
+ <td class="rc" nowrap>
+<table border="0" cellspacing="0" cellpadding="0" class="wintab_pad">
+<tr>
+ <td nowrap><select name="hrend" size="1" onChange="setEndMin()">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+
+</select> :
+<select name="minend" size="1">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select> (hh:mm)</td>
+</tr>
+</table>
+ </td>
+</tr> 
+
+<tr>  <!-- layout row, do not delete -->
+ <td class="lc" nowrap>&nbsp; </td>
+ <td class="rc" nowrap>
+<table border="0" cellspacing="0" cellpadding="0" class="wintab_pad">
+<tr>
+ <td nowrap valign="top">
+ <input type="button" class="stdbuttton" name="addperiod" value="Add" style="width:70px" onClick="return sch_add();">
+ <input type="button" class="stdbuttton" name="clearcancelButton" value="Clear" style="width:70px" onClick="clearorcancel()"></td>
+</tr>
+</table>
+ </td>
+</tr> 
+
+<tr>  <!-- layout row, pushes data up, buttons down -->
+	<td class="lcbb" colspan="2" > </td>
+</tr> 
+
+<tr>
+ <td class="leftbuttonrow">&nbsp;  </td>
+ <td class="rightbuttonrow">
+ <input type="button" class="stdbuttton" name="apply" value=" Save " onClick="return checkData();">
+ <input type="reset" class="stdbuttton" name="cancel" value="Cancel" onClick="setTimeout('init()',250)">
+<input type="button" class="stdbuttton" name="help" value=" Help " onClick="openHelpWin('hlp_access.htm')">
+ </td>
+</tr>
+<tr>  <!-- layout row, pushes data up, buttons down -->
+	<td class="lcbt" colspan="2" > </td>
+</tr> 
+<!-- table footer -->
+
+</table>
+ </td>
+</tr>
+
+
+</table>
+
+</div>  <!-- pagemain -->
+<div ID="ongoing" style="display:block;">
+<table class="maintab2" cellspacing="0">
+<td align="center">
+<img src="format_wait.gif" alt="" border="0">
+</td>
+</table>
+</div>
+<input type="Hidden" name="video_define1" value="">
+<input type="Hidden" name="video_define2" value="">
+<input type="Hidden" name="video_define3" value="">
+<input type="Hidden" name="video_define4" value="">
+<input type="Hidden" name="video_define5" value="">
+<input type="Hidden" name="video_define6" value="">
+<input type="Hidden" name="video_define7" value="">
+<input type="Hidden" name="video_define8" value="">
+<input type="Hidden" name="video_define9" value="">
+<input type="Hidden" name="video_define10" value="">
+<!--input type="Hidden" name="h_access_list" value="@h_access_list#" title="read-only"-->
+<input type="Hidden" name="set_schedule_type" value="" title="not set by CGI">
+<input type="Hidden" name="set_schedule_value" value="" title="not set by CGI">
+
+<input type="Hidden" name="this_file" value="access.htm">
+<input type="Hidden" name="next_file" value="access.htm">
+<input type="Hidden" name="todo" value="save">
+</form>
+
+<script> var msgVar="@message#"; </script>
+</body>
+</html>
+

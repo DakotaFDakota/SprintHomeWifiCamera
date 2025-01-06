@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<head>
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<TITLE>Help -  Network</TITLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+</HEAD>
+
+
+<body bgcolor="#ffffff" onLoad="self.focus()">
+<table width="100%">
+<tr>
+  <th class="help">Help -  Wireless</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+
+
+
+<p><b> Wireless Network</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Site Survey</td>
+   <td>Click this button for wireless camera surveying on the network.  You can also apply the same wireless setting (Network Type / SSID / Channel No / Security) in general as the founded camera you choose.</td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">WSC PIN Code</td>
+   <td>This shows the WSC PIN Code of the Wireless Network Camera.</td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Network Type</td>
+   <td>The <i>Network Type</i> determines the type of wireless communication used by the Wireless Network Camera.
+   <ul><li>If you have an Access Point, select <i>Infrastructure</i>.</li>
+   <li>Otherwise, select <i>Ad-hoc</i>.</li>
+   </ul> </td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> SSID</td>
+   <td>This must match the value used by other devices on your wireless LAN.<br>
+   <b>Note! The SSID is case sensitive.</b> </td>
+</tr>
+
+<tr>
+<td valign="top" nowrap>Domain </td>
+<td>Select your domain from the drop-down list.  This field displays the region of operation for which the wireless interface is intended. It may not be legal to operate the router in a region other than the region shown here.  If your country or region is not listed, please check with your local government agency for more information on which channels you are allowed to use, and select a region which allows those channels. (The channel list changes according to the selected region.)
+</td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Channel No</td>
+   <td><ul>
+   <li>In <i>Infrastructure</i> mode, you cannot set the Channel. The Wireless Network Camera will use the Channel set on the Access Point.</li>
+   <li>For <i>Ad-hoc</i> mode, select the Channel you wish to use on your Wireless Network Camera. This should match the Channel used on the other Wireless Stations.</li>
+   <li>If you experience interference (shown by lost connections and/or slow data transfers) you may need to experiment with different channels to see which is the best.</li></ul> </td>
+</tr>
+
+<!-- tr>
+  <td valign="top" class="itemhead" width="100"> WMM</td>
+   <td>WMM (Wi-Fi Multimedia). It is a standard created to define quality of service (QoS) in Wi-Fi networks. It is a precursor to the IEEE 802.11e WLAN QoS draft standard, which is meant to improve audio, video and voice applications transmitted over Wi-Fi. WMM adds prioritized capabilities to Wi-Fi networks and optimizes their performance when multiple concurring applications, each with different latency and throughput requirements, compete for network resources.</td>
+</tr -->
+</table>
+
+<p><b> Security</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100"> Security</td>
+   <td>Select the desired option, and then enter the settings for the selected method:
+<ul>
+<li>Disabled - No security is used. Anyone using the correct SSID can connect to your network.
+<li>WEP - The 802.11b standard. Data is encrypted before transmission, but the encryption system is not very strong. 
+<li>WPA/WPA2 Personal - Like WEP, data is encrypted before transmission. WPA is more secure than WEP, and should be used if possible. WPA Personal is the version of WPA which does NOT require a Radius Server on your LAN. 
+</ul> </td>
+</tr>
+
+
+</table>
+
+
+<p>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<caption>WEP</caption>
+<tr>
+<td nowrap valign="top" class="itemhead" width="100">Authentication<br>Type</td>
+<td>Select the appropriate value - "Open System" or "Shared Key." Check your wireless card's documentation to see what method to use.
+</td>
+</tr>
+<tr>
+<td valign="top" nowrap>WEP Encryption</td>
+<td>Select the WEP Encryption level:
+<ul>
+<li>64 Bit - data is encrypted, using the default key, before being transmitted. You must enter at least the default key. For 64 Bit Encryption, the key size is 5 chars (ASCII) or 10 chars in HEX (0~9 and A~F). 
+<li>128 Bit - data is encrypted, using the default key, before being transmitted. You must enter at least the default key. For 128 Bit Encryption, the key size is 13 chars (ASCII) or 26 chars in HEX (0~9 and A~F). 
+</ul></td>
+</tr>
+
+<tr>
+<td nowrap valign="top">WEP Keys</td>
+<td>
+<ul>
+<li>Use the radio buttons to select the default key.
+<li>Enter the key value you wish to use. Other stations must have the same key values.
+<!-- li>Keys must be entered in Hex. Hex characters are the digits ( 0 ~ 9 ) and the letters A ~ F. -->
+<li>Click <i>Clear Keys</i> to set the Keys to be blank.
+</ul>
+
+ </td>
+</tr>
+
+<tr>
+<td nowrap valign="top">Passphrase</td>
+<td>
+Enter a word or group of printable characters in the Passphrase box and click the "Generate Key" button to automatically configure the WEP Key(s). If encryption strength is set to 64 bit, then each of the four key fields will be populated with key values. If encryption strength is set to 128 bit, then only the selected WEP key field will will be given a key value.
+ </td>
+</tr>
+</table>
+
+<p>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<caption>WPA/WPA2 Personal</caption>
+<tr>
+<td nowrap valign="top" class="itemhead" width="100">WPA Shared Key</td>
+<td>Enter the key value. Data is encrypted using a key derived from the network key. Other Wireless Stations must use the same network key. The PSK must be from 8 to 63 characters or 64 hex characters in length.
+ </td>
+</tr>
+</table>
+
+</body>
+</html>
+

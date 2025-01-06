@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<head>
+<meta name="description" content="RC8510A">
+<META http-equiv="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">	
+<meta HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT"> 
+
+<TITLE>Help - Network</TITLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="../rc8510a_ig_n.css">
+<script language="JavaScript" type="text/javascript" src="../groupctrl.js"></script>
+<script language="JavaScript" type="text/javascript">
+//<![CDATA[
+
+var h_curr_wifi_bundle;
+var WIRELESS = false;
+
+function set_model_num()
+{
+	WIRELESS = (h_curr_wifi_bundle == 1) ? true : false;	
+	if (WIRELESS)
+	{ 
+		//document.getElementById('wire1').innerHTML = "Wireless&nbsp;";
+		//document.getElementById('wire2').innerHTML = "Wireless&nbsp;";
+	//	document.getElementById('wire3').innerHTML = "Wireless&nbsp;";
+		document.getElementById('wire4').innerHTML = "Wireless&nbsp;";
+		document.getElementById('wire5').innerHTML = "Wireless&nbsp;";
+		document.getElementById('wire6').innerHTML = "Enable QoS mode will automatically enable WMM (802.11e QoS) when in wireless mode.";
+		document.getElementById('wire7').innerHTML = "<br><br>* WMM (Wi-Fi Multimedia). It is a standard created to define quality of service (QoS) in Wi-Fi networks. It is a precursor to the IEEE 802.11e WLAN QoS draft standard, which is meant to improve audio, video and voice applications transmitted over Wi-Fi. WMM adds prioritized capabilities to Wi-Fi networks and optimizes their performance when multiple concurring applications, each with different latency and throughput requirements, compete for network resources.";
+	}
+	else
+	{
+		//document.getElementById('wire1').innerHTML = "";
+		//document.getElementById('wire2').innerHTML = "";
+	//	document.getElementById('wire3').innerHTML = "";
+		document.getElementById('wire4').innerHTML = "";
+		document.getElementById('wire5').innerHTML = "";
+		document.getElementById('wire6').innerHTML = "";
+		document.getElementById('wire7').innerHTML = "";	
+	}
+}
+
+function init()
+{
+	var read = new GroupCtrl();
+	var array_get=[
+			//["SYSTEM", "model_num", "h_model_num"]
+			["WIRELESS", "curr_wifi_bundle", "h_curr_wifi_bundle"]
+		];
+	read.callback = set_model_num;
+	read.getvalue(array_get);	
+
+}
+
+//]]>
+</script>
+</HEAD>
+
+<body bgcolor="#ffffff" onLoad="self.focus();init();">
+<table width="100%">
+<tr>
+  <th class="help">Help - Network</th>
+</tr>
+<tr>
+ <td><hr size=2></td>
+</tr>
+</table>
+
+<!--
+<p><b> Network</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">MAC Address</td>
+   <td>It displays the current MAC address. </td>
+</tr>
+</table>
+-->
+
+<p><strong>Internet Connection Type</strong>
+<table border="1" cellpadding="2" cellspacing="0" width="100%">
+  <tbody>
+    <tr>
+      <td td nowrap valign="top" class="itemhead" width="100">Obtain Address Automatically (DHCP)</td>
+   <td>If selected, the <script>if (WIRELESS) document.write("Wireless")</script> Network Camera will obtain its IP address and related information from a DHCP Server. Only select this option if your LAN has a DHCP Server. </td>
+    </tr>
+    <tr>
+  <td valign="top" class="itemhead" width="100">Static IP Address</td>
+   <td>If selected, you must assign the following data to the <script>if (WIRELESS) document.write("Wireless")</script> Network Camera.
+   <ul><li><b>IP Address</b> - Enter an unused IP address from the address range used on your LAN.</li>
+   <li><b>Subnet Mask</b> - Use the same value as PCs on your LAN.</li>
+   <li><b>Default Gateway</b> - Use the same value as PCs on your LAN.</li>
+   <li><b>Test IP</b> - Check if the desired IP address conflicts with any existing device.</li>
+        </ul></td>
+    </tr>
+    <tr>
+  <td valign="top" class="itemhead" width="100">PPPoE (PPP over Ethernet)</td>
+   <td>If using PPPoE, your IP address is provided automatically, but you must assign the following data to the <script>if (WIRELESS) document.write("Wireless")</script> Network Camera.
+        <ul>
+          <li><b>Username</b> and <b>Password</b> - Enter the Username and Password you use when logging onto your ISP through a PPPoE connection. </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p><b> DNS Server Address</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Obtain DNS server address automatically</td>
+   <td>If selected, the <!--script>if (WIRELESS) document.write("Wireless")</script--><a id="wire4"></a> Network Camera will obtain the DNS server address automatically. </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Use the following DNS server address</td>
+   <td><ul>
+   <li><b>Primary DNS Address</b> - Use the same value as PCs on your LAN. Normally, your ISP will provide this address.</li>
+   <li><b>Secondary DNS Address</b> - This is optional. If entered, this DNS will be used if the Primary DNS does not respond.</li>
+   </ul> </td>
+</tr>
+</table>
+
+<p><b>WINS Address</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead" width="100">Obtain WINS address automatically</td>
+   <td>If selected, the <!--script>if (WIRELESS) document.write("Wireless")</script--><a id="wire5"></a> Network Camera will obtain the WINS server address automatically. </td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead" width="100">Use the following WINS address </td>
+   <td>Use the specific WINS server for the SMB/CIFS feature.</td>
+</tr>
+</table>
+
+<p><b>HTTP/HTTPS</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead">Administrator</td>
+   <td>
+	Select a protocol for WEB management.
+	</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead">Viewer</td>
+   <td>
+	View video works only through the HTTP protocol.
+	</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead">HTTP Secondary Port</td>
+   <td>
+This sets the port number for HTTP (Web) connections to the Camera, whether for administration or viewing video.
+<ul>
+<li>If HTTP Secondary Port enabled, you can connect using either port 80 or the user-defined port. You must enter the user-defined port number (between 1024 to 65535) in the field provided. 
+</ul>
+Note that when using a port number which is not 80, you must specify the port number in the URL. For example, if the Camera's IP address was 192.168.1.100 and the User-defined port was 1024, you would specify the URL for the Camera as follows:
+<pre>     http://192.168.1.100:1024</pre>
+</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead">HTTPS Secondary Port</td>
+   <td>
+This sets the port number for HTTPS (Web) connections to the Camera, whether for administration.
+<ul>
+<li>If HTTPS Secondary Port enabled, you can connect using either port 443 or the user-defined port. You must enter the user-defined port number (between 1024 to 65535) in the field provided. 
+</ul>
+Note that when using a port number which is not 443, you must specify the port number in the URL. For example, if the Camera's IP address was 192.168.1.100 and the User-defined port was 1024, you would specify the URL for the Camera as follows:
+<pre>     https://192.168.1.100:1024</pre>
+</td>
+</tr>
+</table>
+
+<p><b>RTP/RTSP</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">RTSP Port</td>
+   <td>
+  The RTSP (Real Time Streaming Protocol), a standard for connected client(s) to control streaming data (MPEG-4) over the World Wide Web.
+  <p>If desired to change, enter the RTSP Port number (between 1024 to 65535) in the field provided. &nbsp; The default RTSP Port is <strong>554</strong>.
+   </td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">RTP Data Port</td>
+   <td>
+   The RTP (Real-Time Transport Protocol), an Internet protocol used for transmitting a single real-time multimedia data such as audio and video to a select group of connected clients. &nbsp; The RTSP uses RTP to format packets of multimedia content.
+  <p>The Network Camera's data Port number has been pre-configured and can be used for multi casting, and does not normally need to be re-configured. If a port number does need to be changed, please contact your network administrator.
+    <p>If desired to change, enter the data Port number (between 1024 to 65494) in the field provided.
+   </td>
+</tr>
+
+<tr>
+  <td valign="top" class="itemhead" width="100">Max RTP Data Packet</td>
+   <td>
+  If desired to change, enter the Max RTP Data Packet Length (between 400 to 1400 bytes) in the field provided.
+   </td>
+</tr>
+</table>
+
+<p><strong>Multicast RTP/RTSP</strong>
+<table border="1" cellpadding="2" cellspacing="0" width="100%">
+  <tbody>
+    <tr>
+      <td nowrap valign="top" class="itemhead" width="100">Video/Audio Address</td>
+      <td>The RTP (Real-Time Transport Protocol), an Internet protocol used   for transmitting a single real-time multimedia data such as audio and   video to a select group of connected clients.The RTSP uses RTP to   format packets of multimedia content. <br>
+        The camera's Video and Audio   IP Address has been pre-configured and can be used for multicasting, and   does not normally need to be re-configured. If an address does need to   be changed, please contact your network administrator. <br>
+        If desired to change, enter the Video/Audio Address in the field provided.<br>
+        </td>
+    </tr>
+    <tr>
+      <td>Video/Audio Port</td>
+      <td>The camera's Video and Audio Port number has been pre-configured   and can be used for multicasting, and does not normally need to be   re-configured. If a port number does need to be changed, please contact   your network administrator. <br>
+        If desired to change, enter the Video/Audio Port number (between 1024 to 65534 and must be even number) in the field provided. <br>
+        </td>
+    </tr>
+    <tr>
+      <td>Time to Live</td>
+      <td>Enter a reasonable length of time (usually measured in 'hops' -   the number of network routers that can be passed before the multimedia   data packets arrives at its destination or is dropped.), if the packets   fail to be delivered to their destination within. The Time to Live you   entered must be in-between 1 to 255. <br>
+        </td>
+    </tr>
+  </tbody>
+</table>
+
+<p><b>UPnP</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td width="100" height="27" valign="top" nowrap class="itemhead">Enable Discovery</td>
+   <td>If enabled, the Network Camera will broadcast its availability
+    through UPnP. UPnP compatible systems such as Windows XP will then be able to detect the presence of the Network Camera. </td>
+</tr>
+
+<tr>
+  <td nowrap valign="top" class="itemhead" width="100">Enable Traversal</td>
+   <td>If enabled, HTTP, RTP, and RTSP ports can be opened to establish and maintain TCP/IP network connections with the camera that traverse routers using network address translation (NAT).</td>
+</tr>
+
+<!-- tr>
+  <td valign="top" class="itemhead" width="100">Enable Security Camera</td>
+   <td>
+   If enabled,&nbsp; the Network Camera will be accessible through HTTP connections.   
+   </td>
+</tr -->
+</table>
+<p><b>Bonjour</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td width="100" height="27" valign="top" nowrap class="itemhead">Enable Bonjour Service</td>
+   <td>If enabled, the Network Camera is accessible through a "Bonjour" enabled browser, such as Microsoft Internet Explorer with a Bonjour plug-in, or the Mac Safari browser. By using Bonjour, you can easily find Bonjour-enabled items on your network.</td>
+</tr>
+
+</table>
+
+<p><b> QoS</b>
+<table border=1 cellspacing=0 cellpadding=2 width="100%">
+<tr>
+  <td valign="top" class="itemhead"> Enable QoS Mode</td>
+   <td>
+   If enabled,&nbsp; the throughput level (for Video and Audio) is guaranteed through QoS (Quality of Service).  <a id="wire6"></a><!--script>if (WIRELESS) document.write("Enable QoS mode will automatically enable WMM (802.11e QoS) when in wireless mode.")</script-->
+   <a id="wire7"></a><!--script>if (WIRELESS) document.write("<br><br>* WMM (Wi-Fi Multimedia). It is a standard created to define quality of service (QoS) in Wi-Fi networks. It is a precursor to the IEEE 802.11e WLAN QoS draft standard, which is meant to improve audio, video and voice applications transmitted over Wi-Fi. WMM adds prioritized capabilities to Wi-Fi networks and optimizes their performance when multiple concurring applications, each with different latency and throughput requirements, compete for network resources.")</script-->
+</td>
+</tr>
+<tr>
+  <td valign="top" class="itemhead"> DSCP</td>
+   <td>
+	If you enable QoS, please enter the Differentiated Services Code Point (DSCP) to be used to process QoS packets. &nbsp; The DSCP you entered must be in-between 0 to 63. 
+   </td>
+</tr>
+</table>
+
+</body>
+</html>
+

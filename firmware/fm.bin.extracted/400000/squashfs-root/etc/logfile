@@ -1,0 +1,194 @@
+[LOGIN]
+1=Successfully admin user login.
+2=Successfully view only user login.
+3=Unsuccessfully login attempt.
+
+[SYSTEM]
+1=System: Device error (%s).
+2=System: Invalid upgrade file.
+3=System: Reset to factory defaults.
+4=System: Device is busy.
+
+[ALERT]
+1=Alert: Event triggered by %s.
+2=Alert: Event(name:%s) has been skipped because system is reloading new settings.
+3=Alert: Action(%s) of event name(%s) has been skipped because system resource is busying now.[event type: %s]
+4=Alert: Action(%s) of event name(%s) has been skipped because there is same one.[event type: %s]
+5=Alert: There is no action for event name(%s). [event type: %s]
+6=Alert: Action(%s) abnormally exist, caused by %s.
+
+[NETWORK]
+1=Network: Failed to get the IP address. Camera set to default IP address.
+2=Network: Wireless activated.
+3=Network: Lan activated.
+4=Network: Mt7620 boot up failed.
+5=Network: Mt7620 boot up ok.
+
+[DDNS]
+1=DDNS: Failed to connect to DDNS server.
+2=DDNS: Failed to update IP address.
+3=DDNS: Registration OK.
+4=DDNS: Failed to register.
+5=DDNS: No need to update IP address.
+6=DDNS: Update IP address OK.
+7=DDNS: Failed to update, incorrect user name / password.
+8=DDNS: Failed to get current public IP address.
+
+[PRIVACY]
+1=PRIVACY: Enable privacy mode, and stop all streamings.
+2=PRIVACY: Disable privacy mode, and restart all streamings.
+
+[HTTP]
+1=HTTP: Streaming start (%s).
+2=HTTP: Streaming end (%s).
+3=HTTP: Failed to start the Web Server, because port 80 is not valid now.
+4=HTTP: Failed to listen the second port %u which is not valid now.
+
+[HTTPS]
+1=HTTPS: Failed to listen the second port %u which is not valid now.
+2=HTTPS: Streaming start (%s).
+3=HTTPS: Streaming end (%s).
+
+[RTSP]
+1=RTSP: Streaming start (%s).
+2=RTSP: Streaming end (%s).
+3=RTSP: Streaming pause (%s).
+
+[FTP]
+1=FTP: File uploaded successfully.
+2=FTP: Unknown FTP server.
+3=FTP: Login failed.
+4=FTP: No such remote path.
+5=FTP: Failed to upload file.
+6=FTP: FTP server has closed connection.
+7=FTP: Error during the connection or timeout.
+
+[SMB_EVENT]
+1=Samba Event: File uploaded successfully.
+2=Samba Event: Failed to upload file.
+3=Samba Event: Error during the connection or timeout.
+4=Samba Event: Failed to connect to the server [host: %s].
+5=Samba Event: Don't have permission to access the remote path [path: %s].
+6=Samba Event: No such remote path [path: %s].
+
+[SMTP]
+1=SMTP: Send E-mail OK by SMTP server [host: %s].
+2=SMTP: Unknown SMTP server [host: %s].
+3=SMTP: Error during the connection or timeout [host: %s].
+4=SMTP: Failed to authenticate [host: %s].
+5=SMTP: POP before SMTP authentication failed [host: %s].
+6=SMTP: Recipient address [%s] rejected.
+7=SMTP: Invalid sender address [host: %s].
+8=SMTP: Failed to send E-mail to "%s".
+9=SMTP: Send E-mail to "%s" successfully. 
+
+[OUTPUT]
+1=output: Set output port %d to %s OK.
+2=output: Failed to set output port %d.
+
+[HTTP_NOTIFY]
+1=HTTP-NOTIFY:Send notification successfully.
+2=HTTP-NOTIFY:Failed to get http-notify setting.
+3=HTTP-NOTIFY:Failed to connect the HTTP notification server.
+4=HTTP-NOTIFY:Failed to invoke the HTTP notification URL [HTTP error code:%d].
+
+[HTTP_POST]
+1=HTTP/HTTPS POST: Post file successfully.
+2=HTTP/HTTPS POST: Failed to post file.
+3=HTTP/HTTPS POST: Failed to connect to the POST server.
+4=HTTP/HTTPS POST: Failed to post file [HTTP error code: %d].
+5=HTTP/HTTPS POST: Failed to post file due to session reach maximum timeout.
+
+[NTP]
+1=NTP: Synchronization OK.
+2=NTP: Failed to connect to the NTP server.
+3=NTP: Failed to synchronize data & time with the NTP server.
+4=NTP: No NTP server specified.
+
+[DHCP]
+1=DHCP: Lease renewal successfully.
+2=DHCP: Lease renewal unsuccessfully.
+3=DHCP: Lease release successfully.
+4=DHCP: Lease release unsuccessfully.
+5=DHCP: Timeout error renewing DHCP lease.
+6=DHCP: Lease renewal start.
+7=DHCP: IP discovery.
+
+[UPNP]
+1=UPnP: UPnP Start.
+2=UPnP: UPnP Stop.
+3=UPnP: SecurityCam Start.
+4=UPnP: SecurityCam Stop.
+5=UPnP: Traversal Start.
+6=UPnP: Traversal Stop.
+7=UPnP: ControlPoint Start.
+8=UPnP: ControlPoint Stop.
+
+[LOG]
+1=LOG: Log File is full. Start to wrap around.
+2=LOG: Clear all messages.
+
+[UPLOAD]
+3=UPLOAD: Upgrade file format error.
+4=UPLOAD: Failed to read upgrade file.
+
+[AUTO_UPGRADE]
+3=AutoUpgrade: Upgrade file format error.
+4=AutoUpgrade: Unable to read upgrade file.
+5=AutoUpgrade: Failed to upgrade FW due to time out.
+
+[UPNP_IGDCP]
+1=UPnP: Internet Gateway UPnP discovery failure.
+2=UPnP: Setting port forwarding rule not allowed by Gateway.
+3=UPnP: Failed to add the port to the Gateway, the port %d has been occupied, please try others.
+4=UPnP: Failed to delete the port from the Gateway, the port %d has been occupied.
+
+[UPNPTRAV_NOTIFY]
+1=UPNP Traversal HTTP Notify:Send notification successfully.
+2=UPNP Traversal HTTP Notify:Failed to send notification.
+
+[PPPOE]
+1=PPPoE: Failed to authenticate! Please check username and password again!
+2=PPPoE: PPPoE get the IP address successfully.
+
+[BONJOUR]
+1=Bonjour: Bonjour start.
+2=Bonjour: Failed to init Bonjour.
+3=Bonjour: Bonjour stop.
+
+[SDCARD]
+1=SD Card: SD card attached.
+2=SD Card: Failed to attach SD card.
+3=SD Card: SD card removed.
+4=SD Card: Failed to remove SD card.
+5=SD Card: Format SD card successfully.
+6=SD Card: Failed to format SD card.
+
+[SD_EVENT]
+1=SD Event: File recorded successfully.
+2=SD Event: Failed to record, SD card is full.
+3=SD Event: Failed to record, loading configuration failed.
+4=SD Event: Failed to record, SD card is unavailable.
+5=SD Event: Failed to record, SD card is read only.
+6=SD Event: Failed to record, creating file failed.
+7=SD Event: Failed to record, timeout.
+8=SD Event: Wrapped, SD card is full.
+
+[SD_RECORD]
+1=SD Record: Recording start.
+2=SD Record: Failed to start recording, privacy enabled.
+3=SD Record: Failed to start recording, SD card is unavailable.
+4=SD Record: Failed to start recording, SD card is read only.
+5=SD Record: Failed to start recording, loading configuration failed.
+6=SD Record: Failed to start recording, creating file failed.
+7=SD Record: Failed to start recording, SD card is full.
+8=SD Record: Stopped, SD card is unavailable.
+9=SD Record: Stopped, system time changed.
+10=SD Record: Stopped, privacy enabled.
+11=SD Record: Stopped, configuration changed.
+12=SD Record: Stopped, out of schedule.
+13=SD Record: Stopped, getting frame failed.
+14=SD Record: Stopped, writing data failed.
+15=SD Record: Stopped, creating file failed.
+16=SD Record: Stopped, SD card is full.
+17=SD Record: Wrapped, SD card is full.

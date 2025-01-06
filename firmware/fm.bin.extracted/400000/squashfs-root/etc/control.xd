@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sc:model xmlns:sc="RC8510A">
+
+<event>
+	<mode data_type="integer"></mode>
+	<!--in1 data_type="integer"></in1-->
+	<!--pir data_type="integer"></pir-->
+	<md data_type="integer"></md>
+	<au data_type="integer"></au>
+	<http_trigger data_type="integer"></http_trigger>
+	<event_list>
+		<item data_type="innerXML" multiple="10">
+			<name data_type="string"></name>
+			<channel data_type="integer"></channel>
+			<mode data_type="integer"></mode>
+			<schedule>
+				<weekdays data_type="string"></weekdays>
+				<time data_type="string"></time>
+			</schedule>
+			<by data_type="string"></by>
+			<interval data_type="string"></interval>
+			<event_file_info data_type="string"></event_file_info>
+			<action_list data_type="innerXML">
+				<action multiple="10">
+					<name data_type="string"></name>
+				</action>
+			</action_list>
+		</item>
+	</event_list>
+</event>
+
+</sc:model>

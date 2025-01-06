@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "Enter rcK ..."
+# Stop all init scripts in /etc/init.d
+# executing them in reversed numerical order.
+#
+/sbin/ifdown -a
